@@ -1,0 +1,1977 @@
+{
+  "namespace": "server_form",
+
+  "progress_anim_8_1": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_8_1_motion"
+  },
+
+  "progress_anim_8_1_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 0, 6 ],
+    "to": [ 61, 6 ]
+  },
+
+  "progress_anim_8_2": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_8_2_motion"
+  },
+
+  "progress_anim_8_2_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 61, 6 ],
+    "to": [ 122, 6 ]
+  },
+
+  "progress_anim_8_3": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_8_3_motion"
+  },
+
+  "progress_anim_8_3_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 122, 6 ],
+    "to": [ 183, 6 ]
+  },
+
+  "progress_anim_8_4": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_8_4_motion"
+  },
+
+  "progress_anim_8_4_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 183, 6 ],
+    "to": [ 244, 6 ]
+  },
+
+  "progress_anim_16_1": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_1_motion"
+  },
+
+  "progress_anim_16_1_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 0, 6 ],
+    "to": [ 41, 6 ]
+  },
+
+  "progress_anim_16_2": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_2_motion"
+  },
+
+  "progress_anim_16_2_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 41, 6 ],
+    "to": [ 81, 6 ]
+  },
+
+  "progress_anim_16_3": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_3_motion"
+  },
+
+  "progress_anim_16_3_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 81, 6 ],
+    "to": [ 122, 6 ]
+  },
+
+  "progress_anim_16_4": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_4_motion"
+  },
+
+  "progress_anim_16_4_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 122, 6 ],
+    "to": [ 163, 6 ]
+  },
+
+  "progress_anim_16_5": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_5_motion"
+  },
+
+  "progress_anim_16_5_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 163, 6 ],
+    "to": [ 203, 6 ]
+  },
+
+  "progress_anim_16_6": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_6_motion"
+  },
+
+  "progress_anim_16_6_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 203, 6 ],
+    "to": [ 244, 6 ]
+  },
+
+  "progress_anim_8_reverse_1": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_8_reverse_1_motion"
+  },
+
+  "progress_anim_8_reverse_1_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 122, 6 ],
+    "to": [ 61, 6 ]
+  },
+
+  "progress_anim_8_reverse_2": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_8_reverse_2_motion"
+  },
+
+  "progress_anim_8_reverse_2_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 183, 6 ],
+    "to": [ 122, 6 ]
+  },
+
+  "progress_anim_8_reverse_3": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_8_reverse_3_motion"
+  },
+
+  "progress_anim_8_reverse_3_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 244, 6 ],
+    "to": [ 183, 6 ]
+  },
+
+  "progress_anim_16_reverse_1": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_reverse_1_motion"
+  },
+
+  "progress_anim_16_reverse_1_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 81, 6 ],
+    "to": [ 41, 6 ]
+  },
+
+  "progress_anim_16_reverse_2": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_reverse_2_motion"
+  },
+
+  "progress_anim_16_reverse_2_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 122, 6 ],
+    "to": [ 81, 6 ]
+  },
+
+  "progress_anim_16_reverse_3": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_reverse_3_motion"
+  },
+
+  "progress_anim_16_reverse_3_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 163, 6 ],
+    "to": [ 122, 6 ]
+  },
+
+  "progress_anim_16_reverse_4": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_reverse_4_motion"
+  },
+
+  "progress_anim_16_reverse_4_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 203, 6 ],
+    "to": [ 163, 6 ]
+  },
+
+  "progress_anim_16_reverse_5": {
+    "anim_type": "wait",
+    "duration": 0.0,
+    "next": "@server_form.progress_anim_16_reverse_5_motion"
+  },
+
+  "progress_anim_16_reverse_5_motion": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.2,
+    "from": [ 244, 6 ],
+    "to": [ 203, 6 ]
+  },
+
+  "preview_intro_offset": {
+    "anim_type": "wait",
+    "duration": 0.02,
+    "next": "@server_form.preview_intro_offset_motion"
+  },
+
+  "preview_intro_offset_motion": {
+    "anim_type": "offset",
+    "easing": "out_quart",
+    "duration": 0.48,
+    "from": [ 0, -72 ],
+    "to": [ 0, -32 ]
+  },
+
+  "preview_intro_size": {
+    "anim_type": "wait",
+    "duration": 0.02,
+    "next": "@server_form.preview_intro_size_motion"
+  },
+
+  "preview_intro_size_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.48,
+    "from": [ 96, 58 ],
+    "to": [ 304, 184 ]
+  },
+
+  "third_party_server_screen@common.base_screen": {
+    "$screen_content": "server_form.main_screen_content",
+    "$additional_screen_content": "server_form.ponder_form_additional_screen_content",
+    "$screen_animations": [],
+    "force_render_below": true,
+    "render_only_when_topmost": false,
+    "render_game_behind": true,
+    "load_screen_immediately": true
+  },
+
+  "main_screen_content": {
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+
+  "main_screen_content/server_form_factory": {
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+
+  "long_form": {
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+
+  "custom_form": {
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+
+  "ponder_structure_renderer_window_base": {
+    "$gesture_source_control|default": "structure_renderer_8",
+    "$window_visibility_expression|default": "true",
+    "$focus|default": [ 0, 0, 0 ],
+    "$bottom_left|default": [ 0, 0, 0 ],
+    "$top_right|default": [ 0, 0, 0 ],
+    "type": "panel",
+    "anchor_from": "center",
+    "anchor_to": "center",
+    "offset": [ 0, -32 ],
+    "size": [ 304, 184 ],
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "$window_visibility_expression",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "renderer_body": {
+          "type": "custom",
+          "renderer": "3d_structure_renderer",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ "100%", "100%" ],
+          "property_bag": {
+            "#has_focus": false,
+            "#block_position": "$focus",
+            "#bottom_left_block": "$bottom_left",
+            "#top_right_block": "$top_right",
+            "#include_entities": false,
+            "#remove_blocks": false,
+            "#include_players": false
+          },
+          "bindings": [
+            {
+              "binding_name": "#has_focus",
+              "binding_condition": "visible"
+            },
+            {
+              "binding_name": "#block_position",
+              "binding_condition": "visible"
+            },
+            {
+              "binding_name": "#bottom_left_block",
+              "binding_condition": "visible"
+            },
+            {
+              "binding_name": "#top_right_block",
+              "binding_condition": "visible"
+            },
+            {
+              "binding_name": "#include_entities",
+              "binding_condition": "visible"
+            },
+            {
+              "binding_name": "#remove_blocks",
+              "binding_condition": "visible"
+            },
+            {
+              "binding_name": "#include_players",
+              "binding_condition": "visible"
+            },
+            {
+              "binding_type": "view",
+              "source_control_name": "$gesture_source_control",
+              "source_property_name": "#gesture_delta_source",
+              "target_property_name": "#gesture_delta_source"
+            },
+            {
+              "binding_type": "view",
+              "source_control_name": "$gesture_source_control",
+              "source_property_name": "#gesture_mouse_delta_x",
+              "target_property_name": "#gesture_mouse_delta_x"
+            },
+            {
+              "binding_type": "view",
+              "source_control_name": "$gesture_source_control",
+              "source_property_name": "#gesture_mouse_delta_y",
+              "target_property_name": "#gesture_mouse_delta_y"
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "ponder_structure_renderer_window@server_form.ponder_structure_renderer_window_base": {},
+
+  "ponder_structure_renderer_window_intro@server_form.ponder_structure_renderer_window_base": {
+    "alpha": 1.0,
+    "propagate_alpha": true,
+    "disable_anim_fast_forward": true,
+    "offset": [ 0, -72 ],
+    "size": [ 96, 58 ],
+    "anims": [
+      "@server_form.preview_intro_offset",
+      "@server_form.preview_intro_size"
+    ]
+  },
+
+  "ponder_structure_renderer_8": {
+    "type": "input_panel",
+    "size": [ "100%", "100%" ],
+    "focus_enabled": true,
+    "gesture_tracking_button": "button.turn_structure",
+    "always_handle_controller_direction": true,
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "button.turn_structure",
+        "mapping_type": "pressed",
+        "button_up_right_of_first_refusal": true
+      }
+    ],
+    "controls": [
+      {
+        "renderer_static@server_form.ponder_structure_renderer_window": {
+          "$gesture_source_control": "structure_renderer_8",
+          "$focus": [ 3, 103, 3 ],
+          "$bottom_left": [ 0, 100, 0 ],
+          "$top_right": [ 7, 107, 7 ],
+          "$window_visibility_expression": "((#current_title_text - '\u00A78\u00A7r') = #current_title_text)"
+        }
+      },
+      {
+        "renderer_intro@server_form.ponder_structure_renderer_window_intro": {
+          "$gesture_source_control": "structure_renderer_8",
+          "$focus": [ 3, 103, 3 ],
+          "$bottom_left": [ 0, 100, 0 ],
+          "$top_right": [ 7, 107, 7 ],
+          "$window_visibility_expression": "(not ((#current_title_text - '\u00A78\u00A7r') = #current_title_text))"
+        }
+      }
+    ]
+  },
+
+  "ponder_structure_renderer_16": {
+    "type": "input_panel",
+    "size": [ "100%", "100%" ],
+    "focus_enabled": true,
+    "gesture_tracking_button": "button.turn_structure",
+    "always_handle_controller_direction": true,
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "button.turn_structure",
+        "mapping_type": "pressed",
+        "button_up_right_of_first_refusal": true
+      }
+    ],
+    "controls": [
+      {
+        "renderer_static@server_form.ponder_structure_renderer_window": {
+          "$gesture_source_control": "structure_renderer_16",
+          "$focus": [ 27, 104, 7 ],
+          "$bottom_left": [ 20, 100, 0 ],
+          "$top_right": [ 35, 115, 15 ],
+          "$window_visibility_expression": "((#current_title_text - '\u00A78\u00A7r') = #current_title_text)"
+        }
+      },
+      {
+        "renderer_intro@server_form.ponder_structure_renderer_window_intro": {
+          "$gesture_source_control": "structure_renderer_16",
+          "$focus": [ 27, 104, 7 ],
+          "$bottom_left": [ 20, 100, 0 ],
+          "$top_right": [ 35, 115, 15 ],
+          "$window_visibility_expression": "(not ((#current_title_text - '\u00A78\u00A7r') = #current_title_text))"
+        }
+      }
+    ]
+  },
+
+  "ponder_preview_panel_8": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#title_text - '\u00A74\u00A7r\u00A71\u00A7r') = #title_text))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "structure_renderer_8@server_form.ponder_structure_renderer_8": {
+          "size": [ "100%", "100%" ]
+        }
+      }
+    ]
+  },
+
+  "ponder_preview_panel_16": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#title_text - '\u00A74\u00A7r\u00A72\u00A7r') = #title_text))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "structure_renderer_16@server_form.ponder_structure_renderer_16": {
+          "size": [ "100%", "100%" ]
+        }
+      }
+    ]
+  },
+
+  "ponder_preview_panel": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "controls": [
+      {
+        "preview_8@server_form.ponder_preview_panel_8": {}
+      },
+      {
+        "preview_16@server_form.ponder_preview_panel_16": {}
+      }
+    ]
+  },
+
+  "ponder_progress_bar": {
+    "type": "panel",
+    "size": [ 246, 8 ],
+    "controls": [
+      {
+        "track_background": {
+          "type": "image",
+          "size": [ "100%", "100%" ],
+          "texture": "textures/ui/ponder/progress_track"
+        }
+      },
+      {
+        "fill_8_stage_1": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 61, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_1_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 0, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_8_1"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_1_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 122, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_8_reverse_1"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_2": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 122, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_2_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 61, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_8_2"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_2_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 183, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_8_reverse_2"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_3": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 183, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_3_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 122, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_8_3"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_3_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 244, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_8_reverse_3"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_4": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 244, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r100') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8_stage_4_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 183, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_8_4"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r100') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_1": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 41, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_1_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 0, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_1"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_1_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 81, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_reverse_1"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_2": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 81, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_2_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 41, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_2"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_2_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 122, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_reverse_2"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_3": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 122, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_3_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 81, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_3"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_3_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 163, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_reverse_3"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_4": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 163, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_4_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 122, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_4"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_4_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 203, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_reverse_4"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_5": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 203, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_5_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 163, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_5"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_5_reverse_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 244, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_reverse_5"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_6": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 244, 6 ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r100') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_16_stage_6_anim": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 1 ],
+          "size": [ 203, 6 ],
+          "clips_children": true,
+          "anims": [
+            "@server_form.progress_anim_16_6"
+          ],
+          "disable_anim_fast_forward": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [ 244, 6 ],
+                "texture": "textures/ui/ponder/progress_fill"
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r100') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "ponder_nav_button_state": {
+    "$background_texture|default": "textures/ui/ponder/button_bg_default",
+    "$icon_color|default": [ 1.0, 1.0, 1.0, 1.0 ],
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "controls": [
+      {
+        "background": {
+          "type": "image",
+          "size": [ "100%", "100%" ],
+          "texture": "$background_texture"
+        }
+      },
+      {
+        "prev_icon": {
+          "type": "image",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ 12, 12 ],
+          "texture": "textures/ui/ponder/icon_prev",
+          "color": "$icon_color",
+          "bindings": [
+            {
+              "binding_name": "#form_button_text",
+              "binding_name_override": "#button_text_raw",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A71\u00A7r') = #button_text_raw))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "close_icon": {
+          "type": "image",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ 12, 12 ],
+          "texture": "textures/ui/ponder/icon_close",
+          "color": "$icon_color",
+          "bindings": [
+            {
+              "binding_name": "#form_button_text",
+              "binding_name_override": "#button_text_raw",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A74\u00A7r') = #button_text_raw))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "next_icon": {
+          "type": "image",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ 12, 12 ],
+          "texture": "textures/ui/ponder/icon_next",
+          "color": "$icon_color",
+          "bindings": [
+            {
+              "binding_name": "#form_button_text",
+              "binding_name_override": "#button_text_raw",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A72\u00A7r') = #button_text_raw))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "replay_icon": {
+          "type": "image",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ 12, 12 ],
+          "texture": "textures/ui/ponder/icon_replay",
+          "color": "$icon_color",
+          "bindings": [
+            {
+              "binding_name": "#form_button_text",
+              "binding_name_override": "#button_text_raw",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A73\u00A7r') = #button_text_raw))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "ponder_nav_button": {
+    "type": "button",
+    "size": [ 30, 30 ],
+    "$pressed_button_name": "button.form_button_click",
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "focus_enabled": true,
+    "sound_name": "button.form_button_click",
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "focused"
+      }
+    ],
+    "controls": [
+      {
+        "default@server_form.ponder_nav_button_state": {}
+      },
+      {
+        "hover@server_form.ponder_nav_button_state": {
+          "$background_texture": "textures/ui/ponder/button_bg_hover"
+        }
+      },
+      {
+        "pressed@server_form.ponder_nav_button_state": {
+          "$background_texture": "textures/ui/ponder/button_bg_pressed"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#form_button_text",
+        "binding_name_override": "#button_text_raw",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#button_text_raw - '\u00A73\u00A7r\u00A70\u00A7r') = #button_text_raw)",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+
+  "ponder_nav_button_slot": {
+    "type": "panel",
+    "size": [ 46, 30 ],
+    "controls": [
+      {
+        "button@server_form.ponder_nav_button": {
+          "anchor_from": "center",
+          "anchor_to": "center"
+        }
+      }
+    ]
+  },
+
+  "ponder_nav_buttons": {
+    "type": "stack_panel",
+    "orientation": "horizontal",
+    "size": [ "100%c", 30 ],
+    "factory": {
+      "name": "buttons",
+      "control_ids": {
+        "button": "server_form.ponder_nav_button_slot"
+      }
+    },
+    "collection_name": "form_buttons",
+    "bindings": [
+      {
+        "binding_name": "#form_button_contents",
+        "binding_name_override": "#collection_length"
+      }
+    ]
+  },
+
+  "ponder_footer_layer": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "size": [ 246, 44 ],
+    "controls": [
+      {
+        "nav_holder": {
+          "type": "panel",
+          "size": [ "100%", 30 ],
+          "controls": [
+            {
+              "nav@server_form.ponder_nav_buttons": {
+                "anchor_from": "center",
+                "anchor_to": "center"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "footer_gap": {
+          "type": "panel",
+          "size": [ "100%", 6 ]
+        }
+      },
+      {
+        "progress_holder": {
+          "type": "panel",
+          "size": [ "100%", 8 ],
+          "controls": [
+            {
+              "progress@server_form.ponder_progress_bar": {
+                "anchor_from": "center",
+                "anchor_to": "center"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "ponder_form_panel": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "controls": [
+      {
+        "dimmer": {
+          "type": "image",
+          "layer": 1,
+          "size": [ "100%", "100%" ],
+          "texture": "textures/ui/White",
+          "color": [ 0.0, 0.0, 0.0 ],
+          "alpha": 0.34
+        }
+      },
+      {
+        "preview@server_form.ponder_preview_panel": {
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "layer": 10
+        }
+      },
+      {
+        "footer_layer@server_form.ponder_footer_layer": {
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [ 0, -14 ],
+          "layer": 30
+        }
+      }
+    ]
+  },
+
+  "ponder_form_screen_layer": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "layer": 90,
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "content@server_form.ponder_form_panel": {}
+      }
+    ]
+  },
+
+  "ponder_form_additional_screen_content": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "controls": [
+      {
+        "ponder_form_screen_layer@server_form.ponder_form_screen_layer": {}
+      }
+    ]
+  }
+}
