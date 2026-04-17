@@ -1944,28 +1944,94 @@
     ]
   },
 
-  "ponder_text_bubble_alpha": {
+  "ponder_text_bubble_alpha_wait": {
+    "anim_type": "wait",
+    "duration": 0.1875,
+    "next": "@server_form.ponder_text_bubble_alpha_1"
+  },
+
+  "ponder_text_bubble_alpha_1": {
     "anim_type": "alpha",
-    "easing": "out_quart",
-    "duration": 0.16,
+    "easing": "linear",
+    "duration": 0.05,
     "from": 0.0,
+    "to": 0.25,
+    "next": "@server_form.ponder_text_bubble_alpha_2"
+  },
+
+  "ponder_text_bubble_alpha_2": {
+    "anim_type": "alpha",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": 0.25,
     "to": 1.0
   },
 
-  "ponder_text_bubble_offset": {
+  "ponder_text_bubble_offset_wait": {
+    "anim_type": "wait",
+    "duration": 0.1875,
+    "next": "@server_form.ponder_text_bubble_offset_1"
+  },
+
+  "ponder_text_bubble_offset_1": {
     "anim_type": "offset",
-    "easing": "out_quart",
-    "duration": 0.18,
-    "from": [ 16, 0 ],
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [ 6, 0 ],
+    "to": [ 4, 0 ],
+    "next": "@server_form.ponder_text_bubble_offset_2"
+  },
+
+  "ponder_text_bubble_offset_2": {
+    "anim_type": "offset",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [ 4, 0 ],
     "to": [ 0, 0 ]
   },
 
   "ponder_text_bubble_line_clip": {
-    "anim_type": "clip",
-    "easing": "out_quart",
-    "duration": 0.16,
-    "from": 1,
-    "to": 0
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [ 0, 2 ],
+    "to": [ 3, 2 ],
+    "next": "@server_form.ponder_text_bubble_line_clip_2"
+  },
+
+  "ponder_text_bubble_line_clip_2": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [ 3, 2 ],
+    "to": [ 12, 2 ],
+    "next": "@server_form.ponder_text_bubble_line_clip_3"
+  },
+
+  "ponder_text_bubble_line_clip_3": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [ 12, 2 ],
+    "to": [ 26, 2 ],
+    "next": "@server_form.ponder_text_bubble_line_clip_4"
+  },
+
+  "ponder_text_bubble_line_clip_4": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [ 26, 2 ],
+    "to": [ 46, 2 ],
+    "next": "@server_form.ponder_text_bubble_line_clip_5"
+  },
+
+  "ponder_text_bubble_line_clip_5": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [ 46, 2 ],
+    "to": [ 72, 2 ]
   },
 
   "ponder_text_bubble_slot": {
@@ -1996,14 +2062,15 @@
       {
         "bubble_intro": {
           "type": "panel",
+          "offset": [ 6, 0 ],
           "size": [ 184, 64 ],
           "clips_children": false,
-          "alpha": 1.0,
+          "alpha": 0.0,
           "propagate_alpha": true,
           "disable_anim_fast_forward": true,
           "anims": [
-            "@server_form.ponder_text_bubble_alpha",
-            "@server_form.ponder_text_bubble_offset"
+            "@server_form.ponder_text_bubble_alpha_wait",
+            "@server_form.ponder_text_bubble_offset_wait"
           ],
           "controls": [
             {
@@ -2031,7 +2098,7 @@
                       "max_size": [ 164, 48 ],
                       "text": "#text",
                       "text_alignment": "left",
-                      "color": [ 0.98, 0.98, 0.87 ],
+                      "color": [ 0.964706, 0.964706, 0.898039 ],
                       "shadow": false,
                       "localize": false,
                       "line_padding": 1,
@@ -2054,20 +2121,29 @@
                   }
                 ]
               }
-            },
+            }
+          ]
+        }
+      },
+      {
+        "line_sticker": {
+          "type": "panel",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ -56, 0 ],
+          "size": [ 72, 2 ],
+          "clips_children": true,
+          "layer": 4,
+          "disable_anim_fast_forward": true,
+          "anims": [
+            "@server_form.ponder_text_bubble_line_clip"
+          ],
+          "controls": [
             {
-              "line_sticker": {
+              "line_texture": {
                 "type": "image",
-                "offset": [ -71, 2 ],
-                "size": [ 72, 14 ],
-                "layer": 4,
-                "texture": "textures/ui/ponder/text_bubble_line",
-                "clip_direction": "left",
-                "clip_pixelperfect": true,
-                "disable_anim_fast_forward": true,
-                "anims": [
-                  "@server_form.ponder_text_bubble_line_clip"
-                ]
+                "size": [ 72, 2 ],
+                "texture": "textures/ui/ponder/text_bubble_line"
               }
             }
           ]
