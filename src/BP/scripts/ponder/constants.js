@@ -6,6 +6,7 @@ export const OVERWORLD_ID = "minecraft:overworld";
 // ANIMATE_PROGRESS_MARKER，
 // REVERSE_PROGRESS_MARKER，
 // ANIMATE_PREVIEW_MARKER，
+// SLOT_MARKERS，
 // BUTTON_MARKERS
 */
 export const TITLE_MARKER = "\u00A70\u00A7r\u00A71\u00A7r";
@@ -13,6 +14,11 @@ export const PROGRESS_MARKER = "\u00A72\u00A7r";
 export const ANIMATE_PROGRESS_MARKER = "\u00A76\u00A7r";
 export const REVERSE_PROGRESS_MARKER = "\u00A77\u00A7r";
 export const ANIMATE_PREVIEW_MARKER = "\u00A78\u00A7r";
+export const SLOT_MARKERS = {
+  top: "\u00A79\u00A7r\u00A70\u00A7r",
+  middle: "\u00A79\u00A7r\u00A71\u00A7r",
+  bottom: "\u00A79\u00A7r\u00A72\u00A7r",
+};
 export const BUTTON_MARKERS = {
   hidden: "\u00A73\u00A7r\u00A70\u00A7r",
   prev: "\u00A73\u00A7r\u00A71\u00A7r",

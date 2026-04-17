@@ -11,7 +11,6 @@ export const forgeDemoScene = defineScene({
   entryItems: ["minecraft:blaze_rod"],
   stagePresetId: "demo_16x16x16",
   tickingAreaName: "ponder_demo_forge",
-  messages: {},
   structures: [
     defineBoxStructure(
       "forge_base",
@@ -180,15 +179,11 @@ export const forgeDemoScene = defineScene({
   ],
   stages: [
     defineStage({
-      heading: "STEP 1 / 6",
-      title: "Foundation",
       description:
         "Block out the 16 by 16 footprint first so the rest of the forge has a clear base to land on.",
       add: ["forge_base", "forge_floor"],
     }),
     defineStage({
-      heading: "STEP 2 / 6",
-      title: "Outer Shell",
       description:
         "Raise the perimeter walls and anchor the four corners with taller blackstone pillars.",
       add: [
@@ -203,23 +198,17 @@ export const forgeDemoScene = defineScene({
       ],
     }),
     defineStage({
-      heading: "STEP 3 / 6",
-      title: "Access Paths",
       description:
         "Add the copper entry frame and temporary walkways so the workshop has a readable circulation path.",
       add: ["entry_frame", "west_catwalk", "east_catwalk", "scaffold_bridge"],
     }),
     defineStage({
-      heading: "STEP 4 / 6",
-      title: "Workshop Core",
       description:
         "Swap out the temporary bridge and drop in the processing plinth together with the furnace and anvil stations.",
       add: ["core_plinth", "smelter_left", "smelter_right", "anvil_left", "anvil_right"],
       remove: ["scaffold_bridge"],
     }),
     defineStage({
-      heading: "STEP 5 / 6",
-      title: "Roofline",
       description:
         "Cap the hall with a dark oak ring, then close the center with a long skylight strip.",
       add: [
@@ -232,8 +221,6 @@ export const forgeDemoScene = defineScene({
       ],
     }),
     defineStage({
-      heading: "STEP 6 / 6",
-      title: "Power Pass",
       description:
         "Finish the forge with chimneys, a glowing core, and four corner lights to frame the final silhouette.",
       add: [

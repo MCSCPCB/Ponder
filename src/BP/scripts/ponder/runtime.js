@@ -6,6 +6,7 @@ import {
   BUTTON_MARKERS,
   OVERWORLD_ID,
   REVERSE_PROGRESS_MARKER,
+  SLOT_MARKERS,
 } from "./constants.js";
 import { getSceneForItem, getSceneTitlePrefix, getStagePreset } from "./registry.js";
 
@@ -187,37 +188,43 @@ function syncSceneStage(scene, dimension, preset, previousStageIndex, nextStageI
 }
 
 function createStageBody(stage) {
-  return `${stage.title}\n\n${stage.description}`;
+  return stage.description;
 }
 
-function createButtonLabel(id, text) {
+function createMarkedButtonLabel(id, text) {
   return `${BUTTON_MARKERS[id]}${text}`;
 }
 
-function createStageButtons(stageCount, stageIndex) {
+// Bedrock reliably exposes form button text to custom server_form UI, so the
+// middle button carries the bubble payload while still advertising the close icon.
+function createBubblePayloadLabel(text) {
+  return createMarkedButtonLabel("close", text);
+}
+
+function createStageButtons(stageCount, stageIndex, stageBody) {
   const buttons = [
     {
       id: stageIndex > 0 ? "prev" : "noop",
       label:
         stageIndex > 0
-          ? createButtonLabel("prev", "Previous")
-          : createButtonLabel("hidden", ""),
+          ? createMarkedButtonLabel("prev", "Previous")
+          : createMarkedButtonLabel("hidden", ""),
     },
     {
       id: "close",
-      label: createButtonLabel("close", "Close"),
+      label: createBubblePayloadLabel(stageBody),
     },
   ];
 
   if (stageIndex < stageCount - 1) {
     buttons.push({
       id: "next",
-      label: createButtonLabel("next", stageIndex === 0 ? "Begin" : "Next"),
+      label: createMarkedButtonLabel("next", stageIndex === 0 ? "Begin" : "Next"),
     });
   } else {
     buttons.push({
       id: "restart",
-      label: createButtonLabel("restart", "Replay"),
+      label: createMarkedButtonLabel("restart", "Replay"),
     });
   }
 
@@ -232,10 +239,23 @@ function getStageProgress(stageCount, stageIndex) {
   return String(Math.round(((stageIndex + 1) * 100) / stageCount));
 }
 
+function getStageBubbleSlotMarker(stageIndex) {
+  if (stageIndex % 3 === 0) {
+    return SLOT_MARKERS.top;
+  }
+
+  if (stageIndex % 3 === 1) {
+    return SLOT_MARKERS.middle;
+  }
+
+  return SLOT_MARKERS.bottom;
+}
+
 function createStageForm(scene, stageIndex, animateProgressMode = "none", animatePreview = false) {
   const stageCount = scene.stages.length;
   const stage = scene.stages[stageIndex];
-  const buttons = createStageButtons(stageCount, stageIndex);
+  const stageBody = createStageBody(stage);
+  const buttons = createStageButtons(stageCount, stageIndex, stageBody);
   const animationMarker =
     animateProgressMode === "forward"
       ? ANIMATE_PROGRESS_MARKER
@@ -244,9 +264,9 @@ function createStageForm(scene, stageIndex, animateProgressMode = "none", animat
         : "";
   const form = new ActionFormData()
     .title(
-      `${getSceneTitlePrefix(scene)}${getStageProgress(stageCount, stageIndex)}${animationMarker}${animatePreview ? ANIMATE_PREVIEW_MARKER : ""}`,
+      `${getSceneTitlePrefix(scene)}${getStageProgress(stageCount, stageIndex)}${animationMarker}${animatePreview ? ANIMATE_PREVIEW_MARKER : ""}${getStageBubbleSlotMarker(stageIndex)}`,
     )
-    .body(createStageBody(stage));
+    .body(stageBody);
 
   for (const button of buttons) {
     form.button(button.label);

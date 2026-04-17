@@ -70,11 +70,11 @@ function validateScene(scene) {
     console.warn(`Scene "${scene.id}" has no stages`);
   }
 
-  for (const stage of scene.stages) {
+  for (const [stageIndex, stage] of scene.stages.entries()) {
     for (const structureId of [...stage.add, ...stage.remove]) {
       if (!scene.structureById.has(structureId)) {
         console.warn(
-          `Scene "${scene.id}" stage "${stage.title}" references unknown structure id "${structureId}"`,
+          `Scene "${scene.id}" stage ${stageIndex + 1} references unknown structure id "${structureId}"`,
         );
       }
     }

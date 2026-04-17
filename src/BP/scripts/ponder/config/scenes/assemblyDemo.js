@@ -11,7 +11,6 @@ export const assemblyDemoScene = defineScene({
   entryItems: ["minecraft:stick"],
   stagePresetId: "demo_8x8x8",
   tickingAreaName: "ponder_demo_assembly",
-  messages: {},
   structures: [
     defineBoxStructure(
       "stone_base",
@@ -99,15 +98,11 @@ export const assemblyDemoScene = defineScene({
   ],
   stages: [
     defineStage({
-      heading: "STEP 1 / 4",
-      title: "Foundation",
       description:
         "Lay down the stone base and plank deck. This is the footprint the rest of the scene grows from.",
       add: ["stone_base", "deck"],
     }),
     defineStage({
-      heading: "STEP 2 / 4",
-      title: "Frame",
       description:
         "Raise the oak posts and tie them together with a beam ring so the stage reads clearly from every angle.",
       add: [
@@ -122,15 +117,11 @@ export const assemblyDemoScene = defineScene({
       ],
     }),
     defineStage({
-      heading: "STEP 3 / 4",
-      title: "Machine Core",
       description:
         "Drop the processing core into the middle, then bolt on the side machines that make the build feel functional.",
       add: ["machine_core", "barrel", "furnace"],
     }),
     defineStage({
-      heading: "STEP 4 / 4",
-      title: "Finish Pass",
       description:
         "Cap the top with tinted glass and energize the center with bright accent blocks. Drag the preview to inspect the final pass.",
       add: [

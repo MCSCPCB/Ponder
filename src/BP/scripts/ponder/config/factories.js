@@ -60,9 +60,7 @@ export const defineBlockStructure = (id, blockId, position) => ({
   position,
 });
 
-export const defineStage = ({ heading = "", title, description, add = [], remove = [] }) => ({
-  heading,
-  title,
+export const defineStage = ({ description, add = [], remove = [] }) => ({
   description,
   add,
   remove,
