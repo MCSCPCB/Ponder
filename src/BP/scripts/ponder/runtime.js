@@ -4,6 +4,7 @@ import {
   ANIMATE_PREVIEW_MARKER,
   ANIMATE_PROGRESS_MARKER,
   BUTTON_MARKERS,
+  DEFAULT_BUBBLE_SLOT,
   OVERWORLD_ID,
   REVERSE_PROGRESS_MARKER,
   SLOT_MARKERS,
@@ -239,12 +240,20 @@ function getStageProgress(stageCount, stageIndex) {
   return String(Math.round(((stageIndex + 1) * 100) / stageCount));
 }
 
-function getStageBubbleSlotMarker(stageIndex) {
-  if (stageIndex % 2 === 0) {
-    return SLOT_MARKERS.top;
+function getStageBubbleSlot(scene, stageIndex) {
+  for (let currentIndex = stageIndex; currentIndex >= 0; currentIndex -= 1) {
+    const bubbleSlot = scene.stages[currentIndex]?.bubbleSlot;
+    if (bubbleSlot && SLOT_MARKERS[bubbleSlot]) {
+      return bubbleSlot;
+    }
   }
 
-  return SLOT_MARKERS.middle;
+  return DEFAULT_BUBBLE_SLOT;
+}
+
+function getStageBubbleSlotMarker(scene, stageIndex) {
+  const bubbleSlot = getStageBubbleSlot(scene, stageIndex);
+  return SLOT_MARKERS[bubbleSlot] ?? SLOT_MARKERS[DEFAULT_BUBBLE_SLOT];
 }
 
 function createStageForm(scene, stageIndex, animateProgressMode = "none", animatePreview = false) {
@@ -260,7 +269,7 @@ function createStageForm(scene, stageIndex, animateProgressMode = "none", animat
         : "";
   const form = new ActionFormData()
     .title(
-      `${getSceneTitlePrefix(scene)}${getStageProgress(stageCount, stageIndex)}${animationMarker}${animatePreview ? ANIMATE_PREVIEW_MARKER : ""}${getStageBubbleSlotMarker(stageIndex)}`,
+      `${getSceneTitlePrefix(scene)}${getStageProgress(stageCount, stageIndex)}${animationMarker}${animatePreview ? ANIMATE_PREVIEW_MARKER : ""}${getStageBubbleSlotMarker(scene, stageIndex)}`,
     )
     .body(stageBody);
 

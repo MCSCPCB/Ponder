@@ -2178,11 +2178,16 @@
 
   "ponder_text_bubble_top@server_form.ponder_text_bubble_slot": {
     "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A70\u00A7r') = #current_title_text))",
-    "$slot_offset": [ -24, -86 ]
+    "$slot_offset": [ -24, -64 ]
   },
 
   "ponder_text_bubble_middle@server_form.ponder_text_bubble_slot": {
     "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A71\u00A7r') = #current_title_text))",
+    "$slot_offset": [ -24, -32 ]
+  },
+
+  "ponder_text_bubble_bottom@server_form.ponder_text_bubble_slot": {
+    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A72\u00A7r') = #current_title_text))",
     "$slot_offset": [ -24, 0 ]
   },
 
@@ -2197,6 +2202,11 @@
       },
       {
         "bubble_middle@server_form.ponder_text_bubble_middle": {
+          "layer": 20
+        }
+      },
+      {
+        "bubble_bottom@server_form.ponder_text_bubble_bottom": {
           "layer": 20
         }
       }

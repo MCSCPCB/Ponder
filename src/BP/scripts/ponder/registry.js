@@ -1,4 +1,5 @@
 import {
+  BUBBLE_SLOT_IDS,
   DEFAULT_SCENE_MESSAGES,
   PROGRESS_MARKER,
   TITLE_MARKER,
@@ -6,6 +7,8 @@ import {
 import { SUPPORTED_PROGRESS_STAGE_COUNTS } from "./config/progressPresets.js";
 import { STAGE_PRESETS } from "./config/presets.js";
 import { PONDER_SCENES } from "./config/scenes/index.js";
+
+const VALID_BUBBLE_SLOTS = new Set(BUBBLE_SLOT_IDS);
 
 function normalizeScene(rawScene) {
   const structureById = new Map();
@@ -71,6 +74,12 @@ function validateScene(scene) {
   }
 
   for (const [stageIndex, stage] of scene.stages.entries()) {
+    if (stage.bubbleSlot !== undefined && !VALID_BUBBLE_SLOTS.has(stage.bubbleSlot)) {
+      console.warn(
+        `Scene "${scene.id}" stage ${stageIndex + 1} uses invalid bubbleSlot "${stage.bubbleSlot}". Expected one of ${BUBBLE_SLOT_IDS.join(", ")}.`,
+      );
+    }
+
     for (const structureId of [...stage.add, ...stage.remove]) {
       if (!scene.structureById.has(structureId)) {
         console.warn(

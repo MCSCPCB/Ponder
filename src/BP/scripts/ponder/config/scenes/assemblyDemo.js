@@ -98,6 +98,7 @@ export const assemblyDemoScene = defineScene({
   ],
   stages: [
     defineStage({
+      bubbleSlot: "top",
       description:
         "Lay down the stone base and plank deck. This is the footprint the rest of the scene grows from.",
       add: ["stone_base", "deck"],
@@ -117,6 +118,7 @@ export const assemblyDemoScene = defineScene({
       ],
     }),
     defineStage({
+      bubbleSlot: "middle",
       description:
         "Drop the processing core into the middle, then bolt on the side machines that make the build feel functional.",
       add: ["machine_core", "barrel", "furnace"],

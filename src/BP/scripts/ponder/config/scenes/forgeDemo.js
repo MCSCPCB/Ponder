@@ -179,6 +179,7 @@ export const forgeDemoScene = defineScene({
   ],
   stages: [
     defineStage({
+      bubbleSlot: "top",
       description:
         "Block out the 16 by 16 footprint first so the rest of the forge has a clear base to land on.",
       add: ["forge_base", "forge_floor"],
@@ -198,6 +199,7 @@ export const forgeDemoScene = defineScene({
       ],
     }),
     defineStage({
+      bubbleSlot: "middle",
       description:
         "Add the copper entry frame and temporary walkways so the workshop has a readable circulation path.",
       add: ["entry_frame", "west_catwalk", "east_catwalk", "scaffold_bridge"],
@@ -209,6 +211,7 @@ export const forgeDemoScene = defineScene({
       remove: ["scaffold_bridge"],
     }),
     defineStage({
+      bubbleSlot: "bottom",
       description:
         "Cap the hall with a dark oak ring, then close the center with a long skylight strip.",
       add: [

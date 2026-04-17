@@ -60,10 +60,11 @@ export const defineBlockStructure = (id, blockId, position) => ({
   position,
 });
 
-export const defineStage = ({ description, add = [], remove = [] }) => ({
+export const defineStage = ({ description, add = [], remove = [], bubbleSlot }) => ({
   description,
   add,
   remove,
+  ...(bubbleSlot !== undefined ? { bubbleSlot } : {}),
 });
 
 export const defineScene = (config) => config;
