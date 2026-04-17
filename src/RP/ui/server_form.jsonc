@@ -2911,127 +2911,154 @@
     ],
     "controls": [
       {
-        "bubble_intro": {
-          "type": "panel",
-          "offset": [
-            6,
-            0
-          ],
+        "bubble_cluster": {
+          "type": "stack_panel",
+          "orientation": "horizontal",
+          "anchor_from": "top_right",
+          "anchor_to": "top_right",
           "size": [
-            184,
-            64
-          ],
-          "clips_children": false,
-          "alpha": 0.0,
-          "propagate_alpha": true,
-          "disable_anim_fast_forward": true,
-          "anims": [
-            "@server_form.ponder_text_bubble_alpha_wait",
-            "@server_form.ponder_text_bubble_offset_wait"
+            "100%c",
+            "100%cm"
           ],
           "controls": [
             {
-              "bubble_body": {
+              "line_anchor": {
                 "type": "panel",
-                "offset": [
+                "size": [
                   0,
                   0
                 ],
-                "size": [
-                  184,
-                  64
-                ],
+                "layer": 4,
                 "controls": [
                   {
-                    "background": {
-                      "type": "image",
-                      "layer": 0,
-                      "size": [
-                        "100%",
-                        "100%"
-                      ],
-                      "texture": "textures/ui/ponder/text_bubble_frame"
-                    }
-                  },
-                  {
-                    "bubble_text": {
-                      "type": "label",
-                      "layer": 3,
-                      "anchor_from": "top_left",
-                      "anchor_to": "top_left",
+                    "line_sticker": {
+                      "type": "panel",
+                      "anchor_from": "top_right",
+                      "anchor_to": "top_right",
                       "offset": [
-                        10,
-                        8
+                        48,
+                        0
                       ],
                       "size": [
-                        164,
-                        48
+                        72,
+                        2
                       ],
-                      "max_size": [
-                        164,
-                        48
-                      ],
-                      "text": "#text",
-                      "text_alignment": "left",
-                      "color": [
-                        0.964706,
-                        0.964706,
-                        0.898039
-                      ],
-                      "shadow": false,
-                      "localize": false,
-                      "line_padding": 1,
-                      "font_scale_factor": 0.9,
-                      "bindings": [
+                      "controls": [
                         {
-                          "binding_type": "view",
-                          "source_control_name": "bubble_text_source",
-                          "source_property_name": "(#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r')",
-                          "target_property_name": "#text"
-                        },
-                        {
-                          "binding_type": "view",
-                          "source_control_name": "bubble_text_source",
-                          "source_property_name": "(not ((#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r') = ''))",
-                          "target_property_name": "#visible"
+                          "line_clip": {
+                            "type": "panel",
+                            "anchor_from": "top_left",
+                            "anchor_to": "top_left",
+                            "size": [
+                              0,
+                              2
+                            ],
+                            "clips_children": true,
+                            "disable_anim_fast_forward": true,
+                            "anims": [
+                              "@server_form.ponder_text_bubble_line_clip"
+                            ],
+                            "controls": [
+                              {
+                                "line_texture": {
+                                  "type": "image",
+                                  "anchor_from": "top_left",
+                                  "anchor_to": "top_left",
+                                  "size": [
+                                    72,
+                                    2
+                                  ],
+                                  "texture": "textures/ui/ponder/text_bubble_line"
+                                }
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
                   }
                 ]
               }
-            }
-          ]
-        }
-      },
-      {
-        "line_sticker": {
-          "type": "panel",
-          "anchor_from": "top_left",
-          "anchor_to": "top_left",
-          "offset": [
-            -56,
-            0
-          ],
-          "size": [
-            72,
-            2
-          ],
-          "clips_children": true,
-          "layer": 4,
-          "disable_anim_fast_forward": true,
-          "anims": [
-            "@server_form.ponder_text_bubble_line_clip"
-          ],
-          "controls": [
+            },
             {
-              "line_texture": {
-                "type": "image",
-                "size": [
-                  72,
-                  2
+              "bubble_intro": {
+                "type": "panel",
+                "offset": [
+                  6,
+                  0
                 ],
-                "texture": "textures/ui/ponder/text_bubble_line"
+                "size": [
+                  "100%c",
+                  "100%cm"
+                ],
+                "clips_children": false,
+                "alpha": 0.0,
+                "propagate_alpha": true,
+                "disable_anim_fast_forward": true,
+                "anims": [
+                  "@server_form.ponder_text_bubble_alpha_wait",
+                  "@server_form.ponder_text_bubble_offset_wait"
+                ],
+                "controls": [
+                  {
+                    "bubble_body": {
+                      "type": "image",
+                      "layer": 0,
+                      "size": [
+                        "100%c + 20px",
+                        "100%cm + 16px"
+                      ],
+                      "texture": "textures/ui/ponder/text_bubble_frame",
+                      "controls": [
+                        {
+                          "bubble_text": {
+                            "type": "label",
+                            "layer": 3,
+                            "anchor_from": "top_left",
+                            "anchor_to": "top_left",
+                            "offset": [
+                              10,
+                              8
+                            ],
+                            "size": [
+                              "default",
+                              "default"
+                            ],
+                            "max_size": [
+                              164,
+                              "default"
+                            ],
+                            "text": "#text",
+                            "text_alignment": "left",
+                            "color": [
+                              0.964706,
+                              0.964706,
+                              0.898039
+                            ],
+                            "shadow": false,
+                            "localize": false,
+                            "line_padding": 1,
+                            "font_scale_factor": 0.9,
+                            "bindings": [
+                              {
+                                "binding_type": "view",
+                                "source_control_name": "bubble_text_source",
+                                "source_property_name": "(#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r')",
+                                "target_property_name": "#text"
+                              },
+                              {
+                                "binding_type": "view",
+                                "source_control_name": "bubble_text_source",
+                                "source_property_name": "(not ((#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r') = ''))",
+                                "target_property_name": "#visible"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
               }
             }
           ]
@@ -3054,13 +3081,6 @@
       0
     ]
   },
-  "ponder_text_bubble_bottom@server_form.ponder_text_bubble_slot": {
-    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A72\u00A7r') = #current_title_text))",
-    "$slot_offset": [
-      -24,
-      86
-    ]
-  },
   "ponder_text_bubble_layer": {
     "type": "panel",
     "size": [
@@ -3075,11 +3095,6 @@
       },
       {
         "bubble_middle@server_form.ponder_text_bubble_middle": {
-          "layer": 20
-        }
-      },
-      {
-        "bubble_bottom@server_form.ponder_text_bubble_bottom": {
           "layer": 20
         }
       }

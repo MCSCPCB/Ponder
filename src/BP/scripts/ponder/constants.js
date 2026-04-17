@@ -17,7 +17,6 @@ export const ANIMATE_PREVIEW_MARKER = "\u00A78\u00A7r";
 export const SLOT_MARKERS = {
   top: "\u00A79\u00A7r\u00A70\u00A7r",
   middle: "\u00A79\u00A7r\u00A71\u00A7r",
-  bottom: "\u00A79\u00A7r\u00A72\u00A7r",
 };
 export const BUTTON_MARKERS = {
   hidden: "\u00A73\u00A7r\u00A70\u00A7r",

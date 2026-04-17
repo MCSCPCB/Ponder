@@ -240,15 +240,11 @@ function getStageProgress(stageCount, stageIndex) {
 }
 
 function getStageBubbleSlotMarker(stageIndex) {
-  if (stageIndex % 3 === 0) {
+  if (stageIndex % 2 === 0) {
     return SLOT_MARKERS.top;
   }
 
-  if (stageIndex % 3 === 1) {
-    return SLOT_MARKERS.middle;
-  }
-
-  return SLOT_MARKERS.bottom;
+  return SLOT_MARKERS.middle;
 }
 
 function createStageForm(scene, stageIndex, animateProgressMode = "none", animatePreview = false) {
