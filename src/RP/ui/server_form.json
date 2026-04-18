@@ -1,286 +1,365 @@
 {
   "namespace": "server_form",
-
   "progress_anim_8_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_1_motion"
   },
-
   "progress_anim_8_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 0, 6 ],
-    "to": [ 61, 6 ]
+    "from": [
+      0,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
   },
-
   "progress_anim_8_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_2_motion"
   },
-
   "progress_anim_8_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 61, 6 ],
-    "to": [ 122, 6 ]
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
   },
-
   "progress_anim_8_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_3_motion"
   },
-
   "progress_anim_8_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 122, 6 ],
-    "to": [ 183, 6 ]
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
   },
-
   "progress_anim_8_4": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_4_motion"
   },
-
   "progress_anim_8_4_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 183, 6 ],
-    "to": [ 244, 6 ]
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      224,
+      3
+    ]
   },
-
   "progress_anim_16_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_1_motion"
   },
-
   "progress_anim_16_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 0, 6 ],
-    "to": [ 41, 6 ]
+    "from": [
+      0,
+      3
+    ],
+    "to": [
+      37,
+      3
+    ]
   },
-
   "progress_anim_16_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_2_motion"
   },
-
   "progress_anim_16_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 41, 6 ],
-    "to": [ 81, 6 ]
+    "from": [
+      37,
+      3
+    ],
+    "to": [
+      75,
+      3
+    ]
   },
-
   "progress_anim_16_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_3_motion"
   },
-
   "progress_anim_16_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 81, 6 ],
-    "to": [ 122, 6 ]
+    "from": [
+      75,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
   },
-
   "progress_anim_16_4": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_4_motion"
   },
-
   "progress_anim_16_4_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 122, 6 ],
-    "to": [ 163, 6 ]
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      149,
+      3
+    ]
   },
-
   "progress_anim_16_5": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_5_motion"
   },
-
   "progress_anim_16_5_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 163, 6 ],
-    "to": [ 203, 6 ]
+    "from": [
+      149,
+      3
+    ],
+    "to": [
+      187,
+      3
+    ]
   },
-
   "progress_anim_16_6": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_6_motion"
   },
-
   "progress_anim_16_6_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 203, 6 ],
-    "to": [ 244, 6 ]
+    "from": [
+      187,
+      3
+    ],
+    "to": [
+      224,
+      3
+    ]
   },
-
   "progress_anim_8_reverse_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_reverse_1_motion"
   },
-
   "progress_anim_8_reverse_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 122, 6 ],
-    "to": [ 61, 6 ]
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
   },
-
   "progress_anim_8_reverse_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_reverse_2_motion"
   },
-
   "progress_anim_8_reverse_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 183, 6 ],
-    "to": [ 122, 6 ]
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
   },
-
   "progress_anim_8_reverse_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_reverse_3_motion"
   },
-
   "progress_anim_8_reverse_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 244, 6 ],
-    "to": [ 183, 6 ]
+    "from": [
+      224,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
   },
-
   "progress_anim_16_reverse_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_1_motion"
   },
-
   "progress_anim_16_reverse_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 81, 6 ],
-    "to": [ 41, 6 ]
+    "from": [
+      75,
+      3
+    ],
+    "to": [
+      37,
+      3
+    ]
   },
-
   "progress_anim_16_reverse_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_2_motion"
   },
-
   "progress_anim_16_reverse_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 122, 6 ],
-    "to": [ 81, 6 ]
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      75,
+      3
+    ]
   },
-
   "progress_anim_16_reverse_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_3_motion"
   },
-
   "progress_anim_16_reverse_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 163, 6 ],
-    "to": [ 122, 6 ]
+    "from": [
+      149,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
   },
-
   "progress_anim_16_reverse_4": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_4_motion"
   },
-
   "progress_anim_16_reverse_4_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 203, 6 ],
-    "to": [ 163, 6 ]
+    "from": [
+      187,
+      3
+    ],
+    "to": [
+      149,
+      3
+    ]
   },
-
   "progress_anim_16_reverse_5": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_5_motion"
   },
-
   "progress_anim_16_reverse_5_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ 244, 6 ],
-    "to": [ 203, 6 ]
+    "from": [
+      224,
+      3
+    ],
+    "to": [
+      187,
+      3
+    ]
   },
-
   "preview_intro_offset": {
     "anim_type": "wait",
     "duration": 0.02,
     "next": "@server_form.preview_intro_offset_motion"
   },
-
   "preview_intro_offset_motion": {
     "anim_type": "offset",
     "easing": "out_quart",
     "duration": 0.48,
-    "from": [ 0, -72 ],
-    "to": [ 0, -32 ]
+    "from": [
+      0,
+      -72
+    ],
+    "to": [
+      0,
+      -32
+    ]
   },
-
   "preview_intro_size": {
     "anim_type": "wait",
     "duration": 0.02,
     "next": "@server_form.preview_intro_size_motion"
   },
-
   "preview_intro_size_motion": {
     "anim_type": "size",
     "easing": "out_quart",
     "duration": 0.48,
-    "from": [ 96, 58 ],
-    "to": [ 304, 184 ]
+    "from": [
+      96,
+      58
+    ],
+    "to": [
+      304,
+      184
+    ]
   },
-
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
     "$additional_screen_content": "server_form.ponder_form_additional_screen_content",
@@ -290,7 +369,6 @@
     "render_game_behind": true,
     "load_screen_immediately": true
   },
-
   "main_screen_content": {
     "bindings": [
       {
@@ -298,12 +376,11 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
   },
-
   "main_screen_content/server_form_factory": {
     "bindings": [
       {
@@ -311,12 +388,11 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
   },
-
   "long_form": {
     "bindings": [
       {
@@ -324,12 +400,11 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
   },
-
   "custom_form": {
     "bindings": [
       {
@@ -337,23 +412,40 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
   },
-
   "ponder_structure_renderer_window_base": {
     "$gesture_source_control|default": "structure_renderer_8",
     "$window_visibility_expression|default": "true",
-    "$focus|default": [ 0, 0, 0 ],
-    "$bottom_left|default": [ 0, 0, 0 ],
-    "$top_right|default": [ 0, 0, 0 ],
+    "$focus|default": [
+      0,
+      0,
+      0
+    ],
+    "$bottom_left|default": [
+      0,
+      0,
+      0
+    ],
+    "$top_right|default": [
+      0,
+      0,
+      0
+    ],
     "type": "panel",
     "anchor_from": "center",
     "anchor_to": "center",
-    "offset": [ 0, -32 ],
-    "size": [ 304, 184 ],
+    "offset": [
+      0,
+      -32
+    ],
+    "size": [
+      304,
+      184
+    ],
     "property_bag": {
       "#current_title_text": ""
     },
@@ -375,7 +467,10 @@
           "renderer": "3d_structure_renderer",
           "anchor_from": "center",
           "anchor_to": "center",
-          "size": [ "100%", "100%" ],
+          "size": [
+            "100%",
+            "100%"
+          ],
           "property_bag": {
             "#has_focus": false,
             "#block_position": "$focus",
@@ -437,24 +532,30 @@
       }
     ]
   },
-
   "ponder_structure_renderer_window@server_form.ponder_structure_renderer_window_base": {},
-
   "ponder_structure_renderer_window_intro@server_form.ponder_structure_renderer_window_base": {
-    "alpha": 1.0,
+    "alpha": 1,
     "propagate_alpha": true,
     "disable_anim_fast_forward": true,
-    "offset": [ 0, -72 ],
-    "size": [ 96, 58 ],
+    "offset": [
+      0,
+      -72
+    ],
+    "size": [
+      96,
+      58
+    ],
     "anims": [
       "@server_form.preview_intro_offset",
       "@server_form.preview_intro_size"
     ]
   },
-
   "ponder_structure_renderer_8": {
     "type": "input_panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "focus_enabled": true,
     "gesture_tracking_button": "button.turn_structure",
     "always_handle_controller_direction": true,
@@ -470,27 +571,53 @@
       {
         "renderer_static@server_form.ponder_structure_renderer_window": {
           "$gesture_source_control": "structure_renderer_8",
-          "$focus": [ 3, 103, 3 ],
-          "$bottom_left": [ 0, 100, 0 ],
-          "$top_right": [ 7, 107, 7 ],
-          "$window_visibility_expression": "((#current_title_text - '\u00A78\u00A7r') = #current_title_text)"
+          "$focus": [
+            3,
+            103,
+            3
+          ],
+          "$bottom_left": [
+            0,
+            100,
+            0
+          ],
+          "$top_right": [
+            7,
+            107,
+            7
+          ],
+          "$window_visibility_expression": "((#current_title_text - '§8§r') = #current_title_text)"
         }
       },
       {
         "renderer_intro@server_form.ponder_structure_renderer_window_intro": {
           "$gesture_source_control": "structure_renderer_8",
-          "$focus": [ 3, 103, 3 ],
-          "$bottom_left": [ 0, 100, 0 ],
-          "$top_right": [ 7, 107, 7 ],
-          "$window_visibility_expression": "(not ((#current_title_text - '\u00A78\u00A7r') = #current_title_text))"
+          "$focus": [
+            3,
+            103,
+            3
+          ],
+          "$bottom_left": [
+            0,
+            100,
+            0
+          ],
+          "$top_right": [
+            7,
+            107,
+            7
+          ],
+          "$window_visibility_expression": "(not ((#current_title_text - '§8§r') = #current_title_text))"
         }
       }
     ]
   },
-
   "ponder_structure_renderer_16": {
     "type": "input_panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "focus_enabled": true,
     "gesture_tracking_button": "button.turn_structure",
     "always_handle_controller_direction": true,
@@ -506,71 +633,107 @@
       {
         "renderer_static@server_form.ponder_structure_renderer_window": {
           "$gesture_source_control": "structure_renderer_16",
-          "$focus": [ 27, 104, 7 ],
-          "$bottom_left": [ 20, 100, 0 ],
-          "$top_right": [ 35, 115, 15 ],
-          "$window_visibility_expression": "((#current_title_text - '\u00A78\u00A7r') = #current_title_text)"
+          "$focus": [
+            27,
+            104,
+            7
+          ],
+          "$bottom_left": [
+            20,
+            100,
+            0
+          ],
+          "$top_right": [
+            35,
+            115,
+            15
+          ],
+          "$window_visibility_expression": "((#current_title_text - '§8§r') = #current_title_text)"
         }
       },
       {
         "renderer_intro@server_form.ponder_structure_renderer_window_intro": {
           "$gesture_source_control": "structure_renderer_16",
-          "$focus": [ 27, 104, 7 ],
-          "$bottom_left": [ 20, 100, 0 ],
-          "$top_right": [ 35, 115, 15 ],
-          "$window_visibility_expression": "(not ((#current_title_text - '\u00A78\u00A7r') = #current_title_text))"
+          "$focus": [
+            27,
+            104,
+            7
+          ],
+          "$bottom_left": [
+            20,
+            100,
+            0
+          ],
+          "$top_right": [
+            35,
+            115,
+            15
+          ],
+          "$window_visibility_expression": "(not ((#current_title_text - '§8§r') = #current_title_text))"
         }
       }
     ]
   },
-
   "ponder_preview_panel_8": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "bindings": [
       {
         "binding_name": "#title_text"
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '\u00A74\u00A7r\u00A71\u00A7r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§4§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ],
     "controls": [
       {
         "structure_renderer_8@server_form.ponder_structure_renderer_8": {
-          "size": [ "100%", "100%" ]
+          "size": [
+            "100%",
+            "100%"
+          ]
         }
       }
     ]
   },
-
   "ponder_preview_panel_16": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "bindings": [
       {
         "binding_name": "#title_text"
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '\u00A74\u00A7r\u00A72\u00A7r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§4§r§2§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ],
     "controls": [
       {
         "structure_renderer_16@server_form.ponder_structure_renderer_16": {
-          "size": [ "100%", "100%" ]
+          "size": [
+            "100%",
+            "100%"
+          ]
         }
       }
     ]
   },
-
   "ponder_preview_panel": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "controls": [
       {
         "preview_8@server_form.ponder_preview_panel_8": {}
@@ -580,15 +743,20 @@
       }
     ]
   },
-
   "ponder_progress_bar": {
     "type": "panel",
-    "size": [ 246, 8 ],
+    "size": [
+      228,
+      9
+    ],
     "controls": [
       {
         "track_background": {
           "type": "image",
-          "size": [ "100%", "100%" ],
+          "size": [
+            "100%",
+            "100%"
+          ],
           "texture": "textures/ui/ponder/progress_track"
         }
       },
@@ -598,8 +766,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 61, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            56,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -610,7 +784,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -622,7 +799,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r25') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -634,13 +811,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 0, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_1"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            0,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -650,7 +829,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -662,10 +844,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r25') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -674,13 +860,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 122, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_reverse_1"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            112,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -690,7 +878,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -702,10 +893,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r25') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_reverse_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -714,8 +909,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 122, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            112,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -726,7 +927,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -738,7 +942,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r50') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -750,13 +954,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 61, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_2"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            56,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -766,7 +972,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -778,10 +987,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -790,13 +1003,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 183, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_reverse_2"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            168,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -806,7 +1021,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -818,10 +1036,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_reverse_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -830,8 +1052,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 183, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            168,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -842,7 +1070,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -854,7 +1085,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r75') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -866,13 +1097,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 122, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_3"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            112,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -882,7 +1115,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -894,10 +1130,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r75') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -906,13 +1146,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 244, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_reverse_3"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            224,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -922,7 +1164,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -934,10 +1179,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r75') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_reverse_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -946,8 +1195,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 244, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            224,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -958,7 +1213,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -970,7 +1228,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r100') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r100') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -982,13 +1240,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 183, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_4"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            168,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -998,7 +1258,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1010,10 +1273,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r100') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r100') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_4"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1022,8 +1289,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 41, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            37,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -1034,7 +1307,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1046,7 +1322,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r17') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1058,13 +1334,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 0, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_1"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            0,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1074,7 +1352,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1086,10 +1367,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r17') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1098,13 +1383,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 81, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_1"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            75,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1114,7 +1401,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1126,10 +1416,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r17') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1138,8 +1432,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 81, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            75,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -1150,7 +1450,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1162,7 +1465,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r33') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1174,13 +1477,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 41, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_2"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            37,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1190,7 +1495,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1202,10 +1510,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r33') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1214,13 +1526,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 122, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_2"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            112,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1230,7 +1544,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1242,10 +1559,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r33') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1254,8 +1575,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 122, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            112,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -1266,7 +1593,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1278,7 +1608,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r50') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1290,13 +1620,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 81, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_3"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            75,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1306,7 +1638,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1318,10 +1653,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1330,13 +1669,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 163, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_3"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            149,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1346,7 +1687,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1358,10 +1702,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1370,8 +1718,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 163, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            149,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -1382,7 +1736,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1394,7 +1751,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r67') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1406,13 +1763,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 122, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_4"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            112,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1422,7 +1781,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1434,10 +1796,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r67') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_4"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1446,13 +1812,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 203, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_4"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            187,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1462,7 +1830,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1474,10 +1845,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r67') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_4"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1486,8 +1861,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 203, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            187,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -1498,7 +1879,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1510,7 +1894,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r83') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1522,13 +1906,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 163, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_5"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            149,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1538,7 +1924,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1550,10 +1939,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r83') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_5"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1562,13 +1955,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 244, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_5"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            224,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1578,7 +1973,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1590,10 +1988,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r83') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_5"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1602,8 +2004,14 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 244, 6 ],
+          "offset": [
+            2,
+            3
+          ],
+          "size": [
+            224,
+            3
+          ],
           "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
@@ -1614,7 +2022,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1626,7 +2037,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r100') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r100') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1638,13 +2049,15 @@
           "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 1, 1 ],
-          "size": [ 203, 6 ],
-          "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_6"
+          "offset": [
+            2,
+            3
           ],
-          "disable_anim_fast_forward": true,
+          "size": [
+            187,
+            3
+          ],
+          "clips_children": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1654,7 +2067,10 @@
                 "type": "image",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [ 244, 6 ],
+                "size": [
+                  224,
+                  3
+                ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
             }
@@ -1666,25 +2082,219 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r100') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r100') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
+            }
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_6"
+          ],
+          "disable_anim_fast_forward": true
+        }
+      },
+      {
+        "keyframes_8": {
+          "type": "panel",
+          "layer": 3,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§4§r§1§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "marker_1": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  57,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_2": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  113,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_3": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  169,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "keyframes_16": {
+          "type": "panel",
+          "layer": 3,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§4§r§2§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "marker_1": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  38,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_2": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  76,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_3": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  113,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_4": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  150,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_5": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  188,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
             }
           ]
         }
       }
     ]
   },
-
   "ponder_nav_button_state": {
     "$background_texture|default": "textures/ui/ponder/button_bg_default",
-    "$icon_color|default": [ 1.0, 1.0, 1.0, 1.0 ],
+    "$icon_color|default": [
+      1,
+      1,
+      1,
+      1
+    ],
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "controls": [
       {
         "background": {
           "type": "image",
-          "size": [ "100%", "100%" ],
+          "size": [
+            "100%",
+            "100%"
+          ],
           "texture": "$background_texture"
         }
       },
@@ -1693,7 +2303,10 @@
           "type": "image",
           "anchor_from": "center",
           "anchor_to": "center",
-          "size": [ 12, 12 ],
+          "size": [
+            12,
+            12
+          ],
           "texture": "textures/ui/ponder/icon_prev",
           "color": "$icon_color",
           "bindings": [
@@ -1705,7 +2318,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A71\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§1§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -1716,7 +2329,10 @@
           "type": "image",
           "anchor_from": "center",
           "anchor_to": "center",
-          "size": [ 12, 12 ],
+          "size": [
+            12,
+            12
+          ],
           "texture": "textures/ui/ponder/icon_close",
           "color": "$icon_color",
           "bindings": [
@@ -1728,7 +2344,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A74\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§4§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -1739,7 +2355,10 @@
           "type": "image",
           "anchor_from": "center",
           "anchor_to": "center",
-          "size": [ 12, 12 ],
+          "size": [
+            12,
+            12
+          ],
           "texture": "textures/ui/ponder/icon_next",
           "color": "$icon_color",
           "bindings": [
@@ -1751,7 +2370,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A72\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§2§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -1762,7 +2381,10 @@
           "type": "image",
           "anchor_from": "center",
           "anchor_to": "center",
-          "size": [ 12, 12 ],
+          "size": [
+            12,
+            12
+          ],
           "texture": "textures/ui/ponder/icon_replay",
           "color": "$icon_color",
           "bindings": [
@@ -1774,7 +2396,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A73\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§3§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -1782,10 +2404,12 @@
       }
     ]
   },
-
   "ponder_nav_button": {
     "type": "button",
-    "size": [ 30, 30 ],
+    "size": [
+      30,
+      30
+    ],
     "$pressed_button_name": "button.form_button_click",
     "default_control": "default",
     "hover_control": "hover",
@@ -1832,15 +2456,17 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#button_text_raw - '\u00A73\u00A7r\u00A70\u00A7r') = #button_text_raw)",
+        "source_property_name": "((#button_text_raw - '§3§r§0§r') = #button_text_raw)",
         "target_property_name": "#visible"
       }
     ]
   },
-
   "ponder_nav_button_slot": {
     "type": "panel",
-    "size": [ 46, 30 ],
+    "size": [
+      46,
+      30
+    ],
     "controls": [
       {
         "button@server_form.ponder_nav_button": {
@@ -1850,11 +2476,13 @@
       }
     ]
   },
-
   "ponder_nav_buttons": {
     "type": "stack_panel",
     "orientation": "horizontal",
-    "size": [ "100%c", 30 ],
+    "size": [
+      "100%c",
+      30
+    ],
     "collection_name": "form_buttons",
     "controls": [
       {
@@ -1880,16 +2508,21 @@
     ],
     "bindings": []
   },
-
   "ponder_footer_layer": {
     "type": "stack_panel",
     "orientation": "vertical",
-    "size": [ 246, 44 ],
+    "size": [
+      246,
+      44
+    ],
     "controls": [
       {
         "nav_holder": {
           "type": "panel",
-          "size": [ "100%", 30 ],
+          "size": [
+            "100%",
+            30
+          ],
           "controls": [
             {
               "nav@server_form.ponder_nav_buttons": {
@@ -1903,13 +2536,19 @@
       {
         "footer_gap": {
           "type": "panel",
-          "size": [ "100%", 6 ]
+          "size": [
+            "100%",
+            5
+          ]
         }
       },
       {
         "progress_holder": {
           "type": "panel",
-          "size": [ "100%", 8 ],
+          "size": [
+            "100%",
+            9
+          ],
           "controls": [
             {
               "progress@server_form.ponder_progress_bar": {
@@ -1922,10 +2561,12 @@
       }
     ]
   },
-
   "ponder_bubble_button_text_state": {
     "type": "panel",
-    "size": [ 0, 0 ],
+    "size": [
+      0,
+      0
+    ],
     "property_bag": {
       "#bubble_text_raw": ""
     },
@@ -1943,105 +2584,141 @@
       }
     ]
   },
-
   "ponder_text_bubble_alpha_wait": {
     "anim_type": "wait",
     "duration": 0.1875,
     "next": "@server_form.ponder_text_bubble_alpha_1"
   },
-
   "ponder_text_bubble_alpha_1": {
     "anim_type": "alpha",
     "easing": "linear",
     "duration": 0.05,
-    "from": 0.0,
+    "from": 0,
     "to": 0.25,
     "next": "@server_form.ponder_text_bubble_alpha_2"
   },
-
   "ponder_text_bubble_alpha_2": {
     "anim_type": "alpha",
     "easing": "linear",
     "duration": 0.05,
     "from": 0.25,
-    "to": 1.0
+    "to": 1
   },
-
   "ponder_text_bubble_offset_wait": {
     "anim_type": "wait",
     "duration": 0.1875,
     "next": "@server_form.ponder_text_bubble_offset_1"
   },
-
   "ponder_text_bubble_offset_1": {
     "anim_type": "offset",
     "easing": "linear",
     "duration": 0.05,
-    "from": [ 6, 0 ],
-    "to": [ 4, 0 ],
+    "from": [
+      6,
+      0
+    ],
+    "to": [
+      4,
+      0
+    ],
     "next": "@server_form.ponder_text_bubble_offset_2"
   },
-
   "ponder_text_bubble_offset_2": {
     "anim_type": "offset",
     "easing": "linear",
     "duration": 0.05,
-    "from": [ 4, 0 ],
-    "to": [ 0, 0 ]
+    "from": [
+      4,
+      0
+    ],
+    "to": [
+      0,
+      0
+    ]
   },
-
   "ponder_text_bubble_line_clip": {
     "anim_type": "size",
     "easing": "linear",
     "duration": 0.05,
-    "from": [ 0, 2 ],
-    "to": [ 3, 2 ],
+    "from": [
+      0,
+      2
+    ],
+    "to": [
+      3,
+      2
+    ],
     "next": "@server_form.ponder_text_bubble_line_clip_2"
   },
-
   "ponder_text_bubble_line_clip_2": {
     "anim_type": "size",
     "easing": "linear",
     "duration": 0.05,
-    "from": [ 3, 2 ],
-    "to": [ 12, 2 ],
+    "from": [
+      3,
+      2
+    ],
+    "to": [
+      12,
+      2
+    ],
     "next": "@server_form.ponder_text_bubble_line_clip_3"
   },
-
   "ponder_text_bubble_line_clip_3": {
     "anim_type": "size",
     "easing": "linear",
     "duration": 0.05,
-    "from": [ 12, 2 ],
-    "to": [ 26, 2 ],
+    "from": [
+      12,
+      2
+    ],
+    "to": [
+      26,
+      2
+    ],
     "next": "@server_form.ponder_text_bubble_line_clip_4"
   },
-
   "ponder_text_bubble_line_clip_4": {
     "anim_type": "size",
     "easing": "linear",
     "duration": 0.05,
-    "from": [ 26, 2 ],
-    "to": [ 46, 2 ],
+    "from": [
+      26,
+      2
+    ],
+    "to": [
+      46,
+      2
+    ],
     "next": "@server_form.ponder_text_bubble_line_clip_5"
   },
-
   "ponder_text_bubble_line_clip_5": {
     "anim_type": "size",
     "easing": "linear",
     "duration": 0.05,
-    "from": [ 46, 2 ],
-    "to": [ 72, 2 ]
+    "from": [
+      46,
+      2
+    ],
+    "to": [
+      72,
+      2
+    ]
   },
-
   "ponder_text_bubble_slot": {
     "$slot_visibility_expression|default": "false",
-    "$slot_offset|default": [ -24, 0 ],
+    "$slot_offset|default": [
+      -24,
+      0
+    ],
     "type": "panel",
     "anchor_from": "right_middle",
     "anchor_to": "right_middle",
     "offset": "$slot_offset",
-    "size": [ 184, 64 ],
+    "size": [
+      184,
+      64
+    ],
     "clips_children": false,
     "property_bag": {
       "#current_title_text": ""
@@ -2065,12 +2742,18 @@
           "orientation": "horizontal",
           "anchor_from": "top_right",
           "anchor_to": "top_right",
-          "size": [ "100%c", "100%cm" ],
+          "size": [
+            "100%c",
+            "100%cm"
+          ],
           "controls": [
             {
               "line_anchor": {
                 "type": "panel",
-                "size": [ 0, 0 ],
+                "size": [
+                  0,
+                  0
+                ],
                 "layer": 4,
                 "controls": [
                   {
@@ -2078,15 +2761,24 @@
                       "type": "panel",
                       "anchor_from": "top_right",
                       "anchor_to": "top_right",
-                      "offset": [ 48, 0 ],
-                      "size": [ 72, 2 ],
+                      "offset": [
+                        48,
+                        0
+                      ],
+                      "size": [
+                        72,
+                        2
+                      ],
                       "controls": [
                         {
                           "line_clip": {
                             "type": "panel",
                             "anchor_from": "top_left",
                             "anchor_to": "top_left",
-                            "size": [ 0, 2 ],
+                            "size": [
+                              0,
+                              2
+                            ],
                             "clips_children": true,
                             "disable_anim_fast_forward": true,
                             "anims": [
@@ -2098,7 +2790,10 @@
                                   "type": "image",
                                   "anchor_from": "top_left",
                                   "anchor_to": "top_left",
-                                  "size": [ 72, 2 ],
+                                  "size": [
+                                    72,
+                                    2
+                                  ],
                                   "texture": "textures/ui/ponder/text_bubble_line"
                                 }
                               }
@@ -2114,10 +2809,16 @@
             {
               "bubble_intro": {
                 "type": "panel",
-                "offset": [ 6, 0 ],
-                "size": [ "100%c", "100%cm" ],
+                "offset": [
+                  6,
+                  0
+                ],
+                "size": [
+                  "100%c",
+                  "100%cm"
+                ],
                 "clips_children": false,
-                "alpha": 0.0,
+                "alpha": 0,
                 "propagate_alpha": true,
                 "disable_anim_fast_forward": true,
                 "anims": [
@@ -2129,7 +2830,10 @@
                     "bubble_body": {
                       "type": "image",
                       "layer": 0,
-                      "size": [ "100%c + 20px", "100%cm + 16px" ],
+                      "size": [
+                        "100%c + 20px",
+                        "100%cm + 16px"
+                      ],
                       "texture": "textures/ui/ponder/text_bubble_frame",
                       "controls": [
                         {
@@ -2138,12 +2842,25 @@
                             "layer": 3,
                             "anchor_from": "top_left",
                             "anchor_to": "top_left",
-                            "offset": [ 10, 8 ],
-                            "size": [ "default", "default" ],
-                            "max_size": [ 164, "default" ],
+                            "offset": [
+                              10,
+                              8
+                            ],
+                            "size": [
+                              "default",
+                              "default"
+                            ],
+                            "max_size": [
+                              164,
+                              "default"
+                            ],
                             "text": "#text",
                             "text_alignment": "left",
-                            "color": [ 0.964706, 0.964706, 0.898039 ],
+                            "color": [
+                              0.964706,
+                              0.964706,
+                              0.898039
+                            ],
                             "shadow": false,
                             "localize": false,
                             "line_padding": 1,
@@ -2152,13 +2869,13 @@
                               {
                                 "binding_type": "view",
                                 "source_control_name": "bubble_text_source",
-                                "source_property_name": "(#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r')",
+                                "source_property_name": "(#bubble_text_raw - '§3§r§4§r')",
                                 "target_property_name": "#text"
                               },
                               {
                                 "binding_type": "view",
                                 "source_control_name": "bubble_text_source",
-                                "source_property_name": "(not ((#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r') = ''))",
+                                "source_property_name": "(not ((#bubble_text_raw - '§3§r§4§r') = ''))",
                                 "target_property_name": "#visible"
                               }
                             ]
@@ -2175,25 +2892,33 @@
       }
     ]
   },
-
   "ponder_text_bubble_top@server_form.ponder_text_bubble_slot": {
-    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A70\u00A7r') = #current_title_text))",
-    "$slot_offset": [ -24, -64 ]
+    "$slot_visibility_expression": "(not ((#current_title_text - '§9§r§0§r') = #current_title_text))",
+    "$slot_offset": [
+      -24,
+      -64
+    ]
   },
-
   "ponder_text_bubble_middle@server_form.ponder_text_bubble_slot": {
-    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A71\u00A7r') = #current_title_text))",
-    "$slot_offset": [ -24, -32 ]
+    "$slot_visibility_expression": "(not ((#current_title_text - '§9§r§1§r') = #current_title_text))",
+    "$slot_offset": [
+      -24,
+      -32
+    ]
   },
-
   "ponder_text_bubble_bottom@server_form.ponder_text_bubble_slot": {
-    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A72\u00A7r') = #current_title_text))",
-    "$slot_offset": [ -24, 0 ]
+    "$slot_visibility_expression": "(not ((#current_title_text - '§9§r§2§r') = #current_title_text))",
+    "$slot_offset": [
+      -24,
+      0
+    ]
   },
-
   "ponder_text_bubble_layer": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "controls": [
       {
         "bubble_top@server_form.ponder_text_bubble_top": {
@@ -2212,18 +2937,27 @@
       }
     ]
   },
-
   "ponder_form_panel": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "controls": [
       {
         "dimmer": {
           "type": "image",
           "layer": 1,
-          "size": [ "100%", "100%" ],
+          "size": [
+            "100%",
+            "100%"
+          ],
           "texture": "textures/ui/White",
-          "color": [ 0.0, 0.0, 0.0 ],
+          "color": [
+            0,
+            0,
+            0
+          ],
           "alpha": 0.34
         }
       },
@@ -2243,16 +2977,21 @@
         "footer_layer@server_form.ponder_footer_layer": {
           "anchor_from": "bottom_middle",
           "anchor_to": "bottom_middle",
-          "offset": [ 0, -14 ],
+          "offset": [
+            0,
+            -14
+          ],
           "layer": 30
         }
       }
     ]
   },
-
   "ponder_form_screen_layer": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "layer": 90,
     "bindings": [
       {
@@ -2260,7 +2999,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ],
@@ -2270,10 +3009,12 @@
       }
     ]
   },
-
   "ponder_form_additional_screen_content": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "controls": [
       {
         "ponder_form_screen_layer@server_form.ponder_form_screen_layer": {}

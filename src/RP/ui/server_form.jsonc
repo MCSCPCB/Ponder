@@ -2,326 +2,326 @@
   "namespace": "server_form",
   "progress_anim_8_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_1_motion"
   },
   "progress_anim_8_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
       0,
-      6
+      3
     ],
     "to": [
-      61,
-      6
+      56,
+      3
     ]
   },
   "progress_anim_8_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_2_motion"
   },
   "progress_anim_8_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      61,
-      6
+      56,
+      3
     ],
     "to": [
-      122,
-      6
+      112,
+      3
     ]
   },
   "progress_anim_8_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_3_motion"
   },
   "progress_anim_8_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      122,
-      6
+      112,
+      3
     ],
     "to": [
-      183,
-      6
+      168,
+      3
     ]
   },
   "progress_anim_8_4": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_4_motion"
   },
   "progress_anim_8_4_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      183,
-      6
+      168,
+      3
     ],
     "to": [
-      244,
-      6
+      224,
+      3
     ]
   },
   "progress_anim_16_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_1_motion"
   },
   "progress_anim_16_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
       0,
-      6
+      3
     ],
     "to": [
-      41,
-      6
+      37,
+      3
     ]
   },
   "progress_anim_16_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_2_motion"
   },
   "progress_anim_16_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      41,
-      6
+      37,
+      3
     ],
     "to": [
-      81,
-      6
+      75,
+      3
     ]
   },
   "progress_anim_16_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_3_motion"
   },
   "progress_anim_16_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      81,
-      6
+      75,
+      3
     ],
     "to": [
-      122,
-      6
+      112,
+      3
     ]
   },
   "progress_anim_16_4": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_4_motion"
   },
   "progress_anim_16_4_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      122,
-      6
+      112,
+      3
     ],
     "to": [
-      163,
-      6
+      149,
+      3
     ]
   },
   "progress_anim_16_5": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_5_motion"
   },
   "progress_anim_16_5_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      163,
-      6
+      149,
+      3
     ],
     "to": [
-      203,
-      6
+      187,
+      3
     ]
   },
   "progress_anim_16_6": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_6_motion"
   },
   "progress_anim_16_6_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      203,
-      6
+      187,
+      3
     ],
     "to": [
-      244,
-      6
+      224,
+      3
     ]
   },
   "progress_anim_8_reverse_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_reverse_1_motion"
   },
   "progress_anim_8_reverse_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      122,
-      6
+      112,
+      3
     ],
     "to": [
-      61,
-      6
+      56,
+      3
     ]
   },
   "progress_anim_8_reverse_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_reverse_2_motion"
   },
   "progress_anim_8_reverse_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      183,
-      6
+      168,
+      3
     ],
     "to": [
-      122,
-      6
+      112,
+      3
     ]
   },
   "progress_anim_8_reverse_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_8_reverse_3_motion"
   },
   "progress_anim_8_reverse_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      244,
-      6
+      224,
+      3
     ],
     "to": [
-      183,
-      6
+      168,
+      3
     ]
   },
   "progress_anim_16_reverse_1": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_1_motion"
   },
   "progress_anim_16_reverse_1_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      81,
-      6
+      75,
+      3
     ],
     "to": [
-      41,
-      6
+      37,
+      3
     ]
   },
   "progress_anim_16_reverse_2": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_2_motion"
   },
   "progress_anim_16_reverse_2_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      122,
-      6
+      112,
+      3
     ],
     "to": [
-      81,
-      6
+      75,
+      3
     ]
   },
   "progress_anim_16_reverse_3": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_3_motion"
   },
   "progress_anim_16_reverse_3_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      163,
-      6
+      149,
+      3
     ],
     "to": [
-      122,
-      6
+      112,
+      3
     ]
   },
   "progress_anim_16_reverse_4": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_4_motion"
   },
   "progress_anim_16_reverse_4_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      203,
-      6
+      187,
+      3
     ],
     "to": [
-      163,
-      6
+      149,
+      3
     ]
   },
   "progress_anim_16_reverse_5": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_16_reverse_5_motion"
   },
   "progress_anim_16_reverse_5_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
     "from": [
-      244,
-      6
+      224,
+      3
     ],
     "to": [
-      203,
-      6
+      187,
+      3
     ]
   },
   /*注释
@@ -329,31 +329,31 @@
   // i = 1 .. C
   "progress_anim_C_i": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_C_i_motion"
   },
 
   "progress_anim_C_i_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ WIDTH(i - 1), 6 ], 
-    "to": [ WIDTH(i), 6 ] // WIDTH(i) = round(244 * i / C)
+    "from": [ WIDTH(i - 1), 3 ],
+    "to": [ WIDTH(i), 3 ] // WIDTH(i) = round(224 * i / C)
   },
 
    // j = 1 .. C - 1
   "progress_anim_C_reverse_j": {
     "anim_type": "wait",
-    "duration": 0.0,
+    "duration": 0,
     "next": "@server_form.progress_anim_C_reverse_j_motion"
   },
 
   "progress_anim_C_reverse_j_motion": {
     "anim_type": "size",
-    "easing": "linear",
+    "easing": "out_quart",
     "duration": 0.2,
-    "from": [ WIDTH(j + 1), 6 ],
-    "to": [ WIDTH(j), 6 ] // WIDTH(j) = round(244 * j / C)
+    "from": [ WIDTH(j + 1), 3 ],
+    "to": [ WIDTH(j), 3 ] // WIDTH(j) = round(224 * j / C)
   },
   */
   "preview_intro_offset": {
@@ -408,7 +408,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -420,7 +420,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -432,7 +432,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -444,7 +444,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text)",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -566,7 +566,7 @@
   },
   "ponder_structure_renderer_window@server_form.ponder_structure_renderer_window_base": {},
   "ponder_structure_renderer_window_intro@server_form.ponder_structure_renderer_window_base": {
-    "alpha": 1.0,
+    "alpha": 1,
     "propagate_alpha": true,
     "disable_anim_fast_forward": true,
     "offset": [
@@ -618,7 +618,7 @@
             107,
             7
           ],
-          "$window_visibility_expression": "((#current_title_text - '\u00A78\u00A7r') = #current_title_text)"
+          "$window_visibility_expression": "((#current_title_text - '§8§r') = #current_title_text)"
         }
       },
       {
@@ -639,7 +639,7 @@
             107,
             7
           ],
-          "$window_visibility_expression": "(not ((#current_title_text - '\u00A78\u00A7r') = #current_title_text))"
+          "$window_visibility_expression": "(not ((#current_title_text - '§8§r') = #current_title_text))"
         }
       }
     ]
@@ -680,7 +680,7 @@
             115,
             15
           ],
-          "$window_visibility_expression": "((#current_title_text - '\u00A78\u00A7r') = #current_title_text)"
+          "$window_visibility_expression": "((#current_title_text - '§8§r') = #current_title_text)"
         }
       },
       {
@@ -701,7 +701,7 @@
             115,
             15
           ],
-          "$window_visibility_expression": "(not ((#current_title_text - '\u00A78\u00A7r') = #current_title_text))"
+          "$window_visibility_expression": "(not ((#current_title_text - '§8§r') = #current_title_text))"
         }
       }
     ]
@@ -729,7 +729,7 @@
           "$focus": [ MIRROR_X + FOCUS_X, MIRROR_Y + FOCUS_Y, MIRROR_Z + FOCUS_Z ],
           "$bottom_left": [ MIRROR_X, MIRROR_Y, MIRROR_Z ],
           "$top_right": [ MIRROR_X + X - 1, MIRROR_Y + Y - 1, MIRROR_Z + Z - 1 ],
-          "$window_visibility_expression": "((#current_title_text - '\u00A78\u00A7r') = #current_title_text)"
+          "$window_visibility_expression": "((#current_title_text - '§8§r') = #current_title_text)"
         }
       },
       {
@@ -738,7 +738,7 @@
           "$focus": [ MIRROR_X + FOCUS_X, MIRROR_Y + FOCUS_Y, MIRROR_Z + FOCUS_Z ],
           "$bottom_left": [ MIRROR_X, MIRROR_Y, MIRROR_Z ],
           "$top_right": [ MIRROR_X + X - 1, MIRROR_Y + Y - 1, MIRROR_Z + Z - 1 ],
-          "$window_visibility_expression": "(not ((#current_title_text - '\u00A78\u00A7r') = #current_title_text))"
+          "$window_visibility_expression": "(not ((#current_title_text - '§8§r') = #current_title_text))"
         }
       }
     ]
@@ -756,7 +756,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '\u00A74\u00A7r\u00A71\u00A7r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§4§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ],
@@ -783,7 +783,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '\u00A74\u00A7r\u00A72\u00A7r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§4§r§2§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ],
@@ -844,12 +844,11 @@
       */
     ]
   },
-
   "ponder_progress_bar": {
     "type": "panel",
     "size": [
-      246,
-      8
+      228,
+      9
     ],
     "controls": [
       {
@@ -869,12 +868,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            61,
-            6
+            56,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -887,8 +886,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -901,7 +900,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r25') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -914,18 +913,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
             0,
-            6
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_1"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -936,8 +931,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -950,10 +945,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r25') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -963,18 +962,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            122,
-            6
+            112,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_reverse_1"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -985,8 +980,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -999,10 +994,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r25') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r25') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_reverse_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1012,12 +1011,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            122,
-            6
+            112,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1030,8 +1029,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1044,7 +1043,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r50') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1057,18 +1056,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            61,
-            6
+            56,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_2"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1079,8 +1074,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1093,10 +1088,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1106,18 +1105,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            183,
-            6
+            168,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_reverse_2"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1128,8 +1123,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1142,10 +1137,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_reverse_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1155,12 +1154,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            183,
-            6
+            168,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1173,8 +1172,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1187,7 +1186,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r75') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1200,18 +1199,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            122,
-            6
+            112,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_3"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1222,8 +1217,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1236,10 +1231,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r75') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1249,18 +1248,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            244,
-            6
+            224,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_reverse_3"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1271,8 +1266,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1285,10 +1280,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r75') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r75') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_reverse_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1298,12 +1297,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            244,
-            6
+            224,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1316,8 +1315,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1330,7 +1329,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r100') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r100') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1343,18 +1342,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            183,
-            6
+            168,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_8_4"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1365,8 +1360,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1379,10 +1374,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A71\u00A7r\u00A72\u00A7r100') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§1§r§2§r100') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_8_4"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1392,12 +1391,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            41,
-            6
+            37,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1410,8 +1409,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1424,7 +1423,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r17') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1437,18 +1436,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
             0,
-            6
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_1"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1459,8 +1454,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1473,10 +1468,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r17') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1486,18 +1485,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            81,
-            6
+            75,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_1"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1508,8 +1503,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1522,10 +1517,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r17') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r17') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_1"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1535,12 +1534,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            81,
-            6
+            75,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1553,8 +1552,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1567,7 +1566,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r33') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1580,18 +1579,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            41,
-            6
+            37,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_2"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1602,8 +1597,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1616,10 +1611,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r33') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1629,18 +1628,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            122,
-            6
+            112,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_2"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1651,8 +1646,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1665,10 +1660,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r33') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r33') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_2"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1678,12 +1677,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            122,
-            6
+            112,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1696,8 +1695,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1710,7 +1709,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r50') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1723,18 +1722,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            81,
-            6
+            75,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_3"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1745,8 +1740,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1759,10 +1754,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1772,18 +1771,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            163,
-            6
+            149,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_3"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1794,8 +1789,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1808,10 +1803,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r50') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r50') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_3"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1821,12 +1820,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            163,
-            6
+            149,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1839,8 +1838,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1853,7 +1852,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r67') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -1866,18 +1865,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            122,
-            6
+            112,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_4"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1888,8 +1883,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1902,10 +1897,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r67') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_4"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1915,18 +1914,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            203,
-            6
+            187,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_4"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -1937,8 +1932,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1951,10 +1946,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r67') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r67') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_4"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -1964,12 +1963,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            203,
-            6
+            187,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -1982,8 +1981,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -1996,7 +1995,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r83') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -2009,18 +2008,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            163,
-            6
+            149,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_5"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -2031,8 +2026,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2045,10 +2040,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r83') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_5"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -2058,18 +2057,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            244,
-            6
+            224,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_reverse_5"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -2080,8 +2075,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2094,10 +2089,14 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r83') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r83') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_reverse_5"
+          ],
+          "disable_anim_fast_forward": true
         }
       },
       {
@@ -2107,12 +2106,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            244,
-            6
+            224,
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -2125,8 +2124,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2139,7 +2138,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r100') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r100') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -2152,18 +2151,14 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
-            203,
-            6
+            187,
+            3
           ],
           "clips_children": true,
-          "anims": [
-            "@server_form.progress_anim_16_6"
-          ],
-          "disable_anim_fast_forward": true,
           "property_bag": {
             "#current_title_text": ""
           },
@@ -2174,8 +2169,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2188,13 +2183,16 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - '\u00A70\u00A7r\u00A71\u00A7r\u00A74\u00A7r\u00A72\u00A7r\u00A72\u00A7r100') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§2§r§2§r100') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
-          ]
+          ],
+          "anims": [
+            "@server_form.progress_anim_16_6"
+          ],
+          "disable_anim_fast_forward": true
         }
-      }
-
+      },
       /*注释
       // C is defined in progressPresets.js
       // TITLE_MARKER is defined in constants.js
@@ -2207,11 +2205,11 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
-          "size": [ WIDTH(i), // WIDTH(i) = round(244 * i / C)
-            6
+          "size": [ WIDTH(i), // WIDTH(i) = round(224 * i / C)
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -2224,8 +2222,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2240,7 +2238,7 @@
             // PERCENT(i) = round(100 * i / C)
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -2253,12 +2251,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
             0,
-            6
+            3
           ],
           "clips_children": true,
           "anims": [
@@ -2275,8 +2273,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2291,7 +2289,7 @@
             // PERCENT(i) = round(100 * i / C)
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
           ]
@@ -2304,11 +2302,11 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
-          "size": [ WIDTH(i + 1), // WIDTH(i + 1) = round(244 * (i + 1) / C)
-            6
+          "size": [ WIDTH(i + 1), // WIDTH(i + 1) = round(224 * (i + 1) / C)
+            3
           ],
           "clips_children": true,
           "anims": [
@@ -2325,8 +2323,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2341,7 +2339,7 @@
             // PERCENT(i) = round(100 * i / C)
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and (not ((#current_title_text - '\u00A77\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
           ]
@@ -2354,11 +2352,11 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
-          "size": [ WIDTH(i), // WIDTH(i) = round(244 * i / C)
-            6
+          "size": [ WIDTH(i), // WIDTH(i) = round(224 * i / C)
+            3
           ],
           "clips_children": true,
           "property_bag": {
@@ -2371,8 +2369,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2387,7 +2385,7 @@
             // PERCENT(i) = round(100 * i / C)
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and ((#current_title_text - '\u00A76\u00A7r') = #current_title_text) and ((#current_title_text - '\u00A77\u00A7r') = #current_title_text))",
+              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -2400,12 +2398,12 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            1,
-            1
+            2,
+            3
           ],
           "size": [
             0,
-            6
+            3
           ],
           "clips_children": true,
           "anims": [
@@ -2422,8 +2420,8 @@
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  244,
-                  6
+                  224,
+                  3
                 ],
                 "texture": "textures/ui/ponder/progress_fill"
               }
@@ -2438,23 +2436,246 @@
             // PERCENT(i) = round(100 * i / C)
             {
               "binding_type": "view",
-              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and (not ((#current_title_text - '\u00A76\u00A7r') = #current_title_text)))",
+              "source_property_name": "((not ((#current_title_text - 'FULL_STAGE_MARKER(i)') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
               "target_property_name": "#visible"
             }
           ]
         }
       },
       */
-      
+      {
+        "keyframes_8": {
+          "type": "panel",
+          "layer": 3,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§4§r§1§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "marker_1": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  57,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_2": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  113,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_3": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  169,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "keyframes_16": {
+          "type": "panel",
+          "layer": 3,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§4§r§2§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "marker_1": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  38,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_2": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  76,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_3": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  113,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_4": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  150,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            },
+            {
+              "marker_5": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  188,
+                  2
+                ],
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            }
+          ]
+        }
+      }
+      /*注释
+      // C is defined in progressPresets.js
+      // SIZE_MARKER is defined in presets.js
+      {
+        "keyframes_C": {
+          "type": "panel",
+          "layer": 3,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - 'SIZE_MARKER') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            // i = 1 .. C - 1
+            {
+              "marker_i": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [ MARKER_X(i), 2 ], // MARKER_X(i) = round(224 * i / C) + 1
+                "size": [
+                  2,
+                  5
+                ],
+                "texture": "textures/ui/ponder/progress_keyframe"
+              }
+            }
+          ]
+        }
+      }
+      */
     ]
   },
   "ponder_nav_button_state": {
     "$background_texture|default": "textures/ui/ponder/button_bg_default",
     "$icon_color|default": [
-      1.0,
-      1.0,
-      1.0,
-      1.0
+      1,
+      1,
+      1,
+      1
     ],
     "type": "panel",
     "size": [
@@ -2492,7 +2713,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A71\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§1§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -2518,7 +2739,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A74\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§4§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -2544,7 +2765,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A72\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§2§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -2570,7 +2791,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#button_text_raw - '\u00A73\u00A7r\u00A73\u00A7r') = #button_text_raw))",
+              "source_property_name": "(not ((#button_text_raw - '§3§r§3§r') = #button_text_raw))",
               "target_property_name": "#visible"
             }
           ]
@@ -2630,7 +2851,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#button_text_raw - '\u00A73\u00A7r\u00A70\u00A7r') = #button_text_raw)",
+        "source_property_name": "((#button_text_raw - '§3§r§0§r') = #button_text_raw)",
         "target_property_name": "#visible"
       }
     ]
@@ -2712,7 +2933,7 @@
           "type": "panel",
           "size": [
             "100%",
-            6
+            5
           ]
         }
       },
@@ -2721,7 +2942,7 @@
           "type": "panel",
           "size": [
             "100%",
-            8
+            9
           ],
           "controls": [
             {
@@ -2767,7 +2988,7 @@
     "anim_type": "alpha",
     "easing": "linear",
     "duration": 0.05,
-    "from": 0.0,
+    "from": 0,
     "to": 0.25,
     "next": "@server_form.ponder_text_bubble_alpha_2"
   },
@@ -2776,7 +2997,7 @@
     "easing": "linear",
     "duration": 0.05,
     "from": 0.25,
-    "to": 1.0
+    "to": 1
   },
   "ponder_text_bubble_offset_wait": {
     "anim_type": "wait",
@@ -2992,7 +3213,7 @@
                   "100%cm"
                 ],
                 "clips_children": false,
-                "alpha": 0.0,
+                "alpha": 0,
                 "propagate_alpha": true,
                 "disable_anim_fast_forward": true,
                 "anims": [
@@ -3043,13 +3264,13 @@
                               {
                                 "binding_type": "view",
                                 "source_control_name": "bubble_text_source",
-                                "source_property_name": "(#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r')",
+                                "source_property_name": "(#bubble_text_raw - '§3§r§4§r')",
                                 "target_property_name": "#text"
                               },
                               {
                                 "binding_type": "view",
                                 "source_control_name": "bubble_text_source",
-                                "source_property_name": "(not ((#bubble_text_raw - '\u00A73\u00A7r\u00A74\u00A7r') = ''))",
+                                "source_property_name": "(not ((#bubble_text_raw - '§3§r§4§r') = ''))",
                                 "target_property_name": "#visible"
                               }
                             ]
@@ -3068,21 +3289,21 @@
   },
   // SLOT_MARKERS are defined in constants.js
   "ponder_text_bubble_top@server_form.ponder_text_bubble_slot": {
-    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A70\u00A7r') = #current_title_text))",
+    "$slot_visibility_expression": "(not ((#current_title_text - '§9§r§0§r') = #current_title_text))",
     "$slot_offset": [
       -24,
       -64
     ]
   },
   "ponder_text_bubble_middle@server_form.ponder_text_bubble_slot": {
-    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A71\u00A7r') = #current_title_text))",
+    "$slot_visibility_expression": "(not ((#current_title_text - '§9§r§1§r') = #current_title_text))",
     "$slot_offset": [
       -24,
       -32
     ]
   },
   "ponder_text_bubble_bottom@server_form.ponder_text_bubble_slot": {
-    "$slot_visibility_expression": "(not ((#current_title_text - '\u00A79\u00A7r\u00A72\u00A7r') = #current_title_text))",
+    "$slot_visibility_expression": "(not ((#current_title_text - '§9§r§2§r') = #current_title_text))",
     "$slot_offset": [
       -24,
       0
@@ -3129,9 +3350,9 @@
           ],
           "texture": "textures/ui/White",
           "color": [
-            0.0,
-            0.0,
-            0.0
+            0,
+            0,
+            0
           ],
           "alpha": 0.34
         }
@@ -3174,7 +3395,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '\u00A70\u00A7r\u00A71\u00A7r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ],
