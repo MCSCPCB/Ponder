@@ -367,30 +367,24 @@
     "duration": 0.48,
     "from": [
       0,
-      -72
+      -16
     ],
     "to": [
       0,
       -32
     ]
   },
-  "preview_intro_size": {
+  "preview_intro_alpha": {
     "anim_type": "wait",
     "duration": 0.02,
-    "next": "@server_form.preview_intro_size_motion"
+    "next": "@server_form.preview_intro_alpha_motion"
   },
-  "preview_intro_size_motion": {
-    "anim_type": "size",
+  "preview_intro_alpha_motion": {
+    "anim_type": "alpha",
     "easing": "out_quart",
     "duration": 0.48,
-    "from": [
-      96,
-      58
-    ],
-    "to": [
-      304,
-      184
-    ]
+    "from": 0,
+    "to": 1
   },
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
@@ -566,20 +560,20 @@
   },
   "ponder_structure_renderer_window@server_form.ponder_structure_renderer_window_base": {},
   "ponder_structure_renderer_window_intro@server_form.ponder_structure_renderer_window_base": {
-    "alpha": 1,
+    "alpha": 0,
     "propagate_alpha": true,
     "disable_anim_fast_forward": true,
     "offset": [
       0,
-      -72
+      -16
     ],
     "size": [
-      96,
-      58
+      304,
+      184
     ],
     "anims": [
       "@server_form.preview_intro_offset",
-      "@server_form.preview_intro_size"
+      "@server_form.preview_intro_alpha"
     ]
   },
   "ponder_structure_renderer_8": {
