@@ -2491,6 +2491,7 @@
     ]
   },
   "ponder_side_icon_tip_panel": {
+    "$payload_source_control_name|default": "",
     "type": "image",
     "texture": "textures/ui/purpleBorder",
     "nineslice_size": 6,
@@ -2537,6 +2538,7 @@
           "bindings": [
             {
               "binding_type": "view",
+              "source_control_name": "$payload_source_control_name",
               "source_property_name": "#button_text_raw",
               "target_property_name": "#text"
             }
@@ -2547,6 +2549,7 @@
     "bindings": [
       {
         "binding_type": "view",
+        "source_control_name": "$payload_source_control_name",
         "source_property_name": "(not (#button_text_raw = ''))",
         "target_property_name": "#visible"
       }
@@ -2554,6 +2557,7 @@
   },
   "ponder_side_icon_button_state": {
     "$background_texture|default": "textures/ui/ponder/button_bg_default",
+    "$payload_source_control_name|default": "",
     "type": "panel",
     "clips_children": false,
     "size": [
@@ -2585,11 +2589,13 @@
           "bindings": [
             {
               "binding_type": "view",
+              "source_control_name": "$payload_source_control_name",
               "source_property_name": "#button_icon_texture",
               "target_property_name": "#texture"
             },
             {
               "binding_type": "view",
+              "source_control_name": "$payload_source_control_name",
               "source_property_name": "#button_icon_texture_file_system",
               "target_property_name": "#texture_file_system"
             }
@@ -2600,6 +2606,7 @@
   },
   "ponder_side_icon_button_hover_state": {
     "$background_texture|default": "textures/ui/ponder/button_bg_hover",
+    "$payload_source_control_name|default": "",
     "type": "panel",
     "clips_children": false,
     "size": [
@@ -2631,11 +2638,13 @@
           "bindings": [
             {
               "binding_type": "view",
+              "source_control_name": "$payload_source_control_name",
               "source_property_name": "#button_icon_texture",
               "target_property_name": "#texture"
             },
             {
               "binding_type": "view",
+              "source_control_name": "$payload_source_control_name",
               "source_property_name": "#button_icon_texture_file_system",
               "target_property_name": "#texture_file_system"
             }
@@ -2643,11 +2652,14 @@
         }
       },
       {
-        "hover_tip@server_form.ponder_side_icon_tip_panel": {}
+        "hover_tip@server_form.ponder_side_icon_tip_panel": {
+          "$payload_source_control_name": "$payload_source_control_name"
+        }
       }
     ]
   },
   "ponder_side_icon_button_pressed_state": {
+    "$payload_source_control_name|default": "",
     "type": "panel",
     "clips_children": false,
     "size": [
@@ -2679,11 +2691,13 @@
           "bindings": [
             {
               "binding_type": "view",
+              "source_control_name": "$payload_source_control_name",
               "source_property_name": "#button_icon_texture",
               "target_property_name": "#texture"
             },
             {
               "binding_type": "view",
+              "source_control_name": "$payload_source_control_name",
               "source_property_name": "#button_icon_texture_file_system",
               "target_property_name": "#texture_file_system"
             }
@@ -2691,7 +2705,9 @@
         }
       },
       {
-        "hover_tip@server_form.ponder_side_icon_tip_panel": {}
+        "hover_tip@server_form.ponder_side_icon_tip_panel": {
+          "$payload_source_control_name": "$payload_source_control_name"
+        }
       }
     ]
   },
@@ -2711,44 +2727,28 @@
     "focus_wrap_enabled": false,
     "consume_hover_events": false,
     "sound_volume": 0.0,
-    "property_bag": {
-      "#button_text_raw": "",
-      "#button_icon_texture": "",
-      "#button_icon_texture_file_system": ""
-    },
     "button_mappings": [],
     "controls": [
       {
-        "default@server_form.ponder_side_icon_button_state": {}
+        "default@server_form.ponder_side_icon_button_state": {
+          "$payload_source_control_name": "$payload_source_control_name"
+        }
       },
       {
-        "hover@server_form.ponder_side_icon_button_hover_state": {}
+        "hover@server_form.ponder_side_icon_button_hover_state": {
+          "$payload_source_control_name": "$payload_source_control_name"
+        }
       },
       {
-        "pressed@server_form.ponder_side_icon_button_pressed_state": {}
+        "pressed@server_form.ponder_side_icon_button_pressed_state": {
+          "$payload_source_control_name": "$payload_source_control_name"
+        }
       }
     ],
     "bindings": [
       {
         "binding_type": "view",
         "source_control_name": "$payload_source_control_name",
-        "source_property_name": "#button_text_raw",
-        "target_property_name": "#button_text_raw"
-      },
-      {
-        "binding_type": "view",
-        "source_control_name": "$payload_source_control_name",
-        "source_property_name": "#button_icon_texture",
-        "target_property_name": "#button_icon_texture"
-      },
-      {
-        "binding_type": "view",
-        "source_control_name": "$payload_source_control_name",
-        "source_property_name": "#button_icon_texture_file_system",
-        "target_property_name": "#button_icon_texture_file_system"
-      },
-      {
-        "binding_type": "view",
         "source_property_name": "((not ((#button_icon_texture = '') or (#button_icon_texture = 'loading'))) or (not (#button_icon_texture_file_system = '')))",
         "target_property_name": "#visible"
       }
