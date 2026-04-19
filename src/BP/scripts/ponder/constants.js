@@ -33,7 +33,7 @@ export const BUTTON_MARKERS = {
   restart: "\u00A73\u00A7r\u00A73\u00A7r",
   close: "\u00A73\u00A7r\u00A74\u00A7r",
 };
-export const MAX_SIDE_ICON_COUNT = 4;
+export const MAX_SIDE_ICON_COUNT = 6;
 export const DEFAULT_SCENE_MESSAGES = {
   inUse: "The Ponder demo is already in use.",
   invalidDimension: "This demo currently only works in the overworld.",
