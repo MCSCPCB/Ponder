@@ -1,0 +1,70 @@
+{
+    "format_version": "1.8.0",
+    "animations": {
+        "animation.ponder_block": {
+            "loop": true,
+            "bones": {
+                "body": {
+                    "rotation": [
+                        "-this",
+                        "-this",
+                        "-this"
+                    ]
+                },
+                "head": {
+                    "rotation": [
+                        "-this",
+                        "-this",
+                        "-this"
+                    ]
+                },
+                "leftarm": {
+                    "rotation": [
+                        "-this",
+                        "-this",
+                        "-this"
+                    ]
+                },
+                "leftleg": {
+                    "rotation": [
+                        "-this",
+                        "-this",
+                        "-this"
+                    ]
+                },
+                "rightarm": {
+                    "rotation": [
+                        "-this",
+                        "-this",
+                        "-this"
+                    ],
+                    "position": [
+                        -5.0,
+                        -4.0,
+                        -12
+                    ]
+                },
+                "rightleg": {
+                    "rotation": [
+                        "-this",
+                        "-this",
+                        "-this"
+                    ]
+                },
+                "rightitem": {
+                    "scale": "2.7",
+                    "rotation": [
+                        "-this-20",
+                        "-this-135",
+                        "-this"
+                    ],
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            }
+        }
+    }
+}

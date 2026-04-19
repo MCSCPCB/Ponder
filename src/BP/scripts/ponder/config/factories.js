@@ -60,6 +60,14 @@ export const defineBlockStructure = (id, blockId, position) => ({
   position,
 });
 
+export const defineEntityStructure = (id, entityTypeId, position, options = {}) => ({
+  id,
+  kind: "entity",
+  entityTypeId,
+  position,
+  ...options,
+});
+
 export const defineStage = ({ description, add = [], remove = [], bubbleSlot }) => ({
   description,
   add,

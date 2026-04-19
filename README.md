@@ -79,6 +79,43 @@ export const tntDemoScene = defineScene({
 });
 ```
 
+这个示例里，思索场景当前真正支持并且和 UI 直接相关的字段，可以按下面理解：
+
+```js
+defineScene({
+  id: "tnt_demo", // 必填，场景唯一 id
+  title: "TNT", // 左上角标题文字；不写就显示为空
+  iconPath: "textures/items/tnt", // 左上角标题图标；按 ActionFormData 的 iconPath 传字符串，建议只用 textures/... 资源包路径
+  entryItems: ["minecraft:tnt"], // 必填；玩家手持这些物品使用时触发思索
+  stagePresetId: "demo_8x8x8", // 必填；决定结构渲染预设、相机焦点、进度条标题标记
+  tickingAreaName: "ponder_demo_tnt", // 必填；对应演示区域的 ticking area 名称，必须唯一
+  specialBlockIcons: [
+    {
+      iconPath: "textures/items/redstone_dust", // 左侧小图标贴图路径；不写这个图标就不会显示
+      tooltipText: "Redstone Block", // 该图标的 purple tip 文本；可空字符串
+    },
+    // 最多支持 6 个；超过 6 个会被截断
+  ],
+  structures: [
+    // 结构定义列表；这里只负责声明内容，步骤里再通过 add/remove 控制显隐
+    defineEntityStructure("guide", "minecraft:villager_v2", { x: 3.5, y: 1, z: 3.5 }, {
+      rotation: { x: 0, y: 180 }, // 可选：实体朝向
+      spawnEvent: "minecraft:entity_spawned", // 可选：生成时使用的事件
+      nameTag: "Guide", // 可选：实体名牌
+      triggerEvents: ["minecraft:become_adult"], // 可选：生成后依次触发的实体事件
+    }),
+  ],
+  stages: [
+    defineStage({
+      description: "加入一个红石方块，用来表达点火或触发这个动作。", // 当前步骤的气泡文字
+      bubbleSlot: "middle", // 可选：top / middle / bottom；不写则继承上一步，第一步默认 top
+      add: ["trigger_block"], // 本步新增显示的 structure id
+      remove: ["pad"], // 可选：本步移除显示的 structure id
+    }),
+  ],
+});
+```
+
 ### 第二步：把场景注册进索引
 
 修改 `src/BP/scripts/ponder/config/scenes/index.js`：

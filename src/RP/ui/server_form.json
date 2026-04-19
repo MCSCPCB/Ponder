@@ -378,19 +378,28 @@
     "$screen_content": "server_form.main_screen_content",
     "$additional_screen_content": "server_form.ponder_form_additional_screen_content",
     "$screen_animations": [],
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_cancel",
+        "to_button_id": "button.menu_exit",
+        "mapping_type": "global"
+      }
+    ],
     "force_render_below": true,
     "render_only_when_topmost": false,
     "render_game_behind": true,
     "load_screen_immediately": true
   },
   "main_screen_content": {
+    "alpha": 0,
+    "propagate_alpha": true,
     "bindings": [
       {
         "binding_name": "#title_text"
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
+        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ]
@@ -402,7 +411,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
+        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ]
@@ -414,7 +423,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
+        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ]
@@ -426,7 +435,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
+        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
         "target_property_name": "#visible"
       }
     ]
@@ -490,7 +499,7 @@
             "#block_position": "$focus",
             "#bottom_left_block": "$bottom_left",
             "#top_right_block": "$top_right",
-            "#include_entities": false,
+            "#include_entities": true,
             "#remove_blocks": false,
             "#include_players": false
           },
@@ -2490,6 +2499,100 @@
       }
     ]
   },
+  "ponder_close_nav_button_state": {
+    "$background_texture|default": "textures/ui/ponder/button_bg_default",
+    "$icon_color|default": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "background": {
+          "type": "image",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "texture": "$background_texture"
+        }
+      },
+      {
+        "close_icon": {
+          "type": "image",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [
+            12,
+            12
+          ],
+          "texture": "textures/ui/ponder/icon_close",
+          "color": "$icon_color"
+        }
+      }
+    ]
+  },
+  "ponder_close_nav_button": {
+    "type": "button",
+    "size": [
+      30,
+      30
+    ],
+    "$pressed_button_name": "button.form_button_click",
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "focus_enabled": true,
+    "sound_name": "button.form_button_click",
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "focused"
+      }
+    ],
+    "controls": [
+      {
+        "default@server_form.ponder_close_nav_button_state": {}
+      },
+      {
+        "hover@server_form.ponder_close_nav_button_state": {
+          "$background_texture": "textures/ui/ponder/button_bg_hover"
+        }
+      },
+      {
+        "pressed@server_form.ponder_close_nav_button_state": {
+          "$background_texture": "textures/ui/ponder/button_bg_pressed"
+        }
+      }
+    ]
+  },
+  "ponder_close_nav_button_slot": {
+    "type": "panel",
+    "size": [
+      46,
+      30
+    ],
+    "controls": [
+      {
+        "button@server_form.ponder_close_nav_button": {
+          "anchor_from": "center",
+          "anchor_to": "center"
+        }
+      }
+    ]
+  },
   "ponder_side_icon_tip_panel": {
     "$payload_source_control_name|default": "",
     "type": "image",
@@ -2846,7 +2949,7 @@
         }
       },
       {
-        "button_middle@server_form.ponder_nav_button_slot": {
+        "button_middle@server_form.ponder_close_nav_button_slot": {
           "collection_index": 1
         }
       },

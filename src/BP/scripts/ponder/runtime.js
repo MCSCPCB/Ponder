@@ -1,4 +1,4 @@
-import { BlockPermutation, world } from "@minecraft/server";
+import { BlockPermutation, HudVisibility, system, world } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import {
   ANIMATE_PREVIEW_MARKER,
@@ -16,6 +16,10 @@ import { getSceneForItem, getSceneTitlePrefix, getStagePreset } from "./registry
 let activeSession;
 const tickingAreasReady = new Set();
 const DEFAULT_HEADER_ICON_PATH = "textures/ui/ponder/logo";
+const PONDER_STAGE_ENTITY_TAG = "ponder_stage_entity";
+const PONDER_TEMP_ANIMATION_TAG = "ponder_temp_animation";
+const PONDER_FALL_ANIMATION_TICKS = 8;
+const PONDER_FALL_START_HEIGHT = 1.5;
 
 const warnOnError = (message, callback) => {
   try {
@@ -42,6 +46,29 @@ const getPlayerKey = (player) => {
   }
 };
 
+const normalizeEntityTagSegment = (value) =>
+  String(value ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "_");
+
+const getSceneEntityTag = (scene) =>
+  `ponder_scene_${normalizeEntityTagSegment(scene?.id)}`;
+
+const getStructureEntityTag = (scene, structureId) =>
+  `ponder_structure_${normalizeEntityTagSegment(scene?.id)}_${normalizeEntityTagSegment(structureId)}`;
+
+function hideHudElements(player) {
+  warnOnError("Failed to hide HUD elements", () =>
+    player?.onScreenDisplay?.setHudVisibility(HudVisibility.Hide),
+  );
+}
+
+function restoreHudElements(player) {
+  warnOnError("Failed to restore HUD elements", () =>
+    player?.onScreenDisplay?.setHudVisibility(HudVisibility.Reset),
+  );
+}
+
 const getStageLocalMax = (preset) => ({
   x: preset.size.x - 1,
   y: preset.size.y - 1,
@@ -63,6 +90,24 @@ const toStageLocation = (preset, position) => ({
   z: preset.origin.z + position.z,
 });
 
+const toStageEntityLocation = (preset, position) => ({
+  x: preset.origin.x + position.x + (Number.isInteger(position.x) ? 0.5 : 0),
+  y: preset.origin.y + position.y,
+  z: preset.origin.z + position.z + (Number.isInteger(position.z) ? 0.5 : 0),
+});
+
+function getSceneStageEntities(dimension, scene) {
+  return dimension.getEntities({
+    tags: [PONDER_STAGE_ENTITY_TAG, getSceneEntityTag(scene)],
+  });
+}
+
+function getStructureEntities(dimension, scene, structureId) {
+  return dimension.getEntities({
+    tags: [PONDER_STAGE_ENTITY_TAG, getStructureEntityTag(scene, structureId)],
+  });
+}
+
 function setStageBlock(dimension, preset, position, blockId) {
   const block = dimension.getBlock(toStageLocation(preset, position));
   if (!block) {
@@ -82,7 +127,7 @@ function fillStageBox(dimension, preset, from, to, blockId) {
   }
 }
 
-function renderStructure(dimension, preset, structure) {
+function renderStructure(scene, dimension, preset, structure) {
   if (structure.kind === "box") {
     fillStageBox(dimension, preset, structure.from, structure.to, structure.blockId);
     return;
@@ -90,10 +135,58 @@ function renderStructure(dimension, preset, structure) {
 
   if (structure.kind === "block") {
     setStageBlock(dimension, preset, structure.position, structure.blockId);
+    return;
+  }
+
+  if (structure.kind !== "entity") {
+    return;
+  }
+
+  const entity = warnOnError(
+    `Failed to spawn entity "${structure.entityTypeId}" for scene "${scene.id}"`,
+    () =>
+      dimension.spawnEntity(
+        structure.entityTypeId,
+        toStageEntityLocation(preset, structure.position),
+        structure.spawnEvent ? { spawnEvent: structure.spawnEvent } : undefined,
+      ),
+  );
+  if (!entity) {
+    return;
+  }
+
+  warnOnError("Failed to tag Ponder stage entity", () => {
+    entity.addTag(PONDER_STAGE_ENTITY_TAG);
+    entity.addTag(getSceneEntityTag(scene));
+    entity.addTag(getStructureEntityTag(scene, structure.id));
+  });
+
+  if (structure.rotation) {
+    warnOnError("Failed to rotate Ponder stage entity", () =>
+      entity.setRotation(structure.rotation),
+    );
+  }
+
+  if (typeof structure.nameTag === "string") {
+    warnOnError("Failed to set Ponder stage entity name tag", () => {
+      entity.nameTag = structure.nameTag;
+    });
+  }
+
+  if (Array.isArray(structure.triggerEvents)) {
+    for (const triggerEvent of structure.triggerEvents) {
+      if (typeof triggerEvent !== "string" || triggerEvent.length <= 0) {
+        continue;
+      }
+
+      warnOnError(`Failed to trigger entity event "${triggerEvent}"`, () =>
+        entity.triggerEvent(triggerEvent),
+      );
+    }
   }
 }
 
-function clearStructure(dimension, preset, structure) {
+function clearStructure(scene, dimension, preset, structure) {
   if (structure.kind === "box") {
     fillStageBox(dimension, preset, structure.from, structure.to, "minecraft:air");
     return;
@@ -101,10 +194,19 @@ function clearStructure(dimension, preset, structure) {
 
   if (structure.kind === "block") {
     setStageBlock(dimension, preset, structure.position, "minecraft:air");
+    return;
+  }
+
+  if (structure.kind !== "entity") {
+    return;
+  }
+
+  for (const entity of getStructureEntities(dimension, scene, structure.id)) {
+    warnOnError("Failed to remove Ponder stage entity", () => entity.remove());
   }
 }
 
-function clearStage(dimension, preset) {
+function clearStage(dimension, preset, scene) {
   fillStageBox(
     dimension,
     preset,
@@ -112,6 +214,14 @@ function clearStage(dimension, preset) {
     getStageLocalMax(preset),
     "minecraft:air",
   );
+
+  if (!scene) {
+    return;
+  }
+
+  for (const entity of getSceneStageEntities(dimension, scene)) {
+    warnOnError("Failed to clear Ponder stage entity", () => entity.remove());
+  }
 }
 
 function ensureTickingArea(dimension, scene, preset) {
@@ -147,7 +257,7 @@ function getActiveStructureIds(scene, stageIndex) {
 }
 
 function buildSceneStage(scene, dimension, preset, stageIndex) {
-  clearStage(dimension, preset);
+  clearStage(dimension, preset, scene);
 
   for (const structureId of getActiveStructureIds(scene, stageIndex)) {
     const structure = scene.structureById.get(structureId);
@@ -155,40 +265,297 @@ function buildSceneStage(scene, dimension, preset, stageIndex) {
       continue;
     }
 
-    renderStructure(dimension, preset, structure);
+    renderStructure(scene, dimension, preset, structure);
   }
 }
 
-function syncSceneStage(scene, dimension, preset, previousStageIndex, nextStageIndex) {
-  if (previousStageIndex === undefined || previousStageIndex === null) {
-    buildSceneStage(scene, dimension, preset, nextStageIndex);
+const waitTicks = (tickCount) =>
+  new Promise((resolve) => {
+    if (!Number.isFinite(tickCount) || tickCount <= 0) {
+      resolve();
+      return;
+    }
+
+    system.runTimeout(resolve, tickCount);
+  });
+
+const lerpNumber = (start, end, progress) => start + (end - start) * progress;
+
+const easeOutCubic = (progress) => 1 - (1 - progress) ** 3;
+
+const isTransitionCurrent = (session, animationToken) =>
+  activeSession === session && !session?.closed && session?.animationToken === animationToken;
+
+const getTempAnimationBatchTag = (scene, animationToken, phase) =>
+  normalizeEntityTagSegment(`ponder_temp_${scene.id}_${animationToken}_${phase}`);
+
+const getTempAnimationEntityTag = (scene, animationToken, phase, index) =>
+  normalizeEntityTagSegment(`ponder_temp_${scene.id}_${animationToken}_${phase}_${index}`);
+
+const getAnimationEntitySelector = (tags) =>
+  `@e[type=entity:ponder_block,${tags.map((tag) => `tag=${tag}`).join(",")}]`;
+
+const formatCommandNumber = (value) => Number(value.toFixed(4));
+
+const getBlockAnimationAnchor = (preset, position) => toStageLocation(preset, position);
+
+function getTempAnimationEntities(dimension, scene, batchTag) {
+  const tags = [PONDER_TEMP_ANIMATION_TAG, getSceneEntityTag(scene)];
+  if (batchTag) {
+    tags.push(batchTag);
+  }
+
+  return dimension.getEntities({ tags });
+}
+
+function cleanupTempAnimationEntities(dimension, scene, batchTag) {
+  for (const entity of getTempAnimationEntities(dimension, scene, batchTag)) {
+    warnOnError("Failed to clear temporary Ponder animation entity", () => entity.remove());
+  }
+}
+
+function getSceneStageStructureDiff(scene, stageIndex) {
+  const stage = scene.stages[stageIndex];
+  const removedStructures = [];
+  const addedStructures = [];
+
+  for (const structureId of stage?.remove ?? []) {
+    const structure = scene.structureById.get(structureId);
+    if (structure) {
+      removedStructures.push(structure);
+    }
+  }
+
+  for (const structureId of stage?.add ?? []) {
+    const structure = scene.structureById.get(structureId);
+    if (structure) {
+      addedStructures.push(structure);
+    }
+  }
+
+  return { removedStructures, addedStructures };
+}
+
+function expandStructureBlocks(structure) {
+  if (structure.kind === "block") {
+    return [
+      {
+        blockId: structure.blockId,
+        position: structure.position,
+      },
+    ];
+  }
+
+  if (structure.kind !== "box") {
+    return [];
+  }
+
+  const blocks = [];
+
+  for (let x = structure.from.x; x <= structure.to.x; x += 1) {
+    for (let y = structure.from.y; y <= structure.to.y; y += 1) {
+      for (let z = structure.from.z; z <= structure.to.z; z += 1) {
+        blocks.push({
+          blockId: structure.blockId,
+          position: { x, y, z },
+        });
+      }
+    }
+  }
+
+  return blocks;
+}
+
+function getAnimatedBlockEntries(structures) {
+  const animatedBlocks = [];
+
+  for (const structure of structures) {
+    for (const block of expandStructureBlocks(structure)) {
+      animatedBlocks.push(block);
+    }
+  }
+
+  return animatedBlocks;
+}
+
+async function spawnAnimatedBlockEntities(
+  dimension,
+  scene,
+  preset,
+  animatedBlocks,
+  animationToken,
+  phase,
+  itemResolver,
+  extraYOffset = 0,
+) {
+  const batchTag = getTempAnimationBatchTag(scene, animationToken, phase);
+  const spawnedEntities = [];
+
+  for (const [index, animatedBlock] of animatedBlocks.entries()) {
+    const entityTag = getTempAnimationEntityTag(scene, animationToken, phase, index);
+    const finalLocation = getBlockAnimationAnchor(preset, animatedBlock.position);
+    const spawnLocation = {
+      x: finalLocation.x + 0.5,
+      y: finalLocation.y + extraYOffset,
+      z: finalLocation.z + 0.5,
+    };
+    const armorStand = warnOnError(
+      `Failed to spawn temporary Ponder block entity for "${animatedBlock.blockId}"`,
+      () => dimension.spawnEntity("entity:ponder_block", spawnLocation),
+    );
+    if (!armorStand) {
+      continue;
+    }
+
+    warnOnError("Failed to tag temporary Ponder block entity", () => {
+      armorStand.addTag(PONDER_TEMP_ANIMATION_TAG);
+      armorStand.addTag(getSceneEntityTag(scene));
+      armorStand.addTag(batchTag);
+      armorStand.addTag(entityTag);
+    });
+
+    spawnedEntities.push({
+      entityTag,
+      itemId: itemResolver(animatedBlock),
+      finalLocation,
+      startLocation: spawnLocation,
+    });
+  }
+
+  if (spawnedEntities.length > 0) {
+    await waitTicks(1);
+    for (const spawnedEntity of spawnedEntities) {
+      if (!spawnedEntity.itemId) {
+        continue;
+      }
+
+      warnOnError(
+        `Failed to equip temporary Ponder block entity with "${spawnedEntity.itemId}"`,
+        () =>
+          dimension.runCommand(
+            `replaceitem entity ${getAnimationEntitySelector([spawnedEntity.entityTag])} slot.weapon.mainhand 0 ${spawnedEntity.itemId}`,
+          ),
+      );
+    }
+  }
+
+  return { batchTag, spawnedEntities };
+}
+
+function teleportAnimatedBlockEntities(dimension, spawnedEntities, locationResolver) {
+  for (const spawnedEntity of spawnedEntities) {
+    const nextLocation = locationResolver(spawnedEntity);
+    warnOnError("Failed to move temporary Ponder block entity", () =>
+      dimension.runCommand(
+        `tp ${getAnimationEntitySelector([spawnedEntity.entityTag])} ${formatCommandNumber(spawnedEntity.finalLocation.x)} ${formatCommandNumber(nextLocation.y)} ${formatCommandNumber(spawnedEntity.finalLocation.z)}`,
+      ),
+    );
+  }
+}
+
+async function animateFallingBlockEntities(
+  session,
+  dimension,
+  animationToken,
+  spawnedEntities,
+  tickCount,
+) {
+  for (let tick = 0; tick < tickCount; tick += 1) {
+    if (!isTransitionCurrent(session, animationToken)) {
+      return false;
+    }
+
+    const progress = easeOutCubic((tick + 1) / tickCount);
+    teleportAnimatedBlockEntities(dimension, spawnedEntities, ({ startLocation, finalLocation }) => ({
+      x: lerpNumber(startLocation.x, finalLocation.x, progress),
+      y: lerpNumber(startLocation.y, finalLocation.y, progress),
+      z: lerpNumber(startLocation.z, finalLocation.z, progress),
+    }));
+    await waitTicks(1);
+  }
+
+  return isTransitionCurrent(session, animationToken);
+}
+
+async function animateSceneStageTransition(
+  session,
+  scene,
+  dimension,
+  preset,
+  animationToken,
+  targetStageIndex,
+) {
+  const { removedStructures, addedStructures } = getSceneStageStructureDiff(scene, targetStageIndex);
+  const animatedBlocks = getAnimatedBlockEntries(addedStructures);
+
+  if (!isTransitionCurrent(session, animationToken)) {
     return;
   }
 
-  const previousStructureIds = getActiveStructureIds(scene, previousStageIndex);
-  const nextStructureIds = getActiveStructureIds(scene, nextStageIndex);
-
-  for (const structureId of previousStructureIds) {
-    if (nextStructureIds.has(structureId)) {
-      continue;
-    }
-
-    const structure = scene.structureById.get(structureId);
-    if (!structure) {
-      continue;
-    }
-
-    clearStructure(dimension, preset, structure);
+  for (const structure of removedStructures) {
+    clearStructure(scene, dimension, preset, structure);
   }
 
-  for (const structureId of nextStructureIds) {
-    const structure = scene.structureById.get(structureId);
-    if (!structure) {
-      continue;
+  if (animatedBlocks.length > 0) {
+    const fallBatch = await spawnAnimatedBlockEntities(
+      dimension,
+      scene,
+      preset,
+      animatedBlocks,
+      animationToken,
+      "fall",
+      ({ blockId }) => blockId,
+      PONDER_FALL_START_HEIGHT,
+    );
+    const fallFinished = await animateFallingBlockEntities(
+      session,
+      dimension,
+      animationToken,
+      fallBatch.spawnedEntities,
+      PONDER_FALL_ANIMATION_TICKS,
+    );
+
+    cleanupTempAnimationEntities(dimension, scene, fallBatch.batchTag);
+    if (!fallFinished) {
+      return;
+    }
+  }
+
+  if (!isTransitionCurrent(session, animationToken)) {
+    return;
+  }
+
+  for (const structure of addedStructures) {
+    renderStructure(scene, dimension, preset, structure);
+  }
+}
+
+function beginSceneStageTransition(session, scene, dimension, preset, targetStageIndex) {
+  session.animationToken += 1;
+  const animationToken = session.animationToken;
+
+  system.run(() => {
+    if (!isTransitionCurrent(session, animationToken)) {
+      return;
     }
 
-    renderStructure(dimension, preset, structure);
-  }
+    cleanupTempAnimationEntities(dimension, scene);
+
+    if (targetStageIndex <= 0) {
+      buildSceneStage(scene, dimension, preset, 0);
+      return;
+    }
+
+    buildSceneStage(scene, dimension, preset, targetStageIndex - 1);
+    void animateSceneStageTransition(
+      session,
+      scene,
+      dimension,
+      preset,
+      animationToken,
+      targetStageIndex,
+    );
+  });
 }
 
 function createStageBody(stage) {
@@ -372,11 +739,13 @@ async function runPonderScene(player, scene) {
 
   activeSession = {
     playerKey,
+    animationToken: 0,
+    closed: false,
   };
+  const session = activeSession;
 
   let dimension;
   let stageIndex = 0;
-  let renderedStageIndex;
   let animateProgressMode = "forward";
   let animatePreview = true;
 
@@ -384,11 +753,11 @@ async function runPonderScene(player, scene) {
     dimension = world.getDimension(OVERWORLD_ID);
     ensureTickingArea(dimension, scene, preset);
 
-    syncSceneStage(scene, dimension, preset, renderedStageIndex, stageIndex);
-    renderedStageIndex = stageIndex;
+    hideHudElements(player);
 
     let currentFormState = createStageForm(scene, stageIndex, animateProgressMode, animatePreview);
     let pendingResult = currentFormState.form.show(player);
+    beginSceneStageTransition(session, scene, dimension, preset, stageIndex);
 
     while (isPlayerValid(player)) {
       const result = await pendingResult;
@@ -398,6 +767,7 @@ async function runPonderScene(player, scene) {
       }
 
       const action = currentFormState.buttons[result.selection]?.id;
+      let nextStageIndex = stageIndex;
 
       if (!action || action === "noop") {
         animateProgressMode = "none";
@@ -405,29 +775,40 @@ async function runPonderScene(player, scene) {
       } else if (action === "close") {
         break;
       } else if (action === "prev") {
-        stageIndex = Math.max(0, stageIndex - 1);
+        nextStageIndex = Math.max(0, stageIndex - 1);
         animateProgressMode = "reverse";
         animatePreview = false;
       } else if (action === "restart") {
-        stageIndex = 0;
+        nextStageIndex = 0;
         animateProgressMode = "forward";
         animatePreview = false;
       } else if (action === "next") {
-        stageIndex = Math.min(scene.stages.length - 1, stageIndex + 1);
+        nextStageIndex = Math.min(scene.stages.length - 1, stageIndex + 1);
         animateProgressMode = "forward";
         animatePreview = false;
       }
 
+      const stageChanged = nextStageIndex !== stageIndex;
+      stageIndex = nextStageIndex;
       currentFormState = createStageForm(scene, stageIndex, animateProgressMode, animatePreview);
       pendingResult = currentFormState.form.show(player);
-      syncSceneStage(scene, dimension, preset, renderedStageIndex, stageIndex);
-      renderedStageIndex = stageIndex;
+
+      if (stageChanged) {
+        beginSceneStageTransition(session, scene, dimension, preset, stageIndex);
+      }
     }
   } finally {
+    session.closed = true;
+    session.animationToken += 1;
+
     if (dimension) {
-      warnOnError("Failed to clear demo stage", () => clearStage(dimension, preset));
+      warnOnError("Failed to clear temporary Ponder animation entities", () =>
+        cleanupTempAnimationEntities(dimension, scene),
+      );
+      warnOnError("Failed to clear demo stage", () => clearStage(dimension, preset, scene));
     }
 
+    restoreHudElements(player);
     activeSession = undefined;
   }
 }

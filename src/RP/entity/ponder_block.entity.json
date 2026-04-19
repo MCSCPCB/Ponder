@@ -1,0 +1,28 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "entity:ponder_block",
+            "materials": {
+                "default": "zombie"
+            },
+            "textures": {
+                "default": "textures/empty"
+            },
+            "animations": {
+                "ponder_block": "animation.ponder_block"
+            },
+            "scripts": {
+                "animate": [
+                    "ponder_block"
+                ]
+            },
+            "geometry": {
+                "default": "geometry.armor_stand"
+            },
+            "render_controllers": [
+                "controller.render.zombie"
+            ]
+        }
+    }
+}
