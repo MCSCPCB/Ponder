@@ -386,6 +386,26 @@
     "from": 0,
     "to": 1
   },
+  "ponder_header_intro_alpha": {
+    "anim_type": "alpha",
+    "easing": "out_quart",
+    "duration": 0.24,
+    "from": 0,
+    "to": 1
+  },
+  "ponder_header_intro_offset": {
+    "anim_type": "offset",
+    "easing": "out_quart",
+    "duration": 0.24,
+    "from": [
+      21,
+      24
+    ],
+    "to": [
+      21,
+      19
+    ]
+  },
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
     "$additional_screen_content": "server_form.ponder_form_additional_screen_content",
@@ -2893,6 +2913,16 @@
         "bubble_text_source@server_form.ponder_bubble_button_text_state": {
           "collection_index": 1
         }
+      },
+      {
+        "header_icon_source@server_form.ponder_header_icon_texture_state": {
+          "collection_index": 1
+        }
+      },
+      {
+        "title_text_source@server_form.ponder_header_button_text_state": {
+          "collection_index": 3
+        }
       }
     ],
     "bindings": []
@@ -2946,6 +2976,305 @@
               }
             }
           ]
+        }
+      }
+    ]
+  },
+  "ponder_header_button_text_state": {
+    "type": "panel",
+    "size": [
+      0,
+      0
+    ],
+    "property_bag": {
+      "#header_title_raw": ""
+    },
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_name": "#form_button_text",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_condition": "always",
+        "binding_name_override": "#header_title_raw"
+      }
+    ]
+  },
+  "ponder_header_icon_texture_state": {
+    "type": "panel",
+    "size": [
+      0,
+      0
+    ],
+    "property_bag": {
+      "#header_icon_texture": "",
+      "#header_icon_texture_file_system": ""
+    },
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_name": "#form_button_texture",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_condition": "always",
+        "binding_name_override": "#header_icon_texture"
+      },
+      {
+        "binding_name": "#form_button_texture_file_system",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_condition": "always",
+        "binding_name_override": "#header_icon_texture_file_system"
+      }
+    ]
+  },
+  "ponder_scene_header_content": {
+    "type": "panel",
+    "size": [
+      "100%c",
+      "100%cm"
+    ],
+    "clips_children": false,
+    "controls": [
+      {
+        "title_backdrop": {
+          "type": "image",
+          "layer": 0,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            32,
+            3
+          ],
+          "size": [
+            "100%c + 24px",
+            30
+          ],
+          "texture": "textures/ui/ponder/header_streak",
+          "controls": [
+            {
+              "title_labels": {
+                "type": "stack_panel",
+                "orientation": "vertical",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  8,
+                  4
+                ],
+                "size": [
+                  "100%c",
+                  "100%cm"
+                ],
+                "controls": [
+                  {
+                    "pondering_label": {
+                      "type": "label",
+                      "text": "Pondering about...",
+                      "text_alignment": "left",
+                      "color": [
+                        0.705882,
+                        0.705882,
+                        0.705882
+                      ],
+                      "shadow": false,
+                      "localize": false
+                    }
+                  },
+                  {
+                    "scene_title_label": {
+                      "type": "label",
+                      "text": "#text",
+                      "size": [
+                        "default",
+                        "default"
+                      ],
+                      "max_size": [
+                        180,
+                        "default"
+                      ],
+                      "text_alignment": "left",
+                      "color": [
+                        0.964706,
+                        0.964706,
+                        0.964706
+                      ],
+                      "shadow": false,
+                      "localize": false,
+                      "line_padding": 1,
+                      "bindings": [
+                        {
+                          "binding_type": "view",
+                          "source_control_name": "title_text_source",
+                          "source_property_name": "(#header_title_raw - '§3§r§0§r§a§r§0§r')",
+                          "target_property_name": "#text"
+                        },
+                        {
+                          "binding_type": "view",
+                          "source_control_name": "title_text_source",
+                          "source_property_name": "(not ((#header_title_raw - '§3§r§0§r§a§r§0§r') = ''))",
+                          "target_property_name": "#visible"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "icon_frame_border": {
+          "type": "image",
+          "layer": 1,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            0,
+            2
+          ],
+          "size": [
+            32,
+            32
+          ],
+          "texture": "textures/ui/White",
+          "color": [
+            0.490196,
+            0.490196,
+            0.490196,
+            0.95
+          ]
+        }
+      },
+      {
+        "icon_frame_fill": {
+          "type": "image",
+          "layer": 1,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            4
+          ],
+          "size": [
+            28,
+            28
+          ],
+          "texture": "textures/ui/White",
+          "color": [
+            0,
+            0,
+            0,
+            0.9
+          ]
+        }
+      },
+      {
+        "scene_icon": {
+          "type": "image",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            4,
+            6
+          ],
+          "size": [
+            24,
+            24
+          ],
+          "bindings": [
+            {
+              "binding_type": "view",
+              "source_control_name": "header_icon_source",
+              "source_property_name": "#header_icon_texture",
+              "target_property_name": "#texture"
+            },
+            {
+              "binding_type": "view",
+              "source_control_name": "header_icon_source",
+              "source_property_name": "#header_icon_texture_file_system",
+              "target_property_name": "#texture_file_system"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((not ((#texture = '') or (#texture = 'loading'))) or (not (#texture_file_system = '')))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_scene_header_base": {
+    "$visibility_expression|default": "true",
+    "type": "panel",
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      21,
+      19
+    ],
+    "size": [
+      "100%c",
+      "100%cm"
+    ],
+    "clips_children": false,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "$visibility_expression",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "header_content@server_form.ponder_scene_header_content": {}
+      }
+    ]
+  },
+  "ponder_scene_header_intro@server_form.ponder_scene_header_base": {
+    "alpha": 0,
+    "propagate_alpha": true,
+    "disable_anim_fast_forward": true,
+    "offset": [
+      21,
+      24
+    ],
+    "anims": [
+      "@server_form.ponder_header_intro_alpha",
+      "@server_form.ponder_header_intro_offset"
+    ]
+  },
+  "ponder_scene_header_layer": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "header_static@server_form.ponder_scene_header_base": {
+          "$visibility_expression": "((#current_title_text - '§8§r') = #current_title_text)"
+        }
+      },
+      {
+        "header_intro@server_form.ponder_scene_header_intro": {
+          "$visibility_expression": "(not ((#current_title_text - '§8§r') = #current_title_text))"
         }
       }
     ]
@@ -3356,6 +3685,11 @@
           "anchor_from": "center",
           "anchor_to": "center",
           "layer": 10
+        }
+      },
+      {
+        "header_layer@server_form.ponder_scene_header_layer": {
+          "layer": 15
         }
       },
       {

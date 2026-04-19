@@ -5,6 +5,7 @@ import {
   ANIMATE_PROGRESS_MARKER,
   BUTTON_MARKERS,
   DEFAULT_BUBBLE_SLOT,
+  HEADER_TITLE_MARKER,
   OVERWORLD_ID,
   REVERSE_PROGRESS_MARKER,
   SLOT_MARKERS,
@@ -13,6 +14,7 @@ import { getSceneForItem, getSceneTitlePrefix, getStagePreset } from "./registry
 
 let activeSession;
 const tickingAreasReady = new Set();
+const DEFAULT_HEADER_ICON_PATH = "textures/ui/ponder/logo";
 
 const warnOnError = (message, callback) => {
   try {
@@ -202,7 +204,11 @@ function createBubblePayloadLabel(text) {
   return createMarkedButtonLabel("close", text);
 }
 
-function createStageButtons(stageCount, stageIndex, stageBody) {
+function createSceneTitlePayloadLabel(text) {
+  return createMarkedButtonLabel("hidden", `${HEADER_TITLE_MARKER}${text}`);
+}
+
+function createStageButtons(stageCount, stageIndex, stageBody, sceneTitle, sceneIconPath) {
   const buttons = [
     {
       id: stageIndex > 0 ? "prev" : "noop",
@@ -214,6 +220,7 @@ function createStageButtons(stageCount, stageIndex, stageBody) {
     {
       id: "close",
       label: createBubblePayloadLabel(stageBody),
+      iconPath: sceneIconPath,
     },
   ];
 
@@ -228,6 +235,11 @@ function createStageButtons(stageCount, stageIndex, stageBody) {
       label: createMarkedButtonLabel("restart", "Replay"),
     });
   }
+
+  buttons.push({
+    id: "noop",
+    label: createSceneTitlePayloadLabel(sceneTitle),
+  });
 
   return buttons;
 }
@@ -260,7 +272,13 @@ function createStageForm(scene, stageIndex, animateProgressMode = "none", animat
   const stageCount = scene.stages.length;
   const stage = scene.stages[stageIndex];
   const stageBody = createStageBody(stage);
-  const buttons = createStageButtons(stageCount, stageIndex, stageBody);
+  const buttons = createStageButtons(
+    stageCount,
+    stageIndex,
+    stageBody,
+    scene.title ?? "",
+    scene.iconPath ?? DEFAULT_HEADER_ICON_PATH,
+  );
   const animationMarker =
     animateProgressMode === "forward"
       ? ANIMATE_PROGRESS_MARKER
@@ -271,9 +289,14 @@ function createStageForm(scene, stageIndex, animateProgressMode = "none", animat
     .title(
       `${getSceneTitlePrefix(scene)}${getStageProgress(stageCount, stageIndex)}${animationMarker}${animatePreview ? ANIMATE_PREVIEW_MARKER : ""}${getStageBubbleSlotMarker(scene, stageIndex)}`,
     )
-    .body(stageBody);
+    .body(scene.title ?? "");
 
   for (const button of buttons) {
+    if (button.iconPath) {
+      form.button(button.label, button.iconPath);
+      continue;
+    }
+
     form.button(button.label);
   }
 

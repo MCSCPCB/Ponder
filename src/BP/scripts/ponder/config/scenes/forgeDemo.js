@@ -8,6 +8,7 @@ import {
 export const forgeDemoScene = defineScene({
   id: "forge_demo",
   title: "Forge Walkthrough",
+  iconPath: "textures/items/blaze_rod",
   entryItems: ["minecraft:blaze_rod"],
   stagePresetId: "demo_16x16x16",
   tickingAreaName: "ponder_demo_forge",
