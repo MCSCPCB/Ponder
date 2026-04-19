@@ -6,6 +6,7 @@ import {
   BUTTON_MARKERS,
   DEFAULT_BUBBLE_SLOT,
   HEADER_TITLE_MARKER,
+  MAX_SIDE_ICON_COUNT,
   OVERWORLD_ID,
   REVERSE_PROGRESS_MARKER,
   SLOT_MARKERS,
@@ -208,7 +209,31 @@ function createSceneTitlePayloadLabel(text) {
   return createMarkedButtonLabel("hidden", `${HEADER_TITLE_MARKER}${text}`);
 }
 
-function createStageButtons(stageCount, stageIndex, stageBody, sceneTitle, sceneIconPath) {
+function createSpecialBlockIconButtons(specialBlockIcons = []) {
+  const buttons = [];
+
+  for (let sideIconIndex = 0; sideIconIndex < MAX_SIDE_ICON_COUNT; sideIconIndex += 1) {
+    const sideIcon = specialBlockIcons[sideIconIndex];
+    const hasSideIcon = Boolean(sideIcon?.iconPath);
+
+    buttons.push({
+      id: "noop",
+      label: sideIcon?.tooltipText ?? "",
+      ...(hasSideIcon ? { iconPath: sideIcon.iconPath } : {}),
+    });
+  }
+
+  return buttons;
+}
+
+function createStageButtons(
+  stageCount,
+  stageIndex,
+  stageBody,
+  sceneTitle,
+  sceneIconPath,
+  specialBlockIcons,
+) {
   const buttons = [
     {
       id: stageIndex > 0 ? "prev" : "noop",
@@ -241,6 +266,8 @@ function createStageButtons(stageCount, stageIndex, stageBody, sceneTitle, scene
     label: createSceneTitlePayloadLabel(sceneTitle),
   });
 
+  buttons.push(...createSpecialBlockIconButtons(specialBlockIcons));
+
   return buttons;
 }
 
@@ -268,7 +295,12 @@ function getStageBubbleSlotMarker(scene, stageIndex) {
   return SLOT_MARKERS[bubbleSlot] ?? SLOT_MARKERS[DEFAULT_BUBBLE_SLOT];
 }
 
-function createStageForm(scene, stageIndex, animateProgressMode = "none", animatePreview = false) {
+function createStageForm(
+  scene,
+  stageIndex,
+  animateProgressMode = "none",
+  animatePreview = false,
+) {
   const stageCount = scene.stages.length;
   const stage = scene.stages[stageIndex];
   const stageBody = createStageBody(stage);
@@ -278,6 +310,7 @@ function createStageForm(scene, stageIndex, animateProgressMode = "none", animat
     stageBody,
     scene.title ?? "",
     scene.iconPath ?? DEFAULT_HEADER_ICON_PATH,
+    scene.specialBlockIcons ?? scene.sideIcons ?? [],
   );
   const animationMarker =
     animateProgressMode === "forward"
@@ -354,12 +387,7 @@ async function runPonderScene(player, scene) {
     syncSceneStage(scene, dimension, preset, renderedStageIndex, stageIndex);
     renderedStageIndex = stageIndex;
 
-    let currentFormState = createStageForm(
-      scene,
-      stageIndex,
-      animateProgressMode,
-      animatePreview,
-    );
+    let currentFormState = createStageForm(scene, stageIndex, animateProgressMode, animatePreview);
     let pendingResult = currentFormState.form.show(player);
 
     while (isPlayerValid(player)) {
@@ -370,6 +398,7 @@ async function runPonderScene(player, scene) {
       }
 
       const action = currentFormState.buttons[result.selection]?.id;
+
       if (!action || action === "noop") {
         animateProgressMode = "none";
         animatePreview = false;
@@ -389,12 +418,7 @@ async function runPonderScene(player, scene) {
         animatePreview = false;
       }
 
-      currentFormState = createStageForm(
-        scene,
-        stageIndex,
-        animateProgressMode,
-        animatePreview,
-      );
+      currentFormState = createStageForm(scene, stageIndex, animateProgressMode, animatePreview);
       pendingResult = currentFormState.form.show(player);
       syncSceneStage(scene, dimension, preset, renderedStageIndex, stageIndex);
       renderedStageIndex = stageIndex;

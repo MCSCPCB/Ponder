@@ -9,6 +9,20 @@ export const assemblyDemoScene = defineScene({
   id: "assembly_demo",
   title: "Assembly and Use",
   iconPath: "textures/items/stick",
+  specialBlockIcons: [
+    {
+      iconPath: "textures/items/brick",
+      tooltipText: "Barrel",
+    },
+    {
+      iconPath: "textures/items/iron_ingot",
+      tooltipText: "Blast Furnace",
+    },
+    {
+      iconPath: "textures/items/redstone_dust",
+      tooltipText: "Redstone Block",
+    },
+  ],
   entryItems: ["minecraft:stick"],
   stagePresetId: "demo_8x8x8",
   tickingAreaName: "ponder_demo_assembly",

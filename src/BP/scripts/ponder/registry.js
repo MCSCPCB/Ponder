@@ -1,6 +1,7 @@
 import {
   BUBBLE_SLOT_IDS,
   DEFAULT_SCENE_MESSAGES,
+  MAX_SIDE_ICON_COUNT,
   PROGRESS_MARKER,
   TITLE_MARKER,
 } from "./constants.js";
@@ -12,6 +13,24 @@ const VALID_BUBBLE_SLOTS = new Set(BUBBLE_SLOT_IDS);
 
 function normalizeScene(rawScene) {
   const structureById = new Map();
+  const rawSpecialBlockIcons = Array.isArray(rawScene.specialBlockIcons)
+    ? rawScene.specialBlockIcons
+    : Array.isArray(rawScene.sideIcons)
+      ? rawScene.sideIcons
+      : [];
+  const specialBlockIcons = rawSpecialBlockIcons
+        .map((sideIcon) => ({
+          iconPath: typeof sideIcon?.iconPath === "string" ? sideIcon.iconPath : "",
+          tooltipText: typeof sideIcon?.tooltipText === "string" ? sideIcon.tooltipText : "",
+        }))
+        .filter((sideIcon) => sideIcon.iconPath)
+        .slice(0, MAX_SIDE_ICON_COUNT);
+
+  if (rawSpecialBlockIcons.length > MAX_SIDE_ICON_COUNT) {
+    console.warn(
+      `Scene "${rawScene.id}" defines ${rawSpecialBlockIcons.length} specialBlockIcons, but only the first ${MAX_SIDE_ICON_COUNT} can be shown.`,
+    );
+  }
 
   for (const structure of rawScene.structures) {
     if (structureById.has(structure.id)) {
@@ -28,6 +47,8 @@ function normalizeScene(rawScene) {
       ...DEFAULT_SCENE_MESSAGES,
       ...rawScene.messages,
     },
+    specialBlockIcons,
+    sideIcons: specialBlockIcons,
     structureById,
   };
 }
@@ -71,6 +92,12 @@ function validateScene(scene) {
 
   if (scene.stages.length <= 0) {
     console.warn(`Scene "${scene.id}" has no stages`);
+  }
+
+  if (scene.specialBlockIcons.length > MAX_SIDE_ICON_COUNT) {
+    console.warn(
+      `Scene "${scene.id}" uses ${scene.specialBlockIcons.length} specialBlockIcons, but only ${MAX_SIDE_ICON_COUNT} are supported.`,
+    );
   }
 
   for (const [stageIndex, stage] of scene.stages.entries()) {
