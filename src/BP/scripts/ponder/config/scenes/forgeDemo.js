@@ -18,14 +18,6 @@ export const forgeDemoScene = defineScene({
       iconPath: "textures/items/iron_ingot",
       tooltipText: "Anvil",
     },
-    {
-      iconPath: "textures/items/redstone_dust",
-      tooltipText: "Gold Block",
-    },
-    {
-      iconPath: "textures/items/diamond",
-      tooltipText: "Sea Lantern",
-    },
   ],
   entryItems: ["minecraft:blaze_rod"],
   stagePresetId: "demo_16x16x16",
