@@ -3144,36 +3144,7 @@
             32,
             32
           ],
-          "texture": "textures/ui/White",
-          "color": [
-            0.490196,
-            0.490196,
-            0.490196,
-            0.95
-          ]
-        }
-      },
-      {
-        "icon_frame_fill": {
-          "type": "image",
-          "layer": 1,
-          "anchor_from": "top_left",
-          "anchor_to": "top_left",
-          "offset": [
-            2,
-            4
-          ],
-          "size": [
-            28,
-            28
-          ],
-          "texture": "textures/ui/White",
-          "color": [
-            0,
-            0,
-            0,
-            0.9
-          ]
+          "texture": "textures/ui/ponder/header_icon_frame"
         }
       },
       {
