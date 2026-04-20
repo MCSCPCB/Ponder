@@ -1,120 +1,139 @@
 # Ponder
 
-## 开发者手册
+## 1. 如何添加一个思索
 
-这份手册只说明当前项目已经存在的这套链路怎么扩展，不讲泛用 JSON UI 基础。
-
-### 先记住这几件事
-
-- 思索入口已经接在 `world.afterEvents.itemUse` 上，触发代码在 `src/BP/scripts/index.js`。
-- 一个思索要真正生效，只需要两件事：它被加进 `PONDER_SCENES`，并且玩家手里使用的物品命中了 `entryItems`。
-- `structures` 里的坐标都是相对坐标，不是世界坐标。运行时会自动把它们平移到对应 `stagePresetId` 的 `mirrorOrigin`。
-- `bubbleSlot` 是可选的；不填时会继承上一步；第一步默认 `top`。
-- UI 侧一律同时维护 `src/RP/ui/server_form.jsonc` 和 `src/RP/ui/server_form.json`。前者保留注释，后者保持可直接用的纯 JSON，二者语义必须完全同步。
-- 当前进度条判断条件依赖 `uiTitleMarker + 百分比`。如果同一个 `uiTitleMarker` 同时承载不同步数，100% 阶段和关键帧很容易冲突。最稳妥的做法是：新的步数支持尽量配一个新的 `stagePresetId / uiTitleMarker` 一起上。
-
-## 1. 添加一个思索
-
-下面用“给原版 `minecraft:tnt` 添加一个思索”为例。
+下面用“给原版 `minecraft:redstone_lamp` 添加一个思索”为例。
 
 ### 第一步：新建场景文件
 
-在 `src/BP/scripts/ponder/config/scenes/` 下新建 `tntDemo.js`：
+在 `src/BP/scripts/ponder/config/scenes/` 下新建 `redstoneLampDemo.js`：
 
 ```js
 import {
   defineBlockStructure,
   defineBoxStructure,
+  defineEntityStructure,
   defineScene,
   defineStage,
 } from "../factories.js";
 
-export const tntDemoScene = defineScene({
-  id: "tnt_demo",
-  title: "TNT",
-  entryItems: ["minecraft:tnt"],
-  stagePresetId: "demo_8x8x8",
-  tickingAreaName: "ponder_demo_tnt",
-  structures: [
-    defineBoxStructure(
-      "pad",
-      "minecraft:smooth_stone",
-      { x: 2, y: 0, z: 2 },
-      { x: 5, y: 0, z: 5 },
-    ),
-    defineBlockStructure("tnt_block", "minecraft:tnt", { x: 3, y: 1, z: 3 }),
-    defineBlockStructure("trigger_block", "minecraft:redstone_block", {
-      x: 4,
-      y: 1,
-      z: 3,
-    }),
-    defineBoxStructure(
-      "blast_wall",
-      "minecraft:glass",
-      { x: 2, y: 1, z: 2 },
-      { x: 5, y: 2, z: 5 },
-    ),
-  ],
-  stages: [
-    defineStage({
-      bubbleSlot: "top",
-      description: "先搭一个简单底座，给 TNT 一个清晰的展示位置。",
-      add: ["pad"],
-    }),
-    defineStage({
-      description: "把 TNT 放上去，这就是本次思索的核心方块。",
-      add: ["tnt_block"],
-    }),
-    defineStage({
-      bubbleSlot: "middle",
-      description: "加入一个红石方块，用来表达点火或触发这个动作。",
-      add: ["trigger_block"],
-    }),
-    defineStage({
-      bubbleSlot: "bottom",
-      description: "最后加一圈玻璃，强调 TNT 需要受控环境来展示。",
-      add: ["blast_wall"],
-    }),
-  ],
-});
-```
-
-这个示例里，思索场景当前真正支持并且和 UI 直接相关的字段，可以按下面理解：
-
-```js
-defineScene({
-  id: "tnt_demo", // 必填，场景唯一 id
-  title: "TNT", // 左上角标题文字；不写就显示为空
-  iconPath: "textures/items/tnt", // 左上角标题图标；按 ActionFormData 的 iconPath 传字符串，建议只用 textures/... 资源包路径
-  entryItems: ["minecraft:tnt"], // 必填；玩家手持这些物品使用时触发思索
-  stagePresetId: "demo_8x8x8", // 必填；决定结构渲染预设、相机焦点、进度条标题标记
-  tickingAreaName: "ponder_demo_tnt", // 必填；对应演示区域的 ticking area 名称，必须唯一
+export const redstoneLampDemoScene = defineScene({
+  id: "redstone_lamp_demo", // 必填：场景唯一 id
+  title: "Redstone Lamp", // 可选：左上角标题文字
+  iconPath: "textures/blocks/redstone_lamp_off", // 可选：左上角标题图标路径
+  entryItems: ["minecraft:redstone_lamp"], // 必填：玩家手持这些物品使用时触发思索
+  stagePresetId: "demo_8x8x8", // 必填：使用哪个场景渲染结构尺寸预设
+  tickingAreaName: "ponder_demo_redstone_lamp", // 必填：演示区域 ticking area 名称，必须唯一
   specialBlockIcons: [
     {
-      iconPath: "textures/items/redstone_dust", // 左侧小图标贴图路径；不写这个图标就不会显示
-      tooltipText: "Redstone Block", // 该图标的 purple tip 文本；可空字符串
+      iconPath: "textures/items/redstone_dust", // 可选：左侧小图标贴图路径
+      tooltipText: "Redstone Dust", // 可选：这个小图标的提示文本，可写空字符串
     },
-    // 最多支持 6 个；超过 6 个会被截断
+    {
+      iconPath: "textures/blocks/redstone_block", // 可选：第二个小图标贴图路径
+      tooltipText: "Redstone Block", // 可选：第二个小图标的提示文本
+    },
+    {
+      iconPath: "textures/blocks/unpowered_repeater", // 可选：第三个小图标贴图路径
+      tooltipText: "Repeater", // 可选：第三个小图标的提示文本
+    },
+    {
+      iconPath: "textures/blocks/unpowered_comparator", // 可选：第四个小图标贴图路径
+      tooltipText: "Comparator", // 可选：第四个小图标的提示文本
+    },
+    // 可选：最多 6 个；超过 6 个只显示前 6 个
   ],
+  messages: {
+    inUse: "这个思索正在被其他玩家使用。", // 可选：已有玩家占用这个思索时发给后来玩家的消息
+    invalidDimension: "这个思索当前只能在主世界使用。", // 可选：玩家不在主世界时的消息
+    missingStages: "这个思索没有配置任何步骤。", // 可选：场景没有步骤时的消息
+  },
   structures: [
-    // 结构定义列表；这里只负责声明内容，步骤里再通过 add/remove 控制显隐
-    defineEntityStructure("guide", "minecraft:villager_v2", { x: 3.5, y: 1, z: 3.5 }, {
-      rotation: { x: 0, y: 180 }, // 可选：实体朝向
-      spawnEvent: "minecraft:entity_spawned", // 可选：生成时使用的事件
-      nameTag: "Guide", // 可选：实体名牌
-      triggerEvents: ["minecraft:become_adult"], // 可选：生成后依次触发的实体事件
-    }),
+    defineBoxStructure(
+      "platform", // 区域结构 id；后面的 add/remove 都是引用这个 id
+      "minecraft:smooth_stone", // 方块 id
+      { x: 1, y: 0, z: 1 }, // 起点；相对坐标
+      { x: 6, y: 0, z: 6 }, // 终点；相对坐标
+    ),
+    defineBlockStructure(
+      "lamp_off", // 单方块结构 id
+      "minecraft:redstone_lamp", // 方块 id
+      { x: 3, y: 1, z: 3 }, // 相对坐标
+    ),
+    defineBlockStructure(
+      "lamp_on",
+      "minecraft:lit_redstone_lamp",
+      { x: 3, y: 1, z: 3 },
+    ),
+    defineBlockStructure(
+      "adjacent_power_block",
+      "minecraft:redstone_block",
+      { x: 2, y: 1, z: 3 },
+    ),
+    defineBlockStructure(
+      "top_dust",
+      "minecraft:redstone_wire",
+      { x: 3, y: 2, z: 3 },
+    ),
+    defineBlockStructure(
+      "relay_lamp_on",
+      "minecraft:lit_redstone_lamp",
+      { x: 4, y: 1, z: 3 },
+    ),
+    defineEntityStructure(
+      "pp", // 实体结构 id
+      "minecraft:parrot", // 实体类型 id
+      { x: 3, y: 2, z: 3 }, // 实体相对坐标
+      {
+        rotation: { x: 0, y: 180 }, // 可选：实体朝向
+        spawnEvent: "minecraft:entity_spawned", // 可选：生成时使用的事件
+        nameTag: "PP", // 可选：实体名牌
+        triggerEvents: [
+          "minecraft:start_dancing", // 可选：生成后依次触发的实体事件
+        ],
+      },
+    ),
   ],
   stages: [
     defineStage({
-      description: "加入一个红石方块，用来表达点火或触发这个动作。", // 当前步骤的气泡文字
-      bubbleSlot: "middle", // 可选：top / middle / bottom；不写则继承上一步，第一步默认 top
-      add: ["trigger_block"], // 本步新增显示的 structure id
-      remove: ["pad"], // 可选：本步移除显示的 structure id
+      description: "红石灯默认不会自己发亮，只有收到红石信号才会立刻点亮。", // 必填：当前步骤气泡文字
+      bubbleSlot: "top", // 可选：top / middle / bottom；不写则继承上一步，第一步默认 top
+      add: ["platform", "lamp_off", "pp"], // 可选：本步新增显示的 structure id 列表
+      remove: [], // 可选：本步移除显示的 structure id 列表
+    }),
+    defineStage({
+      description: "毗邻的开启电源或毗邻的充能方块都能直接点亮红石灯。",
+      bubbleSlot: "top",
+      add: ["adjacent_power_block", "lamp_on"],
+      remove: ["lamp_off"],
+    }),
+    defineStage({
+      description: "指向红石灯的红石粉、中继器、比较器也能点亮它，包括红石灯上方的红石粉。",
+      bubbleSlot: "middle",
+      add: ["top_dust"],
+      remove: [],
+    }),
+    defineStage({
+      description: "红石灯失去信号后要过 4 游戏刻才会熄灭，而且它本身是红石导体，被充能时也能继续带动相邻元件。",
+      bubbleSlot: "bottom",
+      add: ["relay_lamp_on"],
+      remove: [],
     }),
   ],
 });
 ```
+
+这个例子使用的是 `demo_8x8x8`，所以 `structures` 里的坐标范围必须落在：
+
+- `x = 0 ~ 7`
+- `y = 0 ~ 7`
+- `z = 0 ~ 7`
+
+这个例子里，鹦鹉 `PP` 使用的是 `defineEntityStructure(..., { triggerEvents: [...] })`。也就是：
+
+- 实体生成出来以后，会立刻按顺序执行 `triggerEvents`
+- 事件内容本身由实体文件负责
+- 场景这里只负责在生成时触发这些事件
 
 ### 第二步：把场景注册进索引
 
@@ -123,463 +142,43 @@ defineScene({
 ```js
 import { assemblyDemoScene } from "./assemblyDemo.js";
 import { forgeDemoScene } from "./forgeDemo.js";
-import { tntDemoScene } from "./tntDemo.js";
+import { redstoneLampDemoScene } from "./redstoneLampDemo.js";
 
-export const PONDER_SCENES = [assemblyDemoScene, forgeDemoScene, tntDemoScene];
+export const PONDER_SCENES = [
+  assemblyDemoScene,
+  forgeDemoScene,
+  redstoneLampDemoScene,
+];
 ```
 
-### 第三步：确认这几个字段不要写错
+### 第三步：照着检查这几项
 
 - `id` 必须唯一。
 - `tickingAreaName` 必须唯一。
-- `entryItems` 就是触发物品。这里写 `minecraft:tnt`，玩家手持 TNT 使用时就会尝试打开这个思索。
-- `stagePresetId` 必须能在 `src/BP/scripts/ponder/config/presets.js` 的 `STAGE_PRESETS` 里找到。
-- `stages.length` 必须落在当前 UI 已支持的步数里。当前现成支持的是 4 步和 6 步。
+- `entryItems` 里写的就是触发物品。
+- `stagePresetId` 必须已经存在于 `src/BP/scripts/ponder/config/presets.js`。
+- `stages.length` 必须落在项目已支持的步数里。
+- `add` 和 `remove` 里引用的每个结构 id，都必须已经在 `structures` 里声明过。
 
 ### 第四步：测试
 
-如果上面都对了，进游戏后手持 TNT 使用，就会走到这个思索。
+如果上面都对了，进游戏后手持红石灯使用，就会触发这个思索。
 
-## 2. 添加步数预设
+如果你只是新增一个场景，并且：
 
-下面用“新增一个 5 步支持”为例。
+- 复用现有步数支持
+- 复用现有尺寸预设
 
-### 先说明当前项目里的真实规则
+那通常只需要改两个地方：
 
-当前项目没有单独的 `scene.progressPresetId` 字段。
+- `src/BP/scripts/ponder/config/scenes/你的场景文件.js`
+- `src/BP/scripts/ponder/config/scenes/index.js`
 
-所谓“几步”，实际上由 `scene.stages.length` 直接决定：
+## 2. 如何添加结构尺寸预设
 
-- 场景里写了 5 个 `defineStage(...)`，运行时就会按 5 步计算百分比。
-- `src/BP/scripts/ponder/config/progressPresets.js` 只是维护“哪些步数被项目正式支持”，主要用于校验和警告。
-- 真正决定 UI 能不能正常显示 5 步进度条的，是 `server_form.jsonc / server_form.json` 里那一整套进度条动画、填充和关键帧规则。
+下面用“新增一个 `demo_2x3x2` 尺寸预设”为例。
 
-所以新增 5 步，必须做脚本侧和 UI 侧两件事。
-
-### 第一步：把 5 步加入脚本侧支持列表
-
-修改 `src/BP/scripts/ponder/config/progressPresets.js`：
-
-```js
-export const PROGRESS_STAGE_PRESETS = {
-  steps_4: { stageCount: 4 },
-  steps_5: { stageCount: 5 },
-  steps_6: { stageCount: 6 },
-};
-```
-
-做到这里以后：
-
-- `registry.js` 不会再对 5 步场景报“不受支持”的警告。
-- 但 UI 还不会自动拥有 5 步进度条。
-
-### 第二步：在 UI 里补 5 步进度条
-
-修改这两个文件，保持同步：
-
-- `src/RP/ui/server_form.jsonc`
-- `src/RP/ui/server_form.json`
-
-最省事的做法不是从零写，而是直接照文件里已经准备好的注释模板去补。下面的示例都按当前项目真实字段来写，假设这套 5 步规则绑定给新的 `uiTitleMarker = §4§r§3§r`。`jsonc` 可以保留注释，`json` 需要写成同样的内容但去掉注释。
-
-先在 `server_form.jsonc / server_form.json` 顶层补 5 步动画：
-
-```jsonc
-"progress_anim_5_1": {
-  "anim_type": "wait",
-  "duration": 0,
-  "next": "@server_form.progress_anim_5_1_motion"
-},
-"progress_anim_5_1_motion": {
-  "anim_type": "size",
-  "easing": "out_quart",
-  "duration": 0.2,
-  "from": [ 0, 3 ],
-  "to": [ 45, 3 ]
-},
-"progress_anim_5_2": {
-  "anim_type": "wait",
-  "duration": 0,
-  "next": "@server_form.progress_anim_5_2_motion"
-},
-"progress_anim_5_2_motion": {
-  "anim_type": "size",
-  "easing": "out_quart",
-  "duration": 0.2,
-  "from": [ 45, 3 ],
-  "to": [ 90, 3 ]
-},
-...
-"progress_anim_5_5": {
-  "anim_type": "wait",
-  "duration": 0,
-  "next": "@server_form.progress_anim_5_5_motion"
-},
-"progress_anim_5_5_motion": {
-  "anim_type": "size",
-  "easing": "out_quart",
-  "duration": 0.2,
-  "from": [ 179, 3 ],
-  "to": [ 224, 3 ]
-},
-"progress_anim_5_reverse_1": {
-  "anim_type": "wait",
-  "duration": 0,
-  "next": "@server_form.progress_anim_5_reverse_1_motion"
-},
-"progress_anim_5_reverse_1_motion": {
-  "anim_type": "size",
-  "easing": "out_quart",
-  "duration": 0.2,
-  "from": [ 90, 3 ],
-  "to": [ 45, 3 ]
-},
-...
-"progress_anim_5_reverse_4": {
-  "anim_type": "wait",
-  "duration": 0,
-  "next": "@server_form.progress_anim_5_reverse_4_motion"
-},
-"progress_anim_5_reverse_4_motion": {
-  "anim_type": "size",
-  "easing": "out_quart",
-  "duration": 0.2,
-  "from": [ 224, 3 ],
-  "to": [ 179, 3 ]
-}
-```
-
-然后在 `ponder_progress_bar.controls` 里补这一套填充块。重复项很多，中间可以省略，但字段名和绑定规则必须保持同样结构：
-
-```jsonc
-"ponder_progress_bar": {
-  "type": "panel",
-  "size": [ 228, 9 ],
-  "controls": [
-    {
-      "track_background": {
-        "type": "image",
-        "size": [ "100%", "100%" ],
-        "texture": "textures/ui/ponder/progress_track"
-      }
-    },
-    {
-      "fill_2x3x2_stage_1": {
-        "type": "panel",
-        "layer": 2,
-        "anchor_from": "top_left",
-        "anchor_to": "top_left",
-        "offset": [ 2, 3 ],
-        "size": [ 45, 3 ],
-        "clips_children": true,
-        "property_bag": {
-          "#current_title_text": ""
-        },
-        "controls": [
-          {
-            "fill_image": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "size": [ 224, 3 ],
-              "texture": "textures/ui/ponder/progress_fill"
-            }
-          }
-        ],
-        "bindings": [
-          {
-            "binding_name": "#title_text",
-            "binding_name_override": "#current_title_text"
-          },
-          {
-            "binding_type": "view",
-            "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r20') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
-            "target_property_name": "#visible"
-          }
-        ]
-      }
-    },
-    {
-      "fill_2x3x2_stage_1_anim": {
-        "type": "panel",
-        "layer": 2,
-        "anchor_from": "top_left",
-        "anchor_to": "top_left",
-        "offset": [ 2, 3 ],
-        "size": [ 0, 3 ],
-        "clips_children": true,
-        "property_bag": {
-          "#current_title_text": ""
-        },
-        "controls": [
-          {
-            "fill_image": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "size": [ 224, 3 ],
-              "texture": "textures/ui/ponder/progress_fill"
-            }
-          }
-        ],
-        "bindings": [
-          {
-            "binding_name": "#title_text",
-            "binding_name_override": "#current_title_text"
-          },
-          {
-            "binding_type": "view",
-            "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r20') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
-            "target_property_name": "#visible"
-          }
-        ],
-        "anims": [
-          "@server_form.progress_anim_5_1"
-        ],
-        "disable_anim_fast_forward": true
-      }
-    },
-    {
-      "fill_2x3x2_stage_1_reverse_anim": {
-        "type": "panel",
-        "layer": 2,
-        "anchor_from": "top_left",
-        "anchor_to": "top_left",
-        "offset": [ 2, 3 ],
-        "size": [ 90, 3 ],
-        "clips_children": true,
-        "property_bag": {
-          "#current_title_text": ""
-        },
-        "controls": [
-          {
-            "fill_image": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "size": [ 224, 3 ],
-              "texture": "textures/ui/ponder/progress_fill"
-            }
-          }
-        ],
-        "bindings": [
-          {
-            "binding_name": "#title_text",
-            "binding_name_override": "#current_title_text"
-          },
-          {
-            "binding_type": "view",
-            "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r20') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
-            "target_property_name": "#visible"
-          }
-        ],
-        "anims": [
-          "@server_form.progress_anim_5_reverse_1"
-        ],
-        "disable_anim_fast_forward": true
-      }
-    },
-    ...,
-    {
-      "fill_2x3x2_stage_5": {
-        "type": "panel",
-        "layer": 2,
-        "anchor_from": "top_left",
-        "anchor_to": "top_left",
-        "offset": [ 2, 3 ],
-        "size": [ 224, 3 ],
-        "clips_children": true,
-        "property_bag": {
-          "#current_title_text": ""
-        },
-        "controls": [
-          {
-            "fill_image": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "size": [ 224, 3 ],
-              "texture": "textures/ui/ponder/progress_fill"
-            }
-          }
-        ],
-        "bindings": [
-          {
-            "binding_name": "#title_text",
-            "binding_name_override": "#current_title_text"
-          },
-          {
-            "binding_type": "view",
-            "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r100') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
-            "target_property_name": "#visible"
-          }
-        ]
-      }
-    },
-    {
-      "fill_2x3x2_stage_5_anim": {
-        "type": "panel",
-        "layer": 2,
-        "anchor_from": "top_left",
-        "anchor_to": "top_left",
-        "offset": [ 2, 3 ],
-        "size": [ 179, 3 ],
-        "clips_children": true,
-        "property_bag": {
-          "#current_title_text": ""
-        },
-        "controls": [
-          {
-            "fill_image": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "size": [ 224, 3 ],
-              "texture": "textures/ui/ponder/progress_fill"
-            }
-          }
-        ],
-        "bindings": [
-          {
-            "binding_name": "#title_text",
-            "binding_name_override": "#current_title_text"
-          },
-          {
-            "binding_type": "view",
-            "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r100') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
-            "target_property_name": "#visible"
-          }
-        ],
-        "anims": [
-          "@server_form.progress_anim_5_5"
-        ],
-        "disable_anim_fast_forward": true
-      }
-    },
-    {
-      "keyframes_2x3x2": {
-        "type": "panel",
-        "layer": 3,
-        "size": [ "100%", "100%" ],
-        "property_bag": {
-          "#current_title_text": ""
-        },
-        "bindings": [
-          {
-            "binding_name": "#title_text",
-            "binding_name_override": "#current_title_text"
-          },
-          {
-            "binding_type": "view",
-            "source_property_name": "(not ((#current_title_text - '§4§r§3§r') = #current_title_text))",
-            "target_property_name": "#visible"
-          }
-        ],
-        "controls": [
-          {
-            "marker_1": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "offset": [ 46, 2 ],
-              "size": [ 2, 5 ],
-              "texture": "textures/ui/ponder/progress_keyframe"
-            }
-          },
-          {
-            "marker_2": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "offset": [ 91, 2 ],
-              "size": [ 2, 5 ],
-              "texture": "textures/ui/ponder/progress_keyframe"
-            }
-          },
-          {
-            "marker_3": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "offset": [ 135, 2 ],
-              "size": [ 2, 5 ],
-              "texture": "textures/ui/ponder/progress_keyframe"
-            }
-          },
-          {
-            "marker_4": {
-              "type": "image",
-              "anchor_from": "top_left",
-              "anchor_to": "top_left",
-              "offset": [ 180, 2 ],
-              "size": [ 2, 5 ],
-              "texture": "textures/ui/ponder/progress_keyframe"
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-上面这套实际就是把这六类模板具体展开：
-
-- `progress_anim_C_i`
-- `progress_anim_C_reverse_j`
-- `fill_C_stage_i`
-- `fill_C_stage_i_anim`
-- `fill_C_stage_i_reverse_anim`
-- `keyframes_C`
-
-展开时真正需要你替换的只有三类值：
-
-- 步数对应的宽度
-- `uiTitleMarker` 对应的可见性字符串
-- 新结构预设对应的块名，例如这里示例写的是 `fill_2x3x2_stage_*`
-
-### 第三步：5 步需要用到的数值
-
-当前进度条有效填充宽度是 `224`，高度是 `3`。
-
-5 步时：
-
-- 百分比：`20`、`40`、`60`、`80`、`100`
-- 宽度公式：`WIDTH(i) = round(224 * i / 5)`
-- 具体宽度：`45`、`90`、`134`、`179`、`224`
-- 关键帧 x 坐标公式：`MARKER_X(i) = round(224 * i / 5) + 1`
-- 具体关键帧位置：`46`、`91`、`135`、`180`
-
-也就是说，你至少要补：
-
-- 正向动画 `progress_anim_5_1` 到 `progress_anim_5_5`
-- 反向动画 `progress_anim_5_reverse_1` 到 `progress_anim_5_reverse_4`
-- 对应结构预设的 `fill_*` 规则
-- 对应结构预设的 `keyframes_*` 规则
-
-### 第四步：5 步不是全局自动生效，而是要和具体结构预设绑起来
-
-这一步最容易误解。
-
-当前 UI 的可见性判断，本质上看的是：
-
-`TITLE_MARKER + uiTitleMarker + PROGRESS_MARKER + 百分比`
-
-所以你不是只加一个 `steps_5` 就完了，还要为“哪个 `uiTitleMarker` 要走 5 步”补一套规则。
-
-最稳妥的做法是：
-
-- 新的 5 步场景，配一个新的 `stagePresetId`
-- 这个新的 `stagePresetId` 配一个新的 `uiTitleMarker`
-- 再在 `server_form.jsonc / json` 里，用这个新的 `uiTitleMarker` 去写 5 步进度条规则
-
-如果你强行让现有 `demo_8x8x8` 或 `demo_16x16x16` 同时承载另一套步数，100% 阶段和关键帧容易撞规则。
-
-## 3. 添加渲染结构预设
-
-下面用“新增一个 `2x3x2` 的渲染结构预设”为例。
-
-### 第一步：在脚本侧注册新的 `stagePresetId`
+### 第一步：在脚本侧注册新的尺寸预设
 
 修改 `src/BP/scripts/ponder/config/presets.js`：
 
@@ -588,40 +187,37 @@ import { defineStagePreset } from "./factories.js";
 
 export const STAGE_PRESETS = {
   demo_8x8x8: defineStagePreset({
-    uiTitleMarker: "\u00A74\u00A7r\u00A71\u00A7r",
+    uiTitleMarker: "§4§r§1§r",
     mirrorOrigin: { x: 0, y: 100, z: 0 },
     size: { x: 8, y: 8, z: 8 },
     focus: { x: 3, y: 3, z: 3 },
   }),
   demo_16x16x16: defineStagePreset({
-    uiTitleMarker: "\u00A74\u00A7r\u00A72\u00A7r",
+    uiTitleMarker: "§4§r§2§r",
     mirrorOrigin: { x: 20, y: 100, z: 0 },
     size: { x: 16, y: 16, z: 16 },
     focus: { x: 7, y: 4, z: 7 },
   }),
   demo_2x3x2: defineStagePreset({
-    uiTitleMarker: "\u00A74\u00A7r\u00A73\u00A7r",
-    mirrorOrigin: { x: 40, y: 100, z: 0 },
-    size: { x: 2, y: 3, z: 2 },
-    focus: { x: 0, y: 1, z: 0 },
+    uiTitleMarker: "§4§r§3§r", // 必填：这个尺寸预设自己的标题标记，必须唯一
+    mirrorOrigin: { x: 40, y: 100, z: 0 }, // 必填：镜像起点，不能和别的尺寸预设重叠
+    size: { x: 2, y: 3, z: 2 }, // 必填：结构尺寸
+    focus: { x: 0, y: 1, z: 0 }, // 必填：预览焦点；相对坐标
   }),
 };
 ```
 
-这里要注意三点：
+这个例子里，`demo_2x3x2` 的合法坐标范围就是：
 
-- `uiTitleMarker` 必须唯一，不能和现有预设重复。
-- `mirrorOrigin` 必须选一个没被别的预设占用的位置。
-- `focus` 是相对坐标，不是世界坐标。上面这个例子会把镜头中心放在结构中间偏上的位置。
+- `x = 0 ~ 1`
+- `y = 0 ~ 2`
+- `z = 0 ~ 1`
 
 ### 第二步：在 UI 里补结构渲染器
 
-修改这两个文件，保持同步：
+修改 `src/RP/ui/server_form.json`
 
-- `src/RP/ui/server_form.jsonc`
-- `src/RP/ui/server_form.json`
-
-复制现有的 `ponder_structure_renderer_8` 或 `ponder_structure_renderer_16`，补一份新的：
+加一份新的结构渲染器：
 
 ```jsonc
 "ponder_structure_renderer_2x3x2": {
@@ -641,10 +237,10 @@ export const STAGE_PRESETS = {
   "controls": [
     {
       "renderer_static@server_form.ponder_structure_renderer_window": {
-        "$gesture_source_control": "structure_renderer_2x3x2",
-        "$focus": [ 40, 101, 0 ],
-        "$bottom_left": [ 40, 100, 0 ],
-        "$top_right": [ 41, 102, 1 ],
+        "$gesture_source_control": "structure_renderer_2x3x2", // 这里要和当前 renderer 名字保持一致
+        "$focus": [ 40, 101, 0 ], // mirrorOrigin + focus
+        "$bottom_left": [ 40, 100, 0 ], // mirrorOrigin
+        "$top_right": [ 41, 102, 1 ], // mirrorOrigin + size - 1
         "$window_visibility_expression": "((#current_title_text - '§8§r') = #current_title_text)"
       }
     },
@@ -661,15 +257,11 @@ export const STAGE_PRESETS = {
 }
 ```
 
-上面这些值的来源分别是：
-
-- `$focus = mirrorOrigin + focus`
-- `$bottom_left = mirrorOrigin`
-- `$top_right = mirrorOrigin + size - 1`
-
 ### 第三步：在 UI 里补预览面板
 
-继续在这两个 UI 文件里补一份新的预览面板：
+继续修改 `src/RP/ui/server_form.json`
+
+先加一份新的预览面板：
 
 ```jsonc
 "ponder_preview_panel_2x3x2": {
@@ -715,35 +307,789 @@ export const STAGE_PRESETS = {
 }
 ```
 
-### 第四步：在场景里使用它
+### 第四步：在场景里使用这个尺寸预设
 
-之后任意一个新场景都可以直接写：
+之后任意一个场景都可以直接这样写：
 
 ```js
 stagePresetId: "demo_2x3x2"
 ```
 
-只要这个场景里的结构坐标都落在 `2x3x2` 范围内，渲染就会走这套新预设。
+只要这个场景里所有 `structures` 的坐标都落在下面这个范围里，就会走这套新尺寸预设：
 
-### 第五步：别忘了进度条也是按这个预设的 `uiTitleMarker` 走的
+- `x = 0 ~ 1`
+- `y = 0 ~ 2`
+- `z = 0 ~ 1`
 
-如果 `demo_2x3x2` 对应的场景不只是复用现成 4 步或 6 步，而是还要承载新的 5 步，那就要继续在 `server_form.jsonc / json` 里，为 `§4§r§3§r` 这套 `uiTitleMarker` 补对应的进度条规则。
+### 第五步：照着检查这几项
 
-## 最后检查一次
+- `src/BP/scripts/ponder/config/presets.js` 已经加入新的尺寸预设。
+- `uiTitleMarker` 没有和现有尺寸预设重复。
+- `mirrorOrigin` 没有和现有尺寸预设重叠。
+- `src/RP/ui/server_form.json` 已经加入新的结构渲染器和预览面板。
+- 场景文件里的 `stagePresetId` 已经改成这个新尺寸预设。
 
-新增一个完整可用的思索，通常至少会动到这些文件：
+## 3. 添加场景步数预设
 
-- `src/BP/scripts/ponder/config/scenes/你的场景文件.js`
-- `src/BP/scripts/ponder/config/scenes/index.js`
-- `src/BP/scripts/ponder/config/presets.js`
-- `src/BP/scripts/ponder/config/progressPresets.js`
-- `src/RP/ui/server_form.jsonc`
-- `src/RP/ui/server_form.json`
+下面用“新增 5 步支持”为例。
 
-如果只是：
+这里假设我们使用刚刚定义好的demo_2x3x2尺寸预设，它的 `uiTitleMarker` 是 `§4§r§3§r`。
 
-- 新增一个场景，但复用现有 4 步和现有结构预设：通常只改场景文件和场景索引。
-- 新增一个结构预设：一定要同时补脚本预设和 UI 预览。
-- 新增一个步数支持：一定要同时补脚本支持和 UI 进度条。
+### 第一步：把 5 步加入脚本支持
 
-项目里相关文件已经保留了模板注释，优先照模板扩展，不要自己发明新的命名和标记规则。
+修改 `src/BP/scripts/ponder/config/progressPresets.js`：
+
+```js
+export const PROGRESS_STAGE_PRESETS = {
+  steps_4: { stageCount: 4 }, // 现成支持的 4 步
+  steps_5: { stageCount: 5 }, // 新增支持的 5 步
+  steps_6: { stageCount: 6 }, // 现成支持的 6 步
+};
+
+export const SUPPORTED_PROGRESS_STAGE_COUNTS = new Set(
+  Object.values(PROGRESS_STAGE_PRESETS).map((preset) => preset.stageCount),
+);
+```
+
+做到这里以后，脚本侧会把 5 步当成合法步数；但是 UI 还不会自动拥有 5 步进度条，下面还要继续补 UI。
+
+### 第二步：在 UI 顶层补 5 步动画
+
+修改 `src/RP/ui/server_form.json`
+
+把下面这整段加到 `json` 顶层：
+
+```jsonc
+// 5 步动画；下面示例假设这套规则绑定给 uiTitleMarker = §4§r§3§r
+"progress_anim_5_1": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_1_motion"
+},
+"progress_anim_5_1_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 0, 3 ],
+  "to": [ 45, 3 ]
+},
+"progress_anim_5_2": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_2_motion"
+},
+"progress_anim_5_2_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 45, 3 ],
+  "to": [ 90, 3 ]
+},
+"progress_anim_5_3": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_3_motion"
+},
+"progress_anim_5_3_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 90, 3 ],
+  "to": [ 134, 3 ]
+},
+"progress_anim_5_4": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_4_motion"
+},
+"progress_anim_5_4_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 134, 3 ],
+  "to": [ 179, 3 ]
+},
+"progress_anim_5_5": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_5_motion"
+},
+"progress_anim_5_5_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 179, 3 ],
+  "to": [ 224, 3 ]
+},
+"progress_anim_5_reverse_1": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_reverse_1_motion"
+},
+"progress_anim_5_reverse_1_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 90, 3 ],
+  "to": [ 45, 3 ]
+},
+"progress_anim_5_reverse_2": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_reverse_2_motion"
+},
+"progress_anim_5_reverse_2_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 134, 3 ],
+  "to": [ 90, 3 ]
+},
+"progress_anim_5_reverse_3": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_reverse_3_motion"
+},
+"progress_anim_5_reverse_3_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 179, 3 ],
+  "to": [ 134, 3 ]
+},
+"progress_anim_5_reverse_4": {
+  "anim_type": "wait",
+  "duration": 0,
+  "next": "@server_form.progress_anim_5_reverse_4_motion"
+},
+"progress_anim_5_reverse_4_motion": {
+  "anim_type": "size",
+  "easing": "out_quart",
+  "duration": 0.2,
+  "from": [ 224, 3 ],
+  "to": [ 179, 3 ]
+}
+```
+
+### 第三步：在 `ponder_progress_bar.controls` 里补 5 步填充和关键帧
+
+继续修改 `src/RP/ui/server_form.json`
+
+把下面这些控件加进 `ponder_progress_bar.controls`。下面这组示例里：
+
+- `2x3x2` 是这套规则使用的尺寸预设名字后缀
+- `§4§r§3§r` 是这套规则使用的 `uiTitleMarker`；要和尺寸预设保持一致
+
+```jsonc
+{
+  "fill_2x3x2_stage_1": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 45, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r20') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))", // 注意看 §4§r§3§r 藏在了 §0§r§1§r§4§r§3§r§2§r20 中间
+        "target_property_name": "#visible"
+      }
+    ]
+  }
+},
+{
+  "fill_2x3x2_stage_1_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 0, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r20') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_1"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_1_reverse_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 90, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r20') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_reverse_1"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_2": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 90, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r40') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
+        "target_property_name": "#visible"
+      }
+    ]
+  }
+},
+{
+  "fill_2x3x2_stage_2_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 45, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r40') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_2"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_2_reverse_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 134, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r40') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_reverse_2"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_3": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 134, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r60') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
+        "target_property_name": "#visible"
+      }
+    ]
+  }
+},
+{
+  "fill_2x3x2_stage_3_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 90, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r60') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_3"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_3_reverse_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 179, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r60') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_reverse_3"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_4": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 179, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r80') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
+        "target_property_name": "#visible"
+      }
+    ]
+  }
+},
+{
+  "fill_2x3x2_stage_4_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 134, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r80') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_4"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_4_reverse_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 224, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r80') = #current_title_text)) and (not ((#current_title_text - '§7§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_reverse_4"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "fill_2x3x2_stage_5": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 224, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r100') = #current_title_text)) and ((#current_title_text - '§6§r') = #current_title_text) and ((#current_title_text - '§7§r') = #current_title_text))",
+        "target_property_name": "#visible"
+      }
+    ]
+  }
+},
+{
+  "fill_2x3x2_stage_5_anim": {
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 2, 3 ],
+    "size": [ 179, 3 ],
+    "clips_children": true,
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "controls": [
+      {
+        "fill_image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [ 224, 3 ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((not ((#current_title_text - '§0§r§1§r§4§r§3§r§2§r100') = #current_title_text)) and (not ((#current_title_text - '§6§r') = #current_title_text)))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "anims": [
+      "@server_form.progress_anim_5_5"
+    ],
+    "disable_anim_fast_forward": true
+  }
+},
+{
+  "keyframes_2x3x2": {
+    "type": "panel",
+    "layer": 3,
+    "size": [ "100%", "100%" ],
+    "property_bag": {
+      "#current_title_text": ""
+    },
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#current_title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#current_title_text - '§4§r§3§r') = #current_title_text))", // 注意这里的 §4§r§3§r
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "marker_1": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 46, 2 ],
+          "size": [ 2, 5 ],
+          "texture": "textures/ui/ponder/progress_keyframe"
+        }
+      },
+      {
+        "marker_2": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 91, 2 ],
+          "size": [ 2, 5 ],
+          "texture": "textures/ui/ponder/progress_keyframe"
+        }
+      },
+      {
+        "marker_3": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 135, 2 ],
+          "size": [ 2, 5 ],
+          "texture": "textures/ui/ponder/progress_keyframe"
+        }
+      },
+      {
+        "marker_4": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 180, 2 ],
+          "size": [ 2, 5 ],
+          "texture": "textures/ui/ponder/progress_keyframe"
+        }
+      }
+    ]
+  }
+}
+```
+
+### 第四步：照着检查这几项
+
+- `src/BP/scripts/ponder/config/progressPresets.js` 已经加入 5 步。
+- `src/RP/ui/server_form.json` 已经加入 5 步动画、填充、关键帧。
+- 这套 5 步规则使用的是一个专用 `uiTitleMarker`。
+- 场景里确实写了 5 个 `defineStage(...)`。
+

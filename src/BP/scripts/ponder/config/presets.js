@@ -2,13 +2,13 @@ import { defineStagePreset } from "./factories.js";
 
 export const STAGE_PRESETS = {
   demo_8x8x8: defineStagePreset({
-    uiTitleMarker: "\u00A74\u00A7r\u00A71\u00A7r",
+    uiTitleMarker: "§4§r§1§r",
     mirrorOrigin: { x: 0, y: 100, z: 0 },
     size: { x: 8, y: 8, z: 8 },
     focus: { x: 3, y: 3, z: 3 },
   }),
   demo_16x16x16: defineStagePreset({
-    uiTitleMarker: "\u00A74\u00A7r\u00A72\u00A7r",
+    uiTitleMarker: "§4§r§2§r",
     mirrorOrigin: { x: 20, y: 100, z: 0 },
     size: { x: 16, y: 16, z: 16 },
     focus: { x: 7, y: 4, z: 7 },
