@@ -391,15 +391,13 @@
     "load_screen_immediately": true
   },
   "main_screen_content": {
-    "alpha": 0,
-    "propagate_alpha": true,
     "bindings": [
       {
         "binding_name": "#title_text"
       },
       {
         "binding_type": "view",
-        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -411,7 +409,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -423,7 +421,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -435,7 +433,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "((not (#title_text = '')) and ((#title_text - '§0§r§1§r') = #title_text))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
