@@ -3446,7 +3446,7 @@
     "hover_control": "hover",
     "pressed_control": "pressed",
     "focus_enabled": true,
-    "sound_name": "button.form_button_click",
+    "sound_name": "random.click",
     "button_mappings": [
       {
         "from_button_id": "button.menu_select",
@@ -3557,7 +3557,7 @@
     "hover_control": "hover",
     "pressed_control": "pressed",
     "focus_enabled": true,
-    "sound_name": "button.form_button_click",
+    "sound_name": "random.click",
     "button_mappings": [
       {
         "from_button_id": "button.menu_select",
