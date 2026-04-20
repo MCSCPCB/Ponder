@@ -11,10 +11,26 @@
 ```js
 import {
   defineBlockStructure,
-  defineBoxStructure,
   defineEntityStructure,
   defineStage,
 } from "../factories.js";
+
+const platformTiles = [];
+const platformTileIds = [];
+
+for (let x = 1; x <= 6; x += 1) {
+  for (let z = 1; z <= 6; z += 1) {
+    const id = `platform_${x}_${z}`;
+    platformTileIds.push(id);
+    platformTiles.push(
+      defineBlockStructure(
+        id,
+        (x + z) % 2 === 0 ? "minecraft:light_gray_terracotta" : "minecraft:snow",
+        { x, y: 0, z },
+      ),
+    );
+  }
+}
 
 export const redstoneLampDemoScene = {
   id: "redstone_lamp_demo", // 必填：场景唯一 id
@@ -25,20 +41,8 @@ export const redstoneLampDemoScene = {
   tickingAreaName: "ponder_demo_redstone_lamp", // 必填：演示区域 ticking area 名称，必须唯一
   specialBlockIcons: [
     {
-      iconPath: "textures/items/redstone_dust", // 可选：左侧小图标贴图路径
-      tooltipText: "Redstone Dust", // 可选：这个小图标的提示文本，可写空字符串
-    },
-    {
-      iconPath: "textures/blocks/redstone_block", // 可选：第二个小图标贴图路径
-      tooltipText: "Redstone Block", // 可选：第二个小图标的提示文本
-    },
-    {
-      iconPath: "textures/blocks/unpowered_repeater", // 可选：第三个小图标贴图路径
-      tooltipText: "Repeater", // 可选：第三个小图标的提示文本
-    },
-    {
-      iconPath: "textures/blocks/unpowered_comparator", // 可选：第四个小图标贴图路径
-      tooltipText: "Comparator", // 可选：第四个小图标的提示文本
+      iconPath: "textures/blocks/redstone_block", // 可选：左侧小图标贴图路径
+      tooltipText: "红石块会持续输出信号，且不能关闭。", // 可选：这个小图标的提示文本，可写空字符串
     },
     // 可选：最多 6 个；超过 6 个只显示前 6 个
   ],
@@ -48,21 +52,11 @@ export const redstoneLampDemoScene = {
     missingStages: "这个思索没有配置任何步骤。", // 可选：场景没有步骤时的消息
   },
   structures: [
-    defineBoxStructure(
-      "platform", // 区域结构 id；后面的 add/remove 都是引用这个 id
-      "minecraft:smooth_stone", // 方块 id
-      { x: 1, y: 0, z: 1 }, // 起点；相对坐标
-      { x: 6, y: 0, z: 6 }, // 终点；相对坐标
-    ),
+    ...platformTiles,
     defineBlockStructure(
       "lamp_off", // 单方块结构 id
       "minecraft:redstone_lamp", // 方块 id
       { x: 3, y: 1, z: 3 }, // 相对坐标
-    ),
-    defineBlockStructure(
-      "lamp_on",
-      "minecraft:lit_redstone_lamp",
-      { x: 3, y: 1, z: 3 },
     ),
     defineBlockStructure(
       "adjacent_power_block",
@@ -76,20 +70,18 @@ export const redstoneLampDemoScene = {
     ),
     defineBlockStructure(
       "relay_lamp_on",
-      "minecraft:lit_redstone_lamp",
+      "minecraft:redstone_lamp",
       { x: 4, y: 1, z: 3 },
     ),
     defineEntityStructure(
       "pp", // 实体结构 id
-      "minecraft:parrot", // 实体类型 id
+      "minecraft:armor_stand", // 实体类型 id
       { x: 3, y: 2, z: 3 }, // 实体相对坐标
       {
         rotation: { x: 0, y: 180 }, // 可选：实体朝向
-        spawnEvent: "minecraft:entity_spawned", // 可选：生成时使用的事件
+        //spawnEvent: "minecraft:entity_spawned", // 可选：生成时使用的事件
         nameTag: "PP", // 可选：实体名牌
-        triggerEvents: [
-          "minecraft:start_dancing", // 可选：生成后依次触发的实体事件
-        ],
+        triggerEvents: [], // 可选：生成后依次触发的实体事件；这里不需要就写空数组
       },
     ),
   ],
@@ -97,14 +89,14 @@ export const redstoneLampDemoScene = {
     defineStage({
       description: "红石灯默认不会自己发亮，只有收到红石信号才会立刻点亮。", // 必填：当前步骤气泡文字
       bubbleSlot: "top", // 可选：top / middle / bottom；不写则继承上一步，第一步默认 top
-      add: ["platform", "lamp_off", "pp"], // 可选：本步新增显示的 structure id 列表
+      add: [...platformTileIds, "lamp_off", "pp"], // 可选：本步新增显示的 structure id 列表
       remove: [], // 可选：本步移除显示的 structure id 列表
     }),
     defineStage({
       description: "毗邻的开启电源或毗邻的充能方块都能直接点亮红石灯。",
       bubbleSlot: "top",
-      add: ["adjacent_power_block", "lamp_on"],
-      remove: ["lamp_off"],
+      add: ["adjacent_power_block"],
+      remove: [],
     }),
     defineStage({
       description: "指向红石灯的红石粉、中继器、比较器也能点亮它，包括红石灯上方的红石粉。",
@@ -127,12 +119,6 @@ export const redstoneLampDemoScene = {
 - `x = 0 ~ 7`
 - `y = 0 ~ 7`
 - `z = 0 ~ 7`
-
-这个例子里，鹦鹉 `PP` 使用的是 `defineEntityStructure(..., { triggerEvents: [...] })`。也就是：
-
-- 实体生成出来以后，会立刻按顺序执行 `triggerEvents`
-- 事件内容本身由实体文件负责
-- 场景这里只负责在生成时触发这些事件
 
 ### 第二步：把场景注册进索引
 

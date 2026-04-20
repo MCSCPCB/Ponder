@@ -21,29 +21,9 @@ const PONDER_TEMP_ANIMATION_TAG = "ponder_temp_animation";
 const PONDER_FALL_ANIMATION_TICKS = 8;
 const PONDER_FALL_START_HEIGHT = 1.5;
 
-const ignoreErrors = (callback) => {
-  try {
-    return callback();
-  } catch {
-    return undefined;
-  }
-};
+const isPlayerValid = (player) => player?.typeId === "minecraft:player";
 
-const isPlayerValid = (player) => {
-  try {
-    return player?.typeId === "minecraft:player";
-  } catch {
-    return false;
-  }
-};
-
-const getPlayerKey = (player) => {
-  try {
-    return player?.id ?? player?.name;
-  } catch {
-    return undefined;
-  }
-};
+const getPlayerKey = (player) => player?.id ?? player?.name;
 
 const normalizeEntityTagSegment = (value) =>
   String(value ?? "")
@@ -57,15 +37,11 @@ const getStructureEntityTag = (scene, structureId) =>
   `ponder_structure_${normalizeEntityTagSegment(scene?.id)}_${normalizeEntityTagSegment(structureId)}`;
 
 function hideHudElements(player) {
-  ignoreErrors(() =>
-    player?.onScreenDisplay?.setHudVisibility(HudVisibility.Hide),
-  );
+  player.onScreenDisplay.setHudVisibility(HudVisibility.Hide);
 }
 
 function restoreHudElements(player) {
-  ignoreErrors(() =>
-    player?.onScreenDisplay?.setHudVisibility(HudVisibility.Reset),
-  );
+  player.onScreenDisplay.setHudVisibility(HudVisibility.Reset);
 }
 
 const getStageLocalMax = (preset) => ({
@@ -141,34 +117,26 @@ function renderStructure(scene, dimension, preset, structure) {
     return;
   }
 
-  const entity = ignoreErrors(
-    () =>
-      dimension.spawnEntity(
-        structure.entityTypeId,
-        toStageEntityLocation(preset, structure.position),
-        structure.spawnEvent ? { spawnEvent: structure.spawnEvent } : undefined,
-      ),
+  // `@minecraft/server` 1.x only supports the 2-argument overload here.
+  const entity = dimension.spawnEntity(
+    structure.entityTypeId,
+    toStageEntityLocation(preset, structure.position),
   );
-  if (!entity) {
-    return;
+
+  if (typeof structure.spawnEvent === "string" && structure.spawnEvent.length > 0) {
+    entity.triggerEvent(structure.spawnEvent);
   }
 
-  ignoreErrors(() => {
-    entity.addTag(PONDER_STAGE_ENTITY_TAG);
-    entity.addTag(getSceneEntityTag(scene));
-    entity.addTag(getStructureEntityTag(scene, structure.id));
-  });
+  entity.addTag(PONDER_STAGE_ENTITY_TAG);
+  entity.addTag(getSceneEntityTag(scene));
+  entity.addTag(getStructureEntityTag(scene, structure.id));
 
   if (structure.rotation) {
-    ignoreErrors(() =>
-      entity.setRotation(structure.rotation),
-    );
+    entity.setRotation(structure.rotation);
   }
 
   if (typeof structure.nameTag === "string") {
-    ignoreErrors(() => {
-      entity.nameTag = structure.nameTag;
-    });
+    entity.nameTag = structure.nameTag;
   }
 
   if (Array.isArray(structure.triggerEvents)) {
@@ -177,9 +145,7 @@ function renderStructure(scene, dimension, preset, structure) {
         continue;
       }
 
-      ignoreErrors(() =>
-        entity.triggerEvent(triggerEvent),
-      );
+      entity.triggerEvent(triggerEvent);
     }
   }
 }
@@ -200,7 +166,7 @@ function clearStructure(scene, dimension, preset, structure) {
   }
 
   for (const entity of getStructureEntities(dimension, scene, structure.id)) {
-    ignoreErrors(() => entity.remove());
+    entity.remove();
   }
 }
 
@@ -214,7 +180,7 @@ function clearStage(dimension, preset, scene) {
   );
 
   for (const entity of getSceneStageEntities(dimension, scene)) {
-    ignoreErrors(() => entity.remove());
+    entity.remove();
   }
 }
 
@@ -224,10 +190,8 @@ function ensureTickingArea(dimension, scene, preset) {
   }
 
   const absoluteMax = getStageAbsoluteMax(preset);
-  ignoreErrors(() =>
-    dimension.runCommand(
-      `tickingarea add ${preset.origin.x} ${preset.origin.y} ${preset.origin.z} ${absoluteMax.x} ${absoluteMax.y} ${absoluteMax.z} ${scene.tickingAreaName} true`,
-    ),
+  dimension.runCommand(
+    `tickingarea add ${preset.origin.x} ${preset.origin.y} ${preset.origin.z} ${absoluteMax.x} ${absoluteMax.y} ${absoluteMax.z} ${scene.tickingAreaName} true`,
   );
   tickingAreasReady.add(scene.id);
 }
@@ -291,6 +255,15 @@ const getAnimationEntitySelector = (tags) =>
 
 const formatCommandNumber = (value) => Number(value.toFixed(4));
 
+function runAnimationEntityAction(action, errorMessage) {
+  try {
+    return action();
+  } catch (error) {
+    console.error(errorMessage, error);
+    return undefined;
+  }
+}
+
 function getTempAnimationEntities(dimension, scene, batchTag) {
   const tags = [PONDER_TEMP_ANIMATION_TAG, getSceneEntityTag(scene)];
   if (batchTag) {
@@ -302,7 +275,10 @@ function getTempAnimationEntities(dimension, scene, batchTag) {
 
 function cleanupTempAnimationEntities(dimension, scene, batchTag) {
   for (const entity of getTempAnimationEntities(dimension, scene, batchTag)) {
-    ignoreErrors(() => entity.remove());
+    runAnimationEntityAction(
+      () => entity.remove(),
+      `Failed to remove temp animation entity in scene "${scene.id}".`,
+    );
   }
 }
 
@@ -391,19 +367,31 @@ async function spawnAnimatedBlockEntities(
       y: finalLocation.y + extraYOffset,
       z: finalLocation.z + 0.5,
     };
-    const animationEntity = ignoreErrors(
+    const animationEntity = runAnimationEntityAction(
       () => dimension.spawnEntity("entity:ponder_block", spawnLocation),
+      `Failed to spawn temp animation entity for block "${animatedBlock.blockId}" in scene "${scene.id}".`,
     );
     if (!animationEntity) {
       continue;
     }
 
-    ignoreErrors(() => {
-      animationEntity.addTag(PONDER_TEMP_ANIMATION_TAG);
-      animationEntity.addTag(getSceneEntityTag(scene));
-      animationEntity.addTag(batchTag);
-      animationEntity.addTag(entityTag);
-    });
+    const tagged = runAnimationEntityAction(
+      () => {
+        animationEntity.addTag(PONDER_TEMP_ANIMATION_TAG);
+        animationEntity.addTag(getSceneEntityTag(scene));
+        animationEntity.addTag(batchTag);
+        animationEntity.addTag(entityTag);
+        return true;
+      },
+      `Failed to tag temp animation entity for block "${animatedBlock.blockId}" in scene "${scene.id}".`,
+    );
+    if (!tagged) {
+      runAnimationEntityAction(
+        () => animationEntity.remove(),
+        `Failed to remove untagged temp animation entity for block "${animatedBlock.blockId}" in scene "${scene.id}".`,
+      );
+      continue;
+    }
 
     spawnedEntities.push({
       entityTag,
@@ -420,11 +408,12 @@ async function spawnAnimatedBlockEntities(
         continue;
       }
 
-      ignoreErrors(
+      runAnimationEntityAction(
         () =>
           dimension.runCommand(
             `replaceitem entity ${getAnimationEntitySelector([spawnedEntity.entityTag])} slot.weapon.mainhand 0 ${spawnedEntity.itemId}`,
           ),
+        `Failed to equip temp animation entity with item "${spawnedEntity.itemId}" in scene "${scene.id}".`,
       );
     }
   }
@@ -435,10 +424,12 @@ async function spawnAnimatedBlockEntities(
 function teleportAnimatedBlockEntities(dimension, spawnedEntities, locationResolver) {
   for (const spawnedEntity of spawnedEntities) {
     const nextLocation = locationResolver(spawnedEntity);
-    ignoreErrors(() =>
-      dimension.runCommand(
-        `tp ${getAnimationEntitySelector([spawnedEntity.entityTag])} ${formatCommandNumber(spawnedEntity.finalLocation.x)} ${formatCommandNumber(nextLocation.y)} ${formatCommandNumber(spawnedEntity.finalLocation.z)}`,
-      ),
+    runAnimationEntityAction(
+      () =>
+        dimension.runCommand(
+          `tp ${getAnimationEntitySelector([spawnedEntity.entityTag])} ${formatCommandNumber(spawnedEntity.finalLocation.x)} ${formatCommandNumber(nextLocation.y)} ${formatCommandNumber(spawnedEntity.finalLocation.z)}`,
+        ),
+      `Failed to move temp animation entity "${spawnedEntity.entityTag}".`,
     );
   }
 }
@@ -697,24 +688,22 @@ async function runPonderScene(player, scene) {
 
   if (activeSession) {
     if (activeSession.playerKey !== playerKey) {
-      ignoreErrors(() =>
-        player.sendMessage?.(scene.messages.inUse),
-      );
+      player.sendMessage(scene.messages.inUse);
     }
     return;
   }
 
-  if (!isPlayerValid(player) || player.dimension?.id !== OVERWORLD_ID) {
-    ignoreErrors(() =>
-      player?.sendMessage?.(scene.messages.invalidDimension),
-    );
+  if (!isPlayerValid(player)) {
+    return;
+  }
+
+  if (player.dimension.id !== OVERWORLD_ID) {
+    player.sendMessage(scene.messages.invalidDimension);
     return;
   }
 
   if (scene.stages.length <= 0) {
-    ignoreErrors(() =>
-      player.sendMessage?.(scene.messages.missingStages),
-    );
+    player.sendMessage(scene.messages.missingStages);
     return;
   }
 
@@ -788,10 +777,8 @@ async function runPonderScene(player, scene) {
     session.animationToken += 1;
 
     if (dimension) {
-      ignoreErrors(() =>
-        cleanupTempAnimationEntities(dimension, scene),
-      );
-      ignoreErrors(() => clearStage(dimension, preset, scene));
+      cleanupTempAnimationEntities(dimension, scene);
+      clearStage(dimension, preset, scene);
     }
 
     restoreHudElements(player);

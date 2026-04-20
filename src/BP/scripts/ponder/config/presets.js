@@ -13,6 +13,12 @@ export const STAGE_PRESETS = {
     size: { x: 16, y: 16, z: 16 },
     focus: { x: 7, y: 4, z: 7 },
   }),
+  demo_2x3x2: defineStagePreset({
+    uiTitleMarker: "§4§r§3§r",
+    mirrorOrigin: { x: 40, y: 100, z: 0 },
+    size: { x: 2, y: 3, z: 2 },
+    focus: { x: 0, y: 1, z: 0 },
+  }),
   /*注释
   demo_XxYxZ: defineStagePreset({
     uiTitleMarker: "SIZE_MARKER",
