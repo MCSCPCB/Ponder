@@ -4394,7 +4394,7 @@
             3
           ],
           "size": [
-            "100%c + 24px",
+            204,
             42
           ],
           "texture": "textures/ui/ponder/header_streak_thick",
