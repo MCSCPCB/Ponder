@@ -1,11 +1,10 @@
 import {
   defineBlockStructure,
   defineBoxStructure,
-  defineScene,
   defineStage,
 } from "../factories.js";
 
-export const forgeDemoScene = defineScene({
+export const forgeDemoScene = {
   id: "forge_demo",
   title: "Forge Walkthrough",
   iconPath: "textures/items/blaze_rod",
@@ -249,4 +248,4 @@ export const forgeDemoScene = defineScene({
       ],
     }),
   ],
-});
+};

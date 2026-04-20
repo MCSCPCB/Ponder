@@ -1,11 +1,10 @@
 import {
   defineBlockStructure,
   defineBoxStructure,
-  defineScene,
   defineStage,
 } from "../factories.js";
 
-export const assemblyDemoScene = defineScene({
+export const assemblyDemoScene = {
   id: "assembly_demo",
   title: "Assembly and Use",
   iconPath: "textures/items/stick",
@@ -151,4 +150,4 @@ export const assemblyDemoScene = defineScene({
       ],
     }),
   ],
-});
+};

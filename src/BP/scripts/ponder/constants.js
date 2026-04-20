@@ -9,7 +9,6 @@ export const OVERWORLD_ID = "minecraft:overworld";
 // HEADER_TITLE_MARKER，
 // SLOT_MARKERS，
 // DEFAULT_BUBBLE_SLOT，
-// BUBBLE_SLOT_IDS，
 // BUTTON_MARKERS，
 // MAX_SIDE_ICON_COUNT
 */
@@ -25,7 +24,6 @@ export const SLOT_MARKERS = {
   bottom: "§9§r§2§r",
 };
 export const DEFAULT_BUBBLE_SLOT = "top";
-export const BUBBLE_SLOT_IDS = Object.freeze(Object.keys(SLOT_MARKERS));
 export const BUTTON_MARKERS = {
   hidden: "§3§r§0§r",
   prev: "§3§r§1§r",

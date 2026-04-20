@@ -13,11 +13,10 @@ import {
   defineBlockStructure,
   defineBoxStructure,
   defineEntityStructure,
-  defineScene,
   defineStage,
 } from "../factories.js";
 
-export const redstoneLampDemoScene = defineScene({
+export const redstoneLampDemoScene = {
   id: "redstone_lamp_demo", // 必填：场景唯一 id
   title: "Redstone Lamp", // 可选：左上角标题文字
   iconPath: "textures/blocks/redstone_lamp_off", // 可选：左上角标题图标路径
@@ -120,7 +119,7 @@ export const redstoneLampDemoScene = defineScene({
       remove: [],
     }),
   ],
-});
+};
 ```
 
 这个例子使用的是 `demo_8x8x8`，所以 `structures` 里的坐标范围必须落在：
@@ -157,7 +156,6 @@ export const PONDER_SCENES = [
 - `tickingAreaName` 必须唯一。
 - `entryItems` 里写的就是触发物品。
 - `stagePresetId` 必须已经存在于 `src/BP/scripts/ponder/config/presets.js`。
-- `stages.length` 必须落在项目已支持的步数里。
 - `add` 和 `remove` 里引用的每个结构 id，都必须已经在 `structures` 里声明过。
 
 ### 第四步：测试
@@ -335,25 +333,7 @@ stagePresetId: "demo_2x3x2"
 
 这里假设我们使用刚刚定义好的demo_2x3x2尺寸预设，它的 `uiTitleMarker` 是 `§4§r§3§r`。
 
-### 第一步：把 5 步加入脚本支持
-
-修改 `src/BP/scripts/ponder/config/progressPresets.js`：
-
-```js
-export const PROGRESS_STAGE_PRESETS = {
-  steps_4: { stageCount: 4 }, // 现成支持的 4 步
-  steps_5: { stageCount: 5 }, // 新增支持的 5 步
-  steps_6: { stageCount: 6 }, // 现成支持的 6 步
-};
-
-export const SUPPORTED_PROGRESS_STAGE_COUNTS = new Set(
-  Object.values(PROGRESS_STAGE_PRESETS).map((preset) => preset.stageCount),
-);
-```
-
-做到这里以后，脚本侧会把 5 步当成合法步数；但是 UI 还不会自动拥有 5 步进度条，下面还要继续补 UI。
-
-### 第二步：在 UI 顶层补 5 步动画
+### 第一步：在 UI 顶层补 5 步动画
 
 修改 `src/RP/ui/server_form.json`
 
@@ -471,7 +451,7 @@ export const SUPPORTED_PROGRESS_STAGE_COUNTS = new Set(
 }
 ```
 
-### 第三步：在 `ponder_progress_bar.controls` 里补 5 步填充和关键帧
+### 第二步：在 `ponder_progress_bar.controls` 里补 5 步填充和关键帧
 
 继续修改 `src/RP/ui/server_form.json`
 
@@ -1086,10 +1066,8 @@ export const SUPPORTED_PROGRESS_STAGE_COUNTS = new Set(
 }
 ```
 
-### 第四步：照着检查这几项
+### 第三步：照着检查这几项
 
-- `src/BP/scripts/ponder/config/progressPresets.js` 已经加入 5 步。
 - `src/RP/ui/server_form.json` 已经加入 5 步动画、填充、关键帧。
 - 这套 5 步规则使用的是一个专用 `uiTitleMarker`。
 - 场景里确实写了 5 个 `defineStage(...)`。
-

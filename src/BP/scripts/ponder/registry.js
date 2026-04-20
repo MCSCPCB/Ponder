@@ -1,40 +1,31 @@
 import {
-  BUBBLE_SLOT_IDS,
   DEFAULT_SCENE_MESSAGES,
   MAX_SIDE_ICON_COUNT,
   PROGRESS_MARKER,
   TITLE_MARKER,
 } from "./constants.js";
-import { SUPPORTED_PROGRESS_STAGE_COUNTS } from "./config/progressPresets.js";
 import { STAGE_PRESETS } from "./config/presets.js";
 import { PONDER_SCENES } from "./config/scenes/index.js";
-
-const VALID_BUBBLE_SLOTS = new Set(BUBBLE_SLOT_IDS);
 
 function normalizeScene(rawScene) {
   const structureById = new Map();
   const rawSpecialBlockIcons = Array.isArray(rawScene.specialBlockIcons)
     ? rawScene.specialBlockIcons
-    : Array.isArray(rawScene.sideIcons)
-      ? rawScene.sideIcons
-      : [];
+    : [];
   const specialBlockIcons = rawSpecialBlockIcons
-        .map((sideIcon) => ({
-          iconPath: typeof sideIcon?.iconPath === "string" ? sideIcon.iconPath : "",
-          tooltipText: typeof sideIcon?.tooltipText === "string" ? sideIcon.tooltipText : "",
-        }))
-        .filter((sideIcon) => sideIcon.iconPath)
-        .slice(0, MAX_SIDE_ICON_COUNT);
-
-  if (rawSpecialBlockIcons.length > MAX_SIDE_ICON_COUNT) {
-    console.warn(
-      `Scene "${rawScene.id}" defines ${rawSpecialBlockIcons.length} specialBlockIcons, but only the first ${MAX_SIDE_ICON_COUNT} can be shown.`,
-    );
-  }
+    .map((specialBlockIcon) => ({
+      iconPath:
+        typeof specialBlockIcon?.iconPath === "string" ? specialBlockIcon.iconPath : "",
+      tooltipText:
+        typeof specialBlockIcon?.tooltipText === "string"
+          ? specialBlockIcon.tooltipText
+          : "",
+    }))
+    .filter((specialBlockIcon) => specialBlockIcon.iconPath)
+    .slice(0, MAX_SIDE_ICON_COUNT);
 
   for (const structure of rawScene.structures) {
     if (structureById.has(structure.id)) {
-      console.warn(`Duplicate structure id "${structure.id}" in scene "${rawScene.id}"`);
       continue;
     }
 
@@ -48,83 +39,28 @@ function normalizeScene(rawScene) {
       ...rawScene.messages,
     },
     specialBlockIcons,
-    sideIcons: specialBlockIcons,
     structureById,
   };
 }
 
 function createSceneIndexes(rawScenes) {
-  const scenes = [];
   const sceneByItem = new Map();
 
   for (const rawScene of rawScenes) {
     const scene = normalizeScene(rawScene);
-    scenes.push(scene);
-
     for (const itemId of scene.entryItems) {
-      if (sceneByItem.has(itemId)) {
-        console.warn(
-          `Duplicate entry item "${itemId}" mapped by scenes "${sceneByItem.get(itemId).id}" and "${scene.id}"`,
-        );
-      }
-
       sceneByItem.set(itemId, scene);
     }
   }
 
-  return { scenes, sceneByItem };
+  return sceneByItem;
 }
 
-function validateScene(scene) {
-  if (!STAGE_PRESETS[scene.stagePresetId]) {
-    console.warn(`Missing stage preset "${scene.stagePresetId}" for scene "${scene.id}"`);
-  }
-
-  if (!SUPPORTED_PROGRESS_STAGE_COUNTS.has(scene.stages.length)) {
-    console.warn(
-      `Scene "${scene.id}" uses ${scene.stages.length} stages, but the bundled progress presets currently support ${[...SUPPORTED_PROGRESS_STAGE_COUNTS].join(" and ")} stages.`,
-    );
-  }
-
-  if (scene.entryItems.length <= 0) {
-    console.warn(`Scene "${scene.id}" has no entryItems`);
-  }
-
-  if (scene.stages.length <= 0) {
-    console.warn(`Scene "${scene.id}" has no stages`);
-  }
-
-  if (scene.specialBlockIcons.length > MAX_SIDE_ICON_COUNT) {
-    console.warn(
-      `Scene "${scene.id}" uses ${scene.specialBlockIcons.length} specialBlockIcons, but only ${MAX_SIDE_ICON_COUNT} are supported.`,
-    );
-  }
-
-  for (const [stageIndex, stage] of scene.stages.entries()) {
-    if (stage.bubbleSlot !== undefined && !VALID_BUBBLE_SLOTS.has(stage.bubbleSlot)) {
-      console.warn(
-        `Scene "${scene.id}" stage ${stageIndex + 1} uses invalid bubbleSlot "${stage.bubbleSlot}". Expected one of ${BUBBLE_SLOT_IDS.join(", ")}.`,
-      );
-    }
-
-    for (const structureId of [...stage.add, ...stage.remove]) {
-      if (!scene.structureById.has(structureId)) {
-        console.warn(
-          `Scene "${scene.id}" stage ${stageIndex + 1} references unknown structure id "${structureId}"`,
-        );
-      }
-    }
-  }
-}
-
-const { scenes: SCENES, sceneByItem: ENTRY_SCENE_BY_ITEM } = createSceneIndexes(PONDER_SCENES);
-for (const scene of SCENES) {
-  validateScene(scene);
-}
+const ENTRY_SCENE_BY_ITEM = createSceneIndexes(PONDER_SCENES);
 
 export const getSceneForItem = (itemId) => ENTRY_SCENE_BY_ITEM.get(itemId);
 export const getStagePreset = (scene) => STAGE_PRESETS[scene.stagePresetId];
 export const getSceneTitlePrefix = (scene) => {
   const preset = getStagePreset(scene);
-  return `${TITLE_MARKER}${preset?.uiTitleMarker ?? ""}${PROGRESS_MARKER}`;
+  return `${TITLE_MARKER}${preset.uiTitleMarker}${PROGRESS_MARKER}`;
 };
