@@ -8,12 +8,53 @@
         "texture_height": 16,
         "visible_bounds_width": 96,
         "visible_bounds_height": 96,
-        "visible_bounds_offset": [0, 0, 0]
+        "visible_bounds_offset": [
+          0,
+          0,
+          0
+        ]
       },
       "bones": [
-        { "name": "root", "pivot": [0, 0, 0] },
-        { "name": "slide", "parent": "root", "pivot": [0, 9, 0] },
-        { "name": "rightItem", "parent": "slide", "pivot": [4, 10, -4], "rotation": [-20, 135, 0] }
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "sync",
+          "parent": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "slide",
+          "parent": "root",
+          "pivot": [
+            0,
+            9,
+            0
+          ]
+        },
+        {
+          "name": "rightItem",
+          "parent": "slide",
+          "pivot": [
+            4,
+            10,
+            -4
+          ],
+          "rotation": [
+            -20,
+            135,
+            0
+          ]
+        }
       ]
     }
   ]
