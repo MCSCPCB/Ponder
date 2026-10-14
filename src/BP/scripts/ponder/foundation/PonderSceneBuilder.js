@@ -161,14 +161,26 @@ class OverlayInstructions {
   }
   showLine(color, start, end, duration) { this.b.push({ op: "line", color, start, end, duration, width: 1 / 16 }); }
   showBigLine(color, start, end, duration) { this.b.push({ op: "line", color, start, end, duration, width: 1 / 8 }); }
-  showScrollInput(location, side, duration) { this.b.push({ op: "valueBox", location, side, duration, kind: "scroll" }); }
+  /** Java 的值输入框：第一 tick 是一个点，之后膨胀到 expands，白色，线宽 1/15。 */
+  valueBox(location, expands, duration) {
+    this.b.push({ op: "valueBox", location, expands, duration, color: "white", width: 1 / 15 });
+  }
+  showScrollInput(location, side, duration) {
+    const s = 1 / 16, q = 1 / 4, axis = { east: "x", west: "x", up: "y", down: "y", north: "z", south: "z" }[side];
+    this.valueBox(location, { x: axis === "x" ? s : q, y: axis === "y" ? s : q, z: axis === "z" ? s : q }, duration);
+  }
   showCenteredScrollInput(position, side, duration) {
-    this.b.push({ op: "valueBox", location: { x: position.x + .5, y: position.y + .5, z: position.z + .5 }, side, duration, kind: "scroll" });
+    const n = DIRECTION_VECTORS[side] ?? { x: 0, y: 0, z: 0 };
+    this.showScrollInput({ x: position.x + .5 + n.x * .5, y: position.y + .5 + n.y * .5, z: position.z + .5 + n.z * .5 }, side, duration);
   }
   showRepeaterScrollInput(position, duration) {
-    this.b.push({ op: "valueBox", location: { x: position.x + .5, y: position.y + 1 / 8, z: position.z + .5 }, side: "up", duration, kind: "repeater" });
+    this.valueBox({ x: position.x + .5, y: position.y + 3 / 16, z: position.z + .5 }, { x: 1 / 6, y: 1 / 16, z: 1 / 6 }, duration);
   }
-  showFilterSlotInput(location, side, duration) { this.b.push({ op: "valueBox", location, side, duration, kind: "filter" }); }
+  showFilterSlotInput(location, side, duration) {
+    if (!side) return this.valueBox(location, { x: .1, y: .1, z: .1 }, duration);
+    const n = DIRECTION_VECTORS[side], k = 11 / 128, plane = { x: n.x ? 0 : k, y: n.y ? 0 : k, z: n.z ? 0 : k };
+    this.valueBox({ x: location.x - n.x * 3 / 128, y: location.y - n.y * 3 / 128, z: location.z - n.z * 3 / 128 }, plane, duration);
+  }
 }
 
 /** Fluent text builder. The instruction is pushed on construction, then refined. */

@@ -18,7 +18,7 @@ const num = value => Number(value.toFixed(4));
  *   v.s    sequence number, so the client notices a new packet and restarts its clock
  *   v.dur  fade duration (seconds), v.dir 1 appearing / -1 disappearing, v.dy start offset (blocks)
  *   v.ox/oy/oz  offset the batch rests at; v.mx/my/mz offset it is moving to over v.mdur seconds
- *   v.rx/ry/rz  rotation it rests at; v.sx/sy/sz rotation it turns to over v.mdur (degrees)
+ *   v.rx/ry/rz  rotation it rests at; v.sx/sy/sz rotation it turns to over v.sdur seconds (degrees)
  *
  * Opacity is not available on a held item, so fading is a scale from 0.001 to
  * full size combined with the slide, which is how the client reads v.k.

@@ -111,7 +111,7 @@ export class PonderLevelRenderer {
     return {
       ox: pose.offset.x, oy: pose.offset.y, oz: pose.offset.z, mx: to.x, my: to.y, mz: to.z,
       rx: pose.rotation.x, ry: pose.rotation.y, rz: pose.rotation.z, sx: spin.x, sy: spin.y, sz: spin.z,
-      mdur: Math.max(pose.move?.ticks ?? pose.spin?.ticks ?? 0, 1) / TICKS_PER_SECOND,
+      mdur: Math.max(pose.move?.ticks ?? 0, 1) / TICKS_PER_SECOND, sdur: Math.max(pose.spin?.ticks ?? 0, 1) / TICKS_PER_SECOND,
     };
   }
 

@@ -47,16 +47,14 @@ export function fadeAlpha(age, remaining, fade = 5) {
   return edge >= fade ? 1 : Math.max(0, edge / fade) ** 2;
 }
 const outlineAlpha = (annotation, tick) => annotation.duration ? fadeAlpha(tick - annotation.at, annotation.expires - tick, 3) * .95 : .95;
-/** A value box starts as a point at its anchor and grows to full size, like Java. */
+/** 值输入框：第一 tick 是点，之后直接膨胀到 expands（Java HighlightValueBoxInstruction）。 */
 function valueBoxAt(annotation, tick) {
-  const grow = Math.min(1, (tick - annotation.at) / 4), half = 1 / 16 + grow * 1 / 4, c = annotation.location;
-  return { from: { x: c.x - half, y: c.y - half, z: c.z - half }, to: { x: c.x + half, y: c.y + half, z: c.z + half } };
+  const c = annotation.location, e = tick > annotation.at ? annotation.expands : { x: 0, y: 0, z: 0 };
+  return { from: { x: c.x - e.x, y: c.y - e.y, z: c.z - e.z }, to: { x: c.x + e.x, y: c.y + e.y, z: c.z + e.z } };
 }
-export function controlText(annotation, locale, inputMode = "keyboard") {
-  const action = tr(annotation.action ?? "use", locale);
-  if (inputMode === "touch") return `${tr("touch", locale)} · ${action}`;
-  if (inputMode === "gamepad") return `${tr("gamepad", locale)} · ${action}`;
-  return action;
+/** 操作提示窗口里的前缀文字（Java 的 sneak_and / ctrl_and）；没有前缀时为空。 */
+export function controlText(annotation, locale) {
+  return annotation.sneaking ? tr("sneakAnd", locale) : annotation.ctrl ? tr("ctrlAnd", locale) : "";
 }
 /**
  * Labels live on a world-space camera plane, not in screen/GUI-scaled slots.
@@ -74,7 +72,7 @@ export function layoutAnnotations(scene, state, locale, inputMode = "keyboard", 
     const entityBox = tracked.get(annotation.track);
     if (annotation.op === "outline" || annotation.op === "valueBox") {
       const box = entityBox ? { from: sub(entityBox.center, entityBox.extent), to: add(entityBox.center, entityBox.extent) }
-        : annotation.box ?? (annotation.location && valueBoxAt(annotation, state.tick));
+        : annotation.op === "valueBox" ? valueBoxAt(annotation, state.tick) : annotation.box;
       if (box) outlines.push({ annotation, edges: boxEdges(box, false), alpha: outlineAlpha(annotation, state.tick) });
       continue;
     }
@@ -84,11 +82,12 @@ export function layoutAnnotations(scene, state, locale, inputMode = "keyboard", 
     }
     const target = entityBox?.center ?? annotation.target ?? scene.focus;
     const anchor = view.project(target);
-    const content = annotation.op === "controls" ? controlText(annotation, locale, inputMode) : localize(annotation.text, locale);
+    const content = annotation.op === "controls" ? controlText(annotation, locale) : localize(annotation.text, locale);
     const text = wrapText(content, { width: annotation.maxWidth ?? 180, color: annotation.color });
-    const iconUnits = annotation.op === "controls" ? 22 : 0;
-    const width = (Math.max(22, text.width) + 12 + iconUnits) * scale;
-    const height = Math.max(text.height + 10, iconUnits ? 26 : 0) * scale;
+    // Java：图标 24、物品 24，窗口高 24；有任一项时按 24 计。
+    const iconUnits = annotation.op === "controls" ? 24 * (1 + Number(Boolean(annotation.itemId))) : 0;
+    const width = ((content ? text.width : 0) + 12 + iconUnits) * scale;
+    const height = Math.max(content ? text.height + 10 : 0, iconUnits ? 24 : 0) * scale;
     const gap = 7 * scale, candidates = [];
     const sides = annotation.side === "auto" || !annotation.side
       ? (anchor.x < 0 ? ["left", "right", "top", "bottom"] : ["right", "left", "top", "bottom"])

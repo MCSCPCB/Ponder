@@ -36,15 +36,17 @@ export function compileSchedule(instructions) {
       events.push(event);
     }
   }
-  const duration = Math.max(1, finishedAt ?? cursor);
+  // markAsFinished 只结束进度条计入的时间；场景仍播放到最后一条指令及其淡出。
+  const counted = Math.max(1, finishedAt ?? cursor);
+  const duration = Math.max(counted, cursor, ...events.map(e => e.at + e.duration));
   if (duration > LIMITS.sceneTicks || events.length > LIMITS.sceneEvents) throw new Error("Scene exceeds resource limits");
-  const keyframes = [...new Set([0, ...marks.filter(tick => tick < duration)])].sort((a, b) => a - b)
+  const keyframes = [...new Set([0, ...marks.filter(tick => tick < counted)])].sort((a, b) => a - b)
     .map((tick, index) => ({ tick, id: `k${index}`, label: "" }));
   if (keyframes.length > LIMITS.keyframes) throw new Error("Too many keyframes");
   // Windows during which comfortable reading slows playback.
   const readingWindows = events.filter(e => e.op === "text" || e.op === "controls")
     .map(e => [e.at, e.at + e.duration + 2 * TEXT_FADE_TICKS]);
-  return { events, duration, keyframes, readingWindows };
+  return { events, duration, counted, keyframes, readingWindows };
 }
 
 /** Replays authored state; native redstone and AI history are never replayed. */
@@ -167,7 +169,8 @@ export class TimelineClock {
     if (++this.divider < (this.comfy && hasText ? 3 : 1)) return false;
     this.divider = 0; this.tick++; return true;
   }
-  get finished() { return this.tick >= this.scene.timeline.duration; }
+  /** Java 在 markAsFinished 之后才把场景算作播完（触发“下一个场景”提示）。 */
+  get finished() { return this.tick >= this.scene.timeline.counted; }
 }
 export function remainingWallTicks(scene, tick, comfy) {
   let ticks = 0;

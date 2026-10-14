@@ -2,10 +2,12 @@ import { LIMITS } from "../../enums/PonderConfig.js";
 import { layoutAnnotations } from "./OverlayLayout.js";
 import { add, length, sub } from "../VecHelper.js";
 import { packGlyph, themeColor } from "./TextWindowElement.js";
-import { ICON_PATHS } from "../../enums/PonderGuiTextures.js";
+import { ICON_PATHS, iconIndex } from "../../enums/PonderGuiTextures.js";
 import { markOwned } from "../level/StageOwnership.js";
 import { safeRemove } from "../level/StageJobs.js";
 
+/** 物品图标统一走贴图路径，不做 item_id_aux 映射。 */
+const itemIconPath = itemId => `textures/items/${itemId.split(":").pop()}`;
 const directionIndex = { right: 0, bottom: 1, left: 2, top: 3 };
 const actionIcons = { use: "use", attack: "attack", scroll: "scroll", slot: "slot" };
 export class OverlayRenderer {
@@ -50,11 +52,17 @@ export class OverlayRenderer {
       for (let i = 0; i < panel.line.length - 1; i++)
         line(`${a.id}:pointer:${i}`, panel.line[i], panel.line[i + 1], color, alpha, a.through !== false);
       if (a.op === "controls") {
-        const x = rect.x + 14 * this.scene.textScale, y = rect.y + rect.h / 2;
+        const unit = this.scene.textScale, cy = rect.y + rect.h / 2;
+        let x = rect.x + 6 * unit + (text.width ? text.width * unit : 0);
         const iconPath = a.iconPath ?? `textures/ui/ponder/icon_${this.session.inputMode === "touch" ? "touch" : actionIcons[a.action] ?? "use"}`;
-        const texture = Math.max(0, ICON_PATHS.indexOf(iconPath));
-        addEntity(`${a.id}:icon`, "icon", layout.view.point(x, y, .04),
-          { ...common, color: 0xffffff, icon: texture, size: 16 * this.scene.textScale, angle: 0 });
+        addEntity(`${a.id}:icon`, "icon", layout.view.point(x + 12 * unit, cy, .04),
+          { ...common, color: 0xffffff, icon: iconIndex(iconPath), size: 24 * unit, angle: 0 });
+        x += 24 * unit;
+        if (a.itemId) {
+          const itemIcon = itemIconPath(a.itemId);
+          addEntity(`${a.id}:item`, "icon", layout.view.point(x + 12 * unit, cy, .042),
+            { ...common, color: 0xffffff, icon: iconIndex(itemIcon), size: 24 * unit, angle: 0 });
+        }
         addEntity(`${a.id}:tip`, "icon", layout.view.point(
           panel.side === "left" ? rect.x + rect.w : panel.side === "right" ? rect.x : rect.x + rect.w / 2,
           panel.side === "top" ? rect.y : panel.side === "bottom" ? rect.y + rect.h : rect.y + rect.h / 2, .045),

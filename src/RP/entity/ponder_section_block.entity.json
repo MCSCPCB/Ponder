@@ -23,12 +23,13 @@
           "v.e = 1 - (1 - v.k) * (1 - v.k);",
           "v.fade = (v.dir ?? 1) > 0 ? v.e : 1 - v.e;",
           "v.mt = math.clamp((v.clock - (v.t0 ?? 0)) / math.max(v.mdur ?? 0.0001, 0.0001), 0, 1);",
+          "v.st = math.clamp((v.clock - (v.t0 ?? 0)) / math.max(v.sdur ?? 0.0001, 0.0001), 0, 1);",
           "v.lx = (v.ox ?? 0) + ((v.mx ?? 0) - (v.ox ?? 0)) * v.mt;",
           "v.ly = (v.oy ?? 0) + ((v.my ?? 0) - (v.oy ?? 0)) * v.mt;",
           "v.lz = (v.oz ?? 0) + ((v.mz ?? 0) - (v.oz ?? 0)) * v.mt;",
-          "v.ax = (v.rx ?? 0) + ((v.sx ?? 0) - (v.rx ?? 0)) * v.mt;",
-          "v.ay = (v.ry ?? 0) + ((v.sy ?? 0) - (v.ry ?? 0)) * v.mt;",
-          "v.az = (v.rz ?? 0) + ((v.sz ?? 0) - (v.rz ?? 0)) * v.mt;"
+          "v.ax = (v.rx ?? 0) + ((v.sx ?? 0) - (v.rx ?? 0)) * v.st;",
+          "v.ay = (v.ry ?? 0) + ((v.sy ?? 0) - (v.ry ?? 0)) * v.st;",
+          "v.az = (v.rz ?? 0) + ((v.sz ?? 0) - (v.rz ?? 0)) * v.st;"
         ],
         "animate": [
           "pose"
