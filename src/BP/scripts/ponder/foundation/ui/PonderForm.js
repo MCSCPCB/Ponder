@@ -1,21 +1,13 @@
 import {
-  ACTIVE, ANIMATE_FORWARD, ANIMATE_REVERSE, BUBBLE_SLOT_MARKER, DISABLED, FINISHED_MARKER, HIDDEN,
+  ACTIVE, ANIMATE_FORWARD, ANIMATE_REVERSE, DISABLED, FINISHED_MARKER, HIDDEN,
   KEYFRAME_MARKER, LIMITS, SCENE_MARKER, SLOTS, TIER_MARKER, TITLE_MARKER,
 } from "../../enums/PonderConfig.js";
 import { localize, tr } from "../registration/PonderLocalization.js";
 import { indexEntries, pageEntries, scenePage, scenesInContext } from "./PonderNavigation.js";
 import { keyframeX, progressStep, progressTier } from "./PonderProgressBar.js";
-import { stateAt } from "../instruction/PonderSchedule.js";
 
 const ICON = name => `textures/ui/ponder/icon_${name}`;
 const EMPTY = "textures/empty";
-
-/** 当前窗口里正在显示的第一段文字，作为说明气泡内容。 */
-function bubbleOf(scene, tick, locale) {
-  for (const overlay of stateAt(scene, tick).overlays.values())
-    if (overlay.op === "text") return { text: localize(overlay.text, locale), slot: overlay.slot ?? "top" };
-  return undefined;
-}
 
 /**
  * 固定槽位的表单数据。按钮文本是数据，动作表只在脚本里，不执行字符串。
@@ -54,12 +46,10 @@ export function buildFormModel(registry, nav, clock, locale, { previousStep } = 
     scene.timeline.keyframes.forEach((keyframe, i) => put(SLOTS.keyframes + i,
       `${KEYFRAME_MARKER}${String(keyframeX(scene, i)).padStart(3, "0")}^${tr("step", locale)} ${i + 1}`, EMPTY,
       { type: "seek", tick: keyframe.tick }));
-    const bubble = bubbleOf(scene, clock.tick, locale);
-    if (bubble) put(SLOTS.bubble, bubble.text, EMPTY);
     const step = progressStep(scene, clock.tick);
     const animation = previousStep === undefined || previousStep === step ? ""
       : step > previousStep ? ANIMATE_FORWARD : ANIMATE_REVERSE;
-    title += `${SCENE_MARKER}${TIER_MARKER(progressTier(scene))}${step}|${animation}${clock.finished ? FINISHED_MARKER : ""}${BUBBLE_SLOT_MARKER[bubble?.slot ?? "top"]}`;
+    title += `${SCENE_MARKER}${TIER_MARKER(progressTier(scene))}${step}|${animation}${clock.finished ? FINISHED_MARKER : ""}`;
     body = scene.id;
     return { title, body, slots, scene, step };
   }

@@ -13,7 +13,7 @@ export const LIMITS = Object.freeze({
   sessions: 4, allocationAttempts: 24, safetyBuffer: 3, playerClearance: 96,
   blocks: 16384, stageVolume: 1200000, sceneTicks: 3600, sceneEvents: 512,
   keyframes: 24, annotations: 6, textCharacters: 512, textLines: 12,
-  entities: 192, stageEntities: 48, nativeEntities: 128, particleEmissions: 128,
+  entities: 192, stageEntities: 48, animatedBlocks: 64, nativeEntities: 128, particleEmissions: 128,
   sidebar: 6, indexPageSize: 8,
   formBusyRetries: 3,
 });
@@ -25,13 +25,13 @@ export const PALETTE = Object.freeze({
 // 表单按钮的固定序号。JSON UI 按序号读取，两边必须同步。
 export const SLOTS = Object.freeze({
   previous: 0, close: 1, next: 2, replay: 3, comfy: 4, back: 5,
-  header: 6, bubble: 7, nextUp: 8,
-  sidebar: 9, // 9..14，最多 LIMITS.sidebar 个
-  keyframes: 15, // 15..38，最多 LIMITS.keyframes 个，每个关键帧一个透明按钮
-  cards: 39, // 39..46，索引页每页 LIMITS.indexPageSize 张卡片
-  pagePrevious: 47, pageNext: 48,
-  items: 49, tags: 50, // 场景页侧栏之外的索引入口，索引页和场景页共用
-  count: 51,
+  header: 6, nextUp: 7,
+  sidebar: 8, // 8..13，最多 LIMITS.sidebar 个
+  keyframes: 14, // 14..37，最多 LIMITS.keyframes 个，每个关键帧一个透明按钮
+  cards: 38, // 38..45，索引页每页 LIMITS.indexPageSize 张卡片
+  pagePrevious: 46, pageNext: 47,
+  items: 48, tags: 49, // 场景页侧栏之外的索引入口，索引页和场景页共用
+  count: 50,
 });
 // 标题里的段标记。
 export const SCENE_MARKER = "|scene|";
@@ -43,7 +43,6 @@ export const FINISHED_MARKER = "§5§r";
 // 档位用一个字符编码，避免多位数字被当作多个格式码。
 export const TIER_CODES = Object.freeze({ 4: "a", 8: "b", 12: "c", 16: "d", 24: "e" });
 export const TIER_MARKER = tier => `§4§r§${TIER_CODES[tier]}§r`;
-export const BUBBLE_SLOT_MARKER = Object.freeze({ top: "§9§r§0§r", middle: "§9§r§1§r", bottom: "§9§r§2§r" });
 
 // 淡入淡出时长，取自 Java：区域 15 tick，文字窗口前后各 5 tick。
 export const FADE_IN_TICKS = 15;

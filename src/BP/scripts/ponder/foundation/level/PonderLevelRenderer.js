@@ -78,7 +78,7 @@ export class PonderLevelRenderer {
   /** Animated batches, as the entity-side description the animator sends to the client. */
   animatedBatches(state) {
     const wanted = new Map();
-    let budget = LIMITS.stageEntities - this.entities.size;
+    let budget = LIMITS.animatedBlocks;
     const pending = (batch, vars, cells) => {
       if (!cells.length || cells.length > budget) return;
       budget -= cells.length;
