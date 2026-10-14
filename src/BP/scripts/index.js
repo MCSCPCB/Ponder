@@ -1,3 +1,3 @@
-import { installPonder } from "./ponder/runtime.js";
+import { installPonder } from "./ponder/foundation/ui/PonderUI.js";
 
 installPonder();

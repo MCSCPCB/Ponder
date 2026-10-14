@@ -2467,6 +2467,18 @@
           ]
         }
       }
+    },
+    "controller.render.ponder.section_block": {
+      "geometry": "geometry.default",
+      "materials": [
+        {
+          "*": "material.default"
+        }
+      ],
+      "textures": [
+        "texture.default"
+      ],
+      "ignore_lighting": true
     }
   }
 }

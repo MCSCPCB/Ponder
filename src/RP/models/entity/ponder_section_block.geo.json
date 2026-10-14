@@ -1,0 +1,20 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.ponder.section_block",
+        "texture_width": 16,
+        "texture_height": 16,
+        "visible_bounds_width": 96,
+        "visible_bounds_height": 96,
+        "visible_bounds_offset": [0, 0, 0]
+      },
+      "bones": [
+        { "name": "root", "pivot": [0, 0, 0] },
+        { "name": "slide", "parent": "root", "pivot": [0, 9, 0] },
+        { "name": "rightItem", "parent": "slide", "pivot": [4, 10, -4], "rotation": [-20, 135, 0] }
+      ]
+    }
+  ]
+}

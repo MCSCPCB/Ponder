@@ -222,6 +222,34 @@
           "scale": "q.property('ponder:size')"
         }
       }
+    },
+    "animation.ponder.section": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "position": [
+            "(v.lx ?? 0) * 16 * (v.cal_sx ?? 1)",
+            "(v.ly ?? 0) * 16 + (1 - (v.fade ?? 1)) * (v.dy ?? 0) * 16 + (v.cal_y ?? -9)",
+            "(v.lz ?? 0) * 16 * (v.cal_sz ?? -1)"
+          ]
+        },
+        "slide": {
+          "rotation": [
+            "(v.ax ?? 0) * (v.cal_rx ?? 1)",
+            "(v.ay ?? 0) * (v.cal_ry ?? -1)",
+            "(v.az ?? 0) * (v.cal_rz ?? -1)"
+          ]
+        }
+      }
+    },
+    "animation.ponder.sync": {
+      "loop": true,
+      "animation_length": 1,
+      "bones": {
+        "sync": {
+          "scale": 1
+        }
+      }
     }
   }
 }
