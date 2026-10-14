@@ -2,7 +2,7 @@ export const UI_TEXT = {
   en_US: {
     ponder: "Pondering about", items: "Item index", tags: "Topic index", back: "Back",
     previous: "Previous scene", next: "Next scene", close: "Close", replay: "Replay",
-    pause: "Pause tutorial", play: "Continue tutorial", comfy: "Comfortable reading",
+    comfy: "Comfortable reading",
     comfyOn: "Comfortable reading: on", nextUp: "Up next", done: "Scene complete",
     pagePrevious: "Previous page", pageNext: "Next page", step: "Jump to keyframe",
     loading: "Preparing a safe demonstration area…", busy: "Ponder is at capacity. Please try again later.",
@@ -19,7 +19,7 @@ export const UI_TEXT = {
   zh_CN: {
     ponder: "正在思索", items: "物品索引", tags: "主题索引", back: "返回",
     previous: "上一个场景", next: "下一个场景", close: "关闭", replay: "重播",
-    pause: "暂停教学", play: "继续教学", comfy: "舒适阅读", comfyOn: "舒适阅读：开启",
+    comfy: "舒适阅读", comfyOn: "舒适阅读：开启",
     nextUp: "接下来", done: "场景已完成", pagePrevious: "上一页", pageNext: "下一页",
     step: "跳转到关键帧", loading: "正在准备安全的展示区……",
     busy: "思索展示区或常加载容量不足，请稍后重试。",

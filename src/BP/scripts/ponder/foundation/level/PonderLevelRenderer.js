@@ -91,8 +91,9 @@ export class PonderLevelRenderer {
         return block && block.blockId !== "minecraft:air" ? { ...block, position: unkey(k) } : undefined;
       }).filter(Boolean);
       const e = batch.event, pose = state.sections.get(batch.section);
-      const vars = { dur: Math.max(e.fade, 1) / TICKS_PER_SECOND, dir: 1, dy: e.from ? -e.from.y * .5 : 0 };
-      if (e.from) { vars.dx = -e.from.x * .5; vars.dz = -e.from.z * .5; }
+      const vars = { dur: Math.max(e.fade, 1) / TICKS_PER_SECOND, dir: 1, dx: 0, dy: 0, dz: 0 };
+      // Java starts a section half a block away on the side opposite its entry direction.
+      if (e.from) Object.assign(vars, { dx: -e.from.x * .5, dy: -e.from.y * .5, dz: -e.from.z * .5 });
       if (pose && batch.section !== "base") Object.assign(vars, this.poseVars(pose));
       pending(batch, vars, cells);
     }
@@ -100,7 +101,7 @@ export class PonderLevelRenderer {
       const cells = [...out.cells].filter(([, block]) => block && block.blockId !== "minecraft:air")
         .map(([k, block]) => ({ ...block, position: unkey(k) }));
       pending({ id: out.id }, { dur: Math.max(out.fade, 1) / TICKS_PER_SECOND, dir: -1,
-        dy: out.vec ? out.vec.y * .5 : 0 }, cells);
+        dx: (out.vec?.x ?? 0) * .5, dy: (out.vec?.y ?? 0) * .5, dz: (out.vec?.z ?? 0) * .5 }, cells);
     }
     return wanted;
   }

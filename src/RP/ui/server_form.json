@@ -2,18 +2,19 @@
   "namespace": "server_form",
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
-    "$additional_screen_content": "ponder.root",
-    "$screen_bg_content": "ponder.compatible_background",
-    "force_render_below": true,
-    "render_game_behind": true,
-    "load_screen_immediately": true,
+    "$additional_screen_content": "server_form.ponder_form_additional_screen_content",
+    "$screen_animations": [],
     "button_mappings": [
       {
         "from_button_id": "button.menu_cancel",
         "to_button_id": "button.menu_exit",
         "mapping_type": "global"
       }
-    ]
+    ],
+    "force_render_below": true,
+    "render_only_when_topmost": false,
+    "render_game_behind": true,
+    "load_screen_immediately": true
   },
   "main_screen_content": {
     "bindings": [
@@ -22,7 +23,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not (not ((#title_text - '§0§r§1§r') = #title_text)))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -34,7 +35,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not (not ((#title_text - '§0§r§1§r') = #title_text)))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -46,7 +47,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not (not ((#title_text - '§0§r§1§r') = #title_text)))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -58,8 +59,6710 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not (not ((#title_text - '§0§r§1§r') = #title_text)))",
+        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
         "target_property_name": "#visible"
+      }
+    ]
+  },
+  "ponder_header_intro_alpha": {
+    "anim_type": "alpha",
+    "easing": "out_quart",
+    "duration": 0.24,
+    "from": 0,
+    "to": 1
+  },
+  "ponder_header_intro_offset": {
+    "anim_type": "offset",
+    "easing": "out_quart",
+    "duration": 0.24,
+    "from": [
+      21,
+      24
+    ],
+    "to": [
+      21,
+      19
+    ]
+  },
+  "ponder_footer_intro_alpha": {
+    "anim_type": "alpha",
+    "easing": "out_quart",
+    "duration": 0.3,
+    "from": 0,
+    "to": 1
+  },
+  "ponder_footer_intro_offset": {
+    "anim_type": "offset",
+    "easing": "out_quart",
+    "duration": 0.3,
+    "from": [
+      0,
+      -4
+    ],
+    "to": [
+      0,
+      -9
+    ]
+  },
+  "ponder_text_bubble_alpha_wait": {
+    "anim_type": "wait",
+    "duration": 0.1875,
+    "next": "@server_form.ponder_text_bubble_alpha_1"
+  },
+  "ponder_text_bubble_alpha_1": {
+    "anim_type": "alpha",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": 0,
+    "to": 0.25,
+    "next": "@server_form.ponder_text_bubble_alpha_2"
+  },
+  "ponder_text_bubble_alpha_2": {
+    "anim_type": "alpha",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": 0.25,
+    "to": 1
+  },
+  "ponder_text_bubble_offset_wait": {
+    "anim_type": "wait",
+    "duration": 0.1875,
+    "next": "@server_form.ponder_text_bubble_offset_1"
+  },
+  "ponder_text_bubble_offset_1": {
+    "anim_type": "offset",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [
+      6,
+      0
+    ],
+    "to": [
+      4,
+      0
+    ],
+    "next": "@server_form.ponder_text_bubble_offset_2"
+  },
+  "ponder_text_bubble_offset_2": {
+    "anim_type": "offset",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [
+      4,
+      0
+    ],
+    "to": [
+      0,
+      0
+    ]
+  },
+  "ponder_text_bubble_line_clip": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [
+      0,
+      2
+    ],
+    "to": [
+      3,
+      2
+    ],
+    "next": "@server_form.ponder_text_bubble_line_clip_2"
+  },
+  "ponder_text_bubble_line_clip_2": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [
+      3,
+      2
+    ],
+    "to": [
+      12,
+      2
+    ],
+    "next": "@server_form.ponder_text_bubble_line_clip_3"
+  },
+  "ponder_text_bubble_line_clip_3": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [
+      12,
+      2
+    ],
+    "to": [
+      30,
+      2
+    ],
+    "next": "@server_form.ponder_text_bubble_line_clip_4"
+  },
+  "ponder_text_bubble_line_clip_4": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [
+      30,
+      2
+    ],
+    "to": [
+      54,
+      2
+    ],
+    "next": "@server_form.ponder_text_bubble_line_clip_5"
+  },
+  "ponder_text_bubble_line_clip_5": {
+    "anim_type": "size",
+    "easing": "linear",
+    "duration": 0.05,
+    "from": [
+      54,
+      2
+    ],
+    "to": [
+      72,
+      2
+    ]
+  },
+  "ponder_pulse_up": {
+    "anim_type": "alpha",
+    "easing": "in_out_sine",
+    "duration": 0.65,
+    "from": 0.25,
+    "to": 0.85,
+    "next": "@server_form.ponder_pulse_down"
+  },
+  "ponder_pulse_down": {
+    "anim_type": "alpha",
+    "easing": "in_out_sine",
+    "duration": 0.65,
+    "from": 0.85,
+    "to": 0.25,
+    "next": "@server_form.ponder_pulse_up"
+  },
+  "ponder_next_up_wait": {
+    "anim_type": "wait",
+    "duration": 2.5,
+    "next": "@server_form.ponder_next_up_reveal"
+  },
+  "ponder_next_up_reveal": {
+    "anim_type": "alpha",
+    "easing": "out_quart",
+    "duration": 0.3,
+    "from": 0,
+    "to": 1
+  },
+  "ponder_next_up_offset": {
+    "anim_type": "offset",
+    "easing": "out_quart",
+    "duration": 0.3,
+    "from": [
+      0,
+      5
+    ],
+    "to": [
+      0,
+      0
+    ]
+  },
+  "ponder_hover_in": {
+    "anim_type": "alpha",
+    "easing": "linear",
+    "duration": 0.1,
+    "from": 0.6,
+    "to": 1
+  },
+  "ponder_tooltip_grow": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.25,
+    "from": [
+      0,
+      26
+    ],
+    "to": [
+      200,
+      26
+    ]
+  },
+  "ponder_progress_anim_4_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_4_1_motion"
+  },
+  "ponder_progress_anim_4_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      0,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_4_reverse_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_4_reverse_1_motion"
+  },
+  "ponder_progress_anim_4_reverse_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_4_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_4_2_motion"
+  },
+  "ponder_progress_anim_4_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_4_reverse_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_4_reverse_2_motion"
+  },
+  "ponder_progress_anim_4_reverse_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_4_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_4_3_motion"
+  },
+  "ponder_progress_anim_4_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_4_reverse_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_4_reverse_3_motion"
+  },
+  "ponder_progress_anim_4_reverse_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      224,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_4_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_4_4_motion"
+  },
+  "ponder_progress_anim_4_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      224,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_1_motion"
+  },
+  "ponder_progress_anim_8_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      0,
+      3
+    ],
+    "to": [
+      28,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_reverse_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_reverse_1_motion"
+  },
+  "ponder_progress_anim_8_reverse_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      28,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_2_motion"
+  },
+  "ponder_progress_anim_8_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      28,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_reverse_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_reverse_2_motion"
+  },
+  "ponder_progress_anim_8_reverse_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      84,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_3_motion"
+  },
+  "ponder_progress_anim_8_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      84,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_reverse_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_reverse_3_motion"
+  },
+  "ponder_progress_anim_8_reverse_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      84,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_4_motion"
+  },
+  "ponder_progress_anim_8_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      84,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_reverse_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_reverse_4_motion"
+  },
+  "ponder_progress_anim_8_reverse_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      140,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_5_motion"
+  },
+  "ponder_progress_anim_8_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      140,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_reverse_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_reverse_5_motion"
+  },
+  "ponder_progress_anim_8_reverse_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      140,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_6_motion"
+  },
+  "ponder_progress_anim_8_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      140,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_reverse_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_reverse_6_motion"
+  },
+  "ponder_progress_anim_8_reverse_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      196,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_7_motion"
+  },
+  "ponder_progress_anim_8_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      196,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_reverse_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_reverse_7_motion"
+  },
+  "ponder_progress_anim_8_reverse_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      224,
+      3
+    ],
+    "to": [
+      196,
+      3
+    ]
+  },
+  "ponder_progress_anim_8_8": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_8_8_motion"
+  },
+  "ponder_progress_anim_8_8_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      196,
+      3
+    ],
+    "to": [
+      224,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_1_motion"
+  },
+  "ponder_progress_anim_12_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      0,
+      3
+    ],
+    "to": [
+      19,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_1_motion"
+  },
+  "ponder_progress_anim_12_reverse_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      37,
+      3
+    ],
+    "to": [
+      19,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_2_motion"
+  },
+  "ponder_progress_anim_12_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      19,
+      3
+    ],
+    "to": [
+      37,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_2_motion"
+  },
+  "ponder_progress_anim_12_reverse_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      37,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_3_motion"
+  },
+  "ponder_progress_anim_12_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      37,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_3_motion"
+  },
+  "ponder_progress_anim_12_reverse_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      75,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_4_motion"
+  },
+  "ponder_progress_anim_12_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      75,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_4_motion"
+  },
+  "ponder_progress_anim_12_reverse_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      93,
+      3
+    ],
+    "to": [
+      75,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_5_motion"
+  },
+  "ponder_progress_anim_12_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      75,
+      3
+    ],
+    "to": [
+      93,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_5_motion"
+  },
+  "ponder_progress_anim_12_reverse_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      93,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_6_motion"
+  },
+  "ponder_progress_anim_12_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      93,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_6_motion"
+  },
+  "ponder_progress_anim_12_reverse_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      131,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_7_motion"
+  },
+  "ponder_progress_anim_12_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      131,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_7_motion"
+  },
+  "ponder_progress_anim_12_reverse_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      149,
+      3
+    ],
+    "to": [
+      131,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_8": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_8_motion"
+  },
+  "ponder_progress_anim_12_8_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      131,
+      3
+    ],
+    "to": [
+      149,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_8": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_8_motion"
+  },
+  "ponder_progress_anim_12_reverse_8_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      149,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_9": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_9_motion"
+  },
+  "ponder_progress_anim_12_9_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      149,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_9": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_9_motion"
+  },
+  "ponder_progress_anim_12_reverse_9_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      187,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_10": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_10_motion"
+  },
+  "ponder_progress_anim_12_10_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      187,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_10": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_10_motion"
+  },
+  "ponder_progress_anim_12_reverse_10_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      205,
+      3
+    ],
+    "to": [
+      187,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_11": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_11_motion"
+  },
+  "ponder_progress_anim_12_11_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      187,
+      3
+    ],
+    "to": [
+      205,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_reverse_11": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_reverse_11_motion"
+  },
+  "ponder_progress_anim_12_reverse_11_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      224,
+      3
+    ],
+    "to": [
+      205,
+      3
+    ]
+  },
+  "ponder_progress_anim_12_12": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_12_12_motion"
+  },
+  "ponder_progress_anim_12_12_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      205,
+      3
+    ],
+    "to": [
+      224,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_1_motion"
+  },
+  "ponder_progress_anim_16_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      0,
+      3
+    ],
+    "to": [
+      14,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_1_motion"
+  },
+  "ponder_progress_anim_16_reverse_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      28,
+      3
+    ],
+    "to": [
+      14,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_2_motion"
+  },
+  "ponder_progress_anim_16_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      14,
+      3
+    ],
+    "to": [
+      28,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_2_motion"
+  },
+  "ponder_progress_anim_16_reverse_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      42,
+      3
+    ],
+    "to": [
+      28,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_3_motion"
+  },
+  "ponder_progress_anim_16_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      28,
+      3
+    ],
+    "to": [
+      42,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_3_motion"
+  },
+  "ponder_progress_anim_16_reverse_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      42,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_4_motion"
+  },
+  "ponder_progress_anim_16_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      42,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_4_motion"
+  },
+  "ponder_progress_anim_16_reverse_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      70,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_5_motion"
+  },
+  "ponder_progress_anim_16_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      70,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_5_motion"
+  },
+  "ponder_progress_anim_16_reverse_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      84,
+      3
+    ],
+    "to": [
+      70,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_6_motion"
+  },
+  "ponder_progress_anim_16_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      70,
+      3
+    ],
+    "to": [
+      84,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_6_motion"
+  },
+  "ponder_progress_anim_16_reverse_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      98,
+      3
+    ],
+    "to": [
+      84,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_7_motion"
+  },
+  "ponder_progress_anim_16_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      84,
+      3
+    ],
+    "to": [
+      98,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_7_motion"
+  },
+  "ponder_progress_anim_16_reverse_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      98,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_8": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_8_motion"
+  },
+  "ponder_progress_anim_16_8_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      98,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_8": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_8_motion"
+  },
+  "ponder_progress_anim_16_reverse_8_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      126,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_9": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_9_motion"
+  },
+  "ponder_progress_anim_16_9_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      126,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_9": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_9_motion"
+  },
+  "ponder_progress_anim_16_reverse_9_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      140,
+      3
+    ],
+    "to": [
+      126,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_10": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_10_motion"
+  },
+  "ponder_progress_anim_16_10_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      126,
+      3
+    ],
+    "to": [
+      140,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_10": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_10_motion"
+  },
+  "ponder_progress_anim_16_reverse_10_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      154,
+      3
+    ],
+    "to": [
+      140,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_11": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_11_motion"
+  },
+  "ponder_progress_anim_16_11_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      140,
+      3
+    ],
+    "to": [
+      154,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_11": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_11_motion"
+  },
+  "ponder_progress_anim_16_reverse_11_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      154,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_12": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_12_motion"
+  },
+  "ponder_progress_anim_16_12_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      154,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_12": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_12_motion"
+  },
+  "ponder_progress_anim_16_reverse_12_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      182,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_13": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_13_motion"
+  },
+  "ponder_progress_anim_16_13_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      182,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_13": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_13_motion"
+  },
+  "ponder_progress_anim_16_reverse_13_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      196,
+      3
+    ],
+    "to": [
+      182,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_14": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_14_motion"
+  },
+  "ponder_progress_anim_16_14_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      182,
+      3
+    ],
+    "to": [
+      196,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_14": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_14_motion"
+  },
+  "ponder_progress_anim_16_reverse_14_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      210,
+      3
+    ],
+    "to": [
+      196,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_15": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_15_motion"
+  },
+  "ponder_progress_anim_16_15_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      196,
+      3
+    ],
+    "to": [
+      210,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_reverse_15": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_reverse_15_motion"
+  },
+  "ponder_progress_anim_16_reverse_15_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      224,
+      3
+    ],
+    "to": [
+      210,
+      3
+    ]
+  },
+  "ponder_progress_anim_16_16": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_16_16_motion"
+  },
+  "ponder_progress_anim_16_16_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      210,
+      3
+    ],
+    "to": [
+      224,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_1_motion"
+  },
+  "ponder_progress_anim_24_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      0,
+      3
+    ],
+    "to": [
+      9,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_1": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_1_motion"
+  },
+  "ponder_progress_anim_24_reverse_1_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      19,
+      3
+    ],
+    "to": [
+      9,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_2_motion"
+  },
+  "ponder_progress_anim_24_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      9,
+      3
+    ],
+    "to": [
+      19,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_2": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_2_motion"
+  },
+  "ponder_progress_anim_24_reverse_2_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      28,
+      3
+    ],
+    "to": [
+      19,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_3_motion"
+  },
+  "ponder_progress_anim_24_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      19,
+      3
+    ],
+    "to": [
+      28,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_3": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_3_motion"
+  },
+  "ponder_progress_anim_24_reverse_3_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      37,
+      3
+    ],
+    "to": [
+      28,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_4_motion"
+  },
+  "ponder_progress_anim_24_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      28,
+      3
+    ],
+    "to": [
+      37,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_4": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_4_motion"
+  },
+  "ponder_progress_anim_24_reverse_4_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      47,
+      3
+    ],
+    "to": [
+      37,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_5_motion"
+  },
+  "ponder_progress_anim_24_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      37,
+      3
+    ],
+    "to": [
+      47,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_5": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_5_motion"
+  },
+  "ponder_progress_anim_24_reverse_5_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      47,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_6_motion"
+  },
+  "ponder_progress_anim_24_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      47,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_6": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_6_motion"
+  },
+  "ponder_progress_anim_24_reverse_6_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      65,
+      3
+    ],
+    "to": [
+      56,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_7_motion"
+  },
+  "ponder_progress_anim_24_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      56,
+      3
+    ],
+    "to": [
+      65,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_7": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_7_motion"
+  },
+  "ponder_progress_anim_24_reverse_7_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      75,
+      3
+    ],
+    "to": [
+      65,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_8": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_8_motion"
+  },
+  "ponder_progress_anim_24_8_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      65,
+      3
+    ],
+    "to": [
+      75,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_8": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_8_motion"
+  },
+  "ponder_progress_anim_24_reverse_8_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      84,
+      3
+    ],
+    "to": [
+      75,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_9": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_9_motion"
+  },
+  "ponder_progress_anim_24_9_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      75,
+      3
+    ],
+    "to": [
+      84,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_9": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_9_motion"
+  },
+  "ponder_progress_anim_24_reverse_9_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      93,
+      3
+    ],
+    "to": [
+      84,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_10": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_10_motion"
+  },
+  "ponder_progress_anim_24_10_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      84,
+      3
+    ],
+    "to": [
+      93,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_10": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_10_motion"
+  },
+  "ponder_progress_anim_24_reverse_10_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      103,
+      3
+    ],
+    "to": [
+      93,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_11": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_11_motion"
+  },
+  "ponder_progress_anim_24_11_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      93,
+      3
+    ],
+    "to": [
+      103,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_11": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_11_motion"
+  },
+  "ponder_progress_anim_24_reverse_11_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      103,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_12": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_12_motion"
+  },
+  "ponder_progress_anim_24_12_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      103,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_12": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_12_motion"
+  },
+  "ponder_progress_anim_24_reverse_12_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      121,
+      3
+    ],
+    "to": [
+      112,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_13": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_13_motion"
+  },
+  "ponder_progress_anim_24_13_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      112,
+      3
+    ],
+    "to": [
+      121,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_13": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_13_motion"
+  },
+  "ponder_progress_anim_24_reverse_13_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      131,
+      3
+    ],
+    "to": [
+      121,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_14": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_14_motion"
+  },
+  "ponder_progress_anim_24_14_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      121,
+      3
+    ],
+    "to": [
+      131,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_14": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_14_motion"
+  },
+  "ponder_progress_anim_24_reverse_14_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      140,
+      3
+    ],
+    "to": [
+      131,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_15": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_15_motion"
+  },
+  "ponder_progress_anim_24_15_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      131,
+      3
+    ],
+    "to": [
+      140,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_15": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_15_motion"
+  },
+  "ponder_progress_anim_24_reverse_15_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      149,
+      3
+    ],
+    "to": [
+      140,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_16": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_16_motion"
+  },
+  "ponder_progress_anim_24_16_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      140,
+      3
+    ],
+    "to": [
+      149,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_16": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_16_motion"
+  },
+  "ponder_progress_anim_24_reverse_16_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      159,
+      3
+    ],
+    "to": [
+      149,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_17": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_17_motion"
+  },
+  "ponder_progress_anim_24_17_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      149,
+      3
+    ],
+    "to": [
+      159,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_17": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_17_motion"
+  },
+  "ponder_progress_anim_24_reverse_17_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      159,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_18": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_18_motion"
+  },
+  "ponder_progress_anim_24_18_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      159,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_18": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_18_motion"
+  },
+  "ponder_progress_anim_24_reverse_18_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      177,
+      3
+    ],
+    "to": [
+      168,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_19": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_19_motion"
+  },
+  "ponder_progress_anim_24_19_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      168,
+      3
+    ],
+    "to": [
+      177,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_19": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_19_motion"
+  },
+  "ponder_progress_anim_24_reverse_19_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      187,
+      3
+    ],
+    "to": [
+      177,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_20": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_20_motion"
+  },
+  "ponder_progress_anim_24_20_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      177,
+      3
+    ],
+    "to": [
+      187,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_20": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_20_motion"
+  },
+  "ponder_progress_anim_24_reverse_20_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      196,
+      3
+    ],
+    "to": [
+      187,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_21": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_21_motion"
+  },
+  "ponder_progress_anim_24_21_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      187,
+      3
+    ],
+    "to": [
+      196,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_21": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_21_motion"
+  },
+  "ponder_progress_anim_24_reverse_21_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      205,
+      3
+    ],
+    "to": [
+      196,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_22": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_22_motion"
+  },
+  "ponder_progress_anim_24_22_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      196,
+      3
+    ],
+    "to": [
+      205,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_22": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_22_motion"
+  },
+  "ponder_progress_anim_24_reverse_22_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      215,
+      3
+    ],
+    "to": [
+      205,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_23": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_23_motion"
+  },
+  "ponder_progress_anim_24_23_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      205,
+      3
+    ],
+    "to": [
+      215,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_reverse_23": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_reverse_23_motion"
+  },
+  "ponder_progress_anim_24_reverse_23_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      224,
+      3
+    ],
+    "to": [
+      215,
+      3
+    ]
+  },
+  "ponder_progress_anim_24_24": {
+    "anim_type": "wait",
+    "duration": 0,
+    "next": "@server_form.ponder_progress_anim_24_24_motion"
+  },
+  "ponder_progress_anim_24_24_motion": {
+    "anim_type": "size",
+    "easing": "out_quart",
+    "duration": 0.2,
+    "from": [
+      215,
+      3
+    ],
+    "to": [
+      224,
+      3
+    ]
+  },
+  "ponder_payload_state": {
+    "type": "panel",
+    "size": [
+      0,
+      0
+    ],
+    "property_bag": {
+      "#raw": "",
+      "#icon": "",
+      "#icon_fs": ""
+    },
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_name": "#form_button_text",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_condition": "always",
+        "binding_name_override": "#raw"
+      },
+      {
+        "binding_name": "#form_button_texture",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_condition": "always",
+        "binding_name_override": "#icon"
+      },
+      {
+        "binding_name": "#form_button_texture_file_system",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_condition": "always",
+        "binding_name_override": "#icon_fs"
+      }
+    ]
+  },
+  "ponder_icon_button_state": {
+    "$background|default": "textures/ui/ponder/button_bg_default",
+    "$icon|default": "textures/ui/ponder/icon_close",
+    "$source|default": "",
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "background": {
+          "type": "image",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "texture": "$background"
+        }
+      },
+      {
+        "icon": {
+          "type": "image",
+          "layer": 1,
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [
+            12,
+            12
+          ],
+          "texture": "$icon"
+        }
+      }
+    ]
+  },
+  "ponder_icon_button": {
+    "$icon|default": "textures/ui/ponder/icon_close",
+    "$source|default": "",
+    "type": "button",
+    "size": [
+      28,
+      28
+    ],
+    "$pressed_button_name": "button.form_button_click",
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "locked_control": "locked",
+    "focus_enabled": true,
+    "sound_name": "random.click",
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "focused"
+      }
+    ],
+    "controls": [
+      {
+        "default@server_form.ponder_icon_button_state": {
+          "$background": "textures/ui/ponder/button_bg_default",
+          "$icon": "$icon"
+        }
+      },
+      {
+        "hover@server_form.ponder_icon_button_state": {
+          "$background": "textures/ui/ponder/button_bg_hover",
+          "$icon": "$icon"
+        }
+      },
+      {
+        "pressed@server_form.ponder_icon_button_state": {
+          "$background": "textures/ui/ponder/button_bg_pressed",
+          "$icon": "$icon"
+        }
+      },
+      {
+        "locked@server_form.ponder_icon_button_state": {
+          "$background": "textures/ui/ponder/button_bg_disabled",
+          "$icon": "$icon"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_name": "#form_button_text",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_name_override": "#raw"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#raw - '§0§r§0§r') = #raw)",
+        "target_property_name": "#visible"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#raw - '§8§r§8§r') = #raw)",
+        "target_property_name": "#enabled"
+      }
+    ]
+  },
+  "ponder_header_content": {
+    "type": "panel",
+    "size": [
+      "100%c",
+      "100%cm"
+    ],
+    "clips_children": false,
+    "controls": [
+      {
+        "title_source@server_form.ponder_payload_state": {
+          "collection_index": 6
+        }
+      },
+      {
+        "title_backdrop": {
+          "type": "image",
+          "layer": 0,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            38,
+            3
+          ],
+          "size": [
+            204,
+            42
+          ],
+          "texture": "textures/ui/ponder/header_streak_thick"
+        }
+      },
+      {
+        "title_labels": {
+          "type": "stack_panel",
+          "orientation": "vertical",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            45,
+            11
+          ],
+          "size": [
+            "100%c",
+            "100%cm"
+          ],
+          "controls": [
+            {
+              "pondering_label": {
+                "type": "label",
+                "text": "ponder.ui.ponder",
+                "localize": true,
+                "color": [
+                  0.639216,
+                  0.639216,
+                  0.639216
+                ],
+                "shadow": false,
+                "text_alignment": "left"
+              }
+            },
+            {
+              "title_gap": {
+                "type": "panel",
+                "size": [
+                  0,
+                  4
+                ]
+              }
+            },
+            {
+              "scene_title_label": {
+                "type": "label",
+                "text": "#text",
+                "localize": false,
+                "size": [
+                  "default",
+                  "default"
+                ],
+                "max_size": [
+                  180,
+                  "default"
+                ],
+                "color": [
+                  0.933333,
+                  0.933333,
+                  0.933333
+                ],
+                "shadow": false,
+                "text_alignment": "left",
+                "line_padding": 1,
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "title_source",
+                    "source_property_name": "(#raw - '§0§r§0§r' - '§a§r§a§r' - '§8§r§8§r')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "icon_frame": {
+          "type": "image",
+          "layer": 1,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            1,
+            4
+          ],
+          "size": [
+            40,
+            40
+          ],
+          "texture": "textures/ui/ponder/header_icon_frame"
+        }
+      },
+      {
+        "scene_icon": {
+          "type": "image",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            9,
+            12
+          ],
+          "size": [
+            24,
+            24
+          ],
+          "bindings": [
+            {
+              "binding_type": "view",
+              "source_control_name": "title_source",
+              "source_property_name": "#icon",
+              "target_property_name": "#texture"
+            },
+            {
+              "binding_type": "view",
+              "source_control_name": "title_source",
+              "source_property_name": "#icon_fs",
+              "target_property_name": "#texture_file_system"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_header": {
+    "type": "panel",
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      21,
+      19
+    ],
+    "size": [
+      "100%c",
+      "100%cm"
+    ],
+    "clips_children": false,
+    "alpha": 0,
+    "propagate_alpha": true,
+    "disable_anim_fast_forward": true,
+    "anims": [
+      "@server_form.ponder_header_intro_alpha",
+      "@server_form.ponder_header_intro_offset"
+    ],
+    "controls": [
+      {
+        "content@server_form.ponder_header_content": {}
+      }
+    ]
+  },
+  "ponder_side_state": {
+    "$background|default": "textures/ui/ponder/side_button_bg_default",
+    "$source|default": "",
+    "type": "panel",
+    "size": [
+      20,
+      20
+    ],
+    "clips_children": false,
+    "controls": [
+      {
+        "background": {
+          "type": "image",
+          "layer": 0,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "texture": "$background"
+        }
+      },
+      {
+        "icon": {
+          "type": "image",
+          "layer": 1,
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [
+            12,
+            12
+          ],
+          "bindings": [
+            {
+              "binding_type": "view",
+              "source_control_name": "$source",
+              "source_property_name": "#icon",
+              "target_property_name": "#texture"
+            },
+            {
+              "binding_type": "view",
+              "source_control_name": "$source",
+              "source_property_name": "#icon_fs",
+              "target_property_name": "#texture_file_system"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_side_hover_state": {
+    "$background|default": "textures/ui/ponder/side_button_bg_hover",
+    "$source|default": "",
+    "type": "panel",
+    "size": [
+      20,
+      20
+    ],
+    "clips_children": false,
+    "controls": [
+      {
+        "base@server_form.ponder_side_state": {
+          "$background": "$background",
+          "$source": "$source"
+        }
+      },
+      {
+        "tip@server_form.ponder_side_tip": {
+          "$source": "$source"
+        }
+      }
+    ]
+  },
+  "ponder_side_tip": {
+    "$source|default": "",
+    "type": "image",
+    "layer": 200,
+    "texture": "textures/ui/ponder/tooltip_streak",
+    "anchor_from": "left_middle",
+    "anchor_to": "right_middle",
+    "offset": [
+      4,
+      0
+    ],
+    "size": [
+      200,
+      26
+    ],
+    "allow_clipping": false,
+    "anims": [
+      "@server_form.ponder_tooltip_grow"
+    ],
+    "controls": [
+      {
+        "tip_text": {
+          "type": "label",
+          "layer": 1,
+          "localize": false,
+          "text": "#text",
+          "shadow": true,
+          "color": [
+            0.866667,
+            0.933333,
+            1
+          ],
+          "anchor_from": "left_middle",
+          "anchor_to": "left_middle",
+          "offset": [
+            3,
+            0
+          ],
+          "size": [
+            "default",
+            "default"
+          ],
+          "max_size": [
+            190,
+            24
+          ],
+          "bindings": [
+            {
+              "binding_type": "view",
+              "source_control_name": "$source",
+              "source_property_name": "(#raw - '§0§r§0§r' - '§a§r§a§r' - '§8§r§8§r')",
+              "target_property_name": "#text"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_side_button": {
+    "$source|default": "",
+    "type": "button",
+    "size": [
+      20,
+      20
+    ],
+    "clips_children": false,
+    "$pressed_button_name": "button.form_button_click",
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "focus_enabled": true,
+    "sound_name": "random.click",
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "focused"
+      }
+    ],
+    "controls": [
+      {
+        "default@server_form.ponder_side_state": {
+          "$source": "$source"
+        }
+      },
+      {
+        "hover@server_form.ponder_side_hover_state": {
+          "$source": "$source",
+          "$background": "textures/ui/ponder/side_button_bg_hover"
+        }
+      },
+      {
+        "pressed@server_form.ponder_side_hover_state": {
+          "$source": "$source",
+          "$background": "textures/ui/ponder/side_button_bg_pressed"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_type": "view",
+        "source_control_name": "$source",
+        "source_property_name": "((#raw - '§0§r§0§r') = #raw)",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+  "ponder_sidebar": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "form_buttons",
+    "clips_children": false,
+    "controls": [
+      {
+        "side_source_0@server_form.ponder_payload_state": {
+          "collection_index": 9
+        }
+      },
+      {
+        "side_source_1@server_form.ponder_payload_state": {
+          "collection_index": 10
+        }
+      },
+      {
+        "side_source_2@server_form.ponder_payload_state": {
+          "collection_index": 11
+        }
+      },
+      {
+        "side_source_3@server_form.ponder_payload_state": {
+          "collection_index": 12
+        }
+      },
+      {
+        "side_source_4@server_form.ponder_payload_state": {
+          "collection_index": 13
+        }
+      },
+      {
+        "side_source_5@server_form.ponder_payload_state": {
+          "collection_index": 14
+        }
+      },
+      {
+        "side_0@server_form.ponder_side_button": {
+          "collection_index": 9,
+          "$source": "side_source_0",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            31,
+            81
+          ]
+        }
+      },
+      {
+        "side_1@server_form.ponder_side_button": {
+          "collection_index": 10,
+          "$source": "side_source_1",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            31,
+            111
+          ]
+        }
+      },
+      {
+        "side_2@server_form.ponder_side_button": {
+          "collection_index": 11,
+          "$source": "side_source_2",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            31,
+            141
+          ]
+        }
+      },
+      {
+        "side_3@server_form.ponder_side_button": {
+          "collection_index": 12,
+          "$source": "side_source_3",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            31,
+            171
+          ]
+        }
+      },
+      {
+        "side_4@server_form.ponder_side_button": {
+          "collection_index": 13,
+          "$source": "side_source_4",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            31,
+            201
+          ]
+        }
+      },
+      {
+        "side_5@server_form.ponder_side_button": {
+          "collection_index": 14,
+          "$source": "side_source_5",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            31,
+            231
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_nav": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "form_buttons",
+    "controls": [
+      {
+        "previous@server_form.ponder_icon_button": {
+          "collection_index": 0,
+          "$icon": "textures/ui/ponder/icon_prev",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            -28,
+            -28
+          ]
+        }
+      },
+      {
+        "close@server_form.ponder_icon_button": {
+          "collection_index": 1,
+          "$icon": "textures/ui/ponder/icon_close",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            0,
+            -28
+          ]
+        }
+      },
+      {
+        "next@server_form.ponder_icon_button": {
+          "collection_index": 2,
+          "$icon": "textures/ui/ponder/icon_next",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            28,
+            -28
+          ]
+        }
+      },
+      {
+        "replay@server_form.ponder_icon_button": {
+          "collection_index": 3,
+          "$icon": "textures/ui/ponder/icon_replay",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            70,
+            -28
+          ]
+        }
+      },
+      {
+        "back@server_form.ponder_icon_button": {
+          "collection_index": 5,
+          "$icon": "textures/ui/ponder/icon_back",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            -70,
+            -28
+          ]
+        }
+      },
+      {
+        "comfy@server_form.ponder_icon_button": {
+          "collection_index": 4,
+          "$icon": "textures/ui/ponder/icon_comfy",
+          "anchor_from": "bottom_right",
+          "anchor_to": "bottom_right",
+          "offset": [
+            -24,
+            -28
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_progress_fill": {
+    "$width|default": 0,
+    "$anims|default": [],
+    "$visible|default": "false",
+    "type": "panel",
+    "layer": 2,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      2,
+      3
+    ],
+    "size": [
+      "$width",
+      3
+    ],
+    "clips_children": true,
+    "property_bag": {
+      "#t": ""
+    },
+    "anims": "$anims",
+    "disable_anim_fast_forward": true,
+    "controls": [
+      {
+        "image": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "size": [
+            224,
+            3
+          ],
+          "texture": "textures/ui/ponder/progress_fill"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#t"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "$visible",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+  "ponder_keyframe_state": {
+    "$height|default": 5,
+    "$alpha|default": 0.44,
+    "type": "image",
+    "texture": "textures/ui/ponder/progress_keyframe",
+    "size": [
+      2,
+      "$height"
+    ],
+    "alpha": "$alpha",
+    "anchor_from": "left_middle",
+    "anchor_to": "left_middle"
+  },
+  "ponder_keyframe_button": {
+    "type": "button",
+    "size": [
+      6,
+      15
+    ],
+    "$pressed_button_name": "button.form_button_click",
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "focus_enabled": true,
+    "sound_name": "random.click",
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "property_bag": {
+      "#x000": [
+        0,
+        -3
+      ],
+      "#x001": [
+        1,
+        -3
+      ],
+      "#x002": [
+        2,
+        -3
+      ],
+      "#x003": [
+        3,
+        -3
+      ],
+      "#x004": [
+        4,
+        -3
+      ],
+      "#x005": [
+        5,
+        -3
+      ],
+      "#x006": [
+        6,
+        -3
+      ],
+      "#x007": [
+        7,
+        -3
+      ],
+      "#x008": [
+        8,
+        -3
+      ],
+      "#x009": [
+        9,
+        -3
+      ],
+      "#x010": [
+        10,
+        -3
+      ],
+      "#x011": [
+        11,
+        -3
+      ],
+      "#x012": [
+        12,
+        -3
+      ],
+      "#x013": [
+        13,
+        -3
+      ],
+      "#x014": [
+        14,
+        -3
+      ],
+      "#x015": [
+        15,
+        -3
+      ],
+      "#x016": [
+        16,
+        -3
+      ],
+      "#x017": [
+        17,
+        -3
+      ],
+      "#x018": [
+        18,
+        -3
+      ],
+      "#x019": [
+        19,
+        -3
+      ],
+      "#x020": [
+        20,
+        -3
+      ],
+      "#x021": [
+        21,
+        -3
+      ],
+      "#x022": [
+        22,
+        -3
+      ],
+      "#x023": [
+        23,
+        -3
+      ],
+      "#x024": [
+        24,
+        -3
+      ],
+      "#x025": [
+        25,
+        -3
+      ],
+      "#x026": [
+        26,
+        -3
+      ],
+      "#x027": [
+        27,
+        -3
+      ],
+      "#x028": [
+        28,
+        -3
+      ],
+      "#x029": [
+        29,
+        -3
+      ],
+      "#x030": [
+        30,
+        -3
+      ],
+      "#x031": [
+        31,
+        -3
+      ],
+      "#x032": [
+        32,
+        -3
+      ],
+      "#x033": [
+        33,
+        -3
+      ],
+      "#x034": [
+        34,
+        -3
+      ],
+      "#x035": [
+        35,
+        -3
+      ],
+      "#x036": [
+        36,
+        -3
+      ],
+      "#x037": [
+        37,
+        -3
+      ],
+      "#x038": [
+        38,
+        -3
+      ],
+      "#x039": [
+        39,
+        -3
+      ],
+      "#x040": [
+        40,
+        -3
+      ],
+      "#x041": [
+        41,
+        -3
+      ],
+      "#x042": [
+        42,
+        -3
+      ],
+      "#x043": [
+        43,
+        -3
+      ],
+      "#x044": [
+        44,
+        -3
+      ],
+      "#x045": [
+        45,
+        -3
+      ],
+      "#x046": [
+        46,
+        -3
+      ],
+      "#x047": [
+        47,
+        -3
+      ],
+      "#x048": [
+        48,
+        -3
+      ],
+      "#x049": [
+        49,
+        -3
+      ],
+      "#x050": [
+        50,
+        -3
+      ],
+      "#x051": [
+        51,
+        -3
+      ],
+      "#x052": [
+        52,
+        -3
+      ],
+      "#x053": [
+        53,
+        -3
+      ],
+      "#x054": [
+        54,
+        -3
+      ],
+      "#x055": [
+        55,
+        -3
+      ],
+      "#x056": [
+        56,
+        -3
+      ],
+      "#x057": [
+        57,
+        -3
+      ],
+      "#x058": [
+        58,
+        -3
+      ],
+      "#x059": [
+        59,
+        -3
+      ],
+      "#x060": [
+        60,
+        -3
+      ],
+      "#x061": [
+        61,
+        -3
+      ],
+      "#x062": [
+        62,
+        -3
+      ],
+      "#x063": [
+        63,
+        -3
+      ],
+      "#x064": [
+        64,
+        -3
+      ],
+      "#x065": [
+        65,
+        -3
+      ],
+      "#x066": [
+        66,
+        -3
+      ],
+      "#x067": [
+        67,
+        -3
+      ],
+      "#x068": [
+        68,
+        -3
+      ],
+      "#x069": [
+        69,
+        -3
+      ],
+      "#x070": [
+        70,
+        -3
+      ],
+      "#x071": [
+        71,
+        -3
+      ],
+      "#x072": [
+        72,
+        -3
+      ],
+      "#x073": [
+        73,
+        -3
+      ],
+      "#x074": [
+        74,
+        -3
+      ],
+      "#x075": [
+        75,
+        -3
+      ],
+      "#x076": [
+        76,
+        -3
+      ],
+      "#x077": [
+        77,
+        -3
+      ],
+      "#x078": [
+        78,
+        -3
+      ],
+      "#x079": [
+        79,
+        -3
+      ],
+      "#x080": [
+        80,
+        -3
+      ],
+      "#x081": [
+        81,
+        -3
+      ],
+      "#x082": [
+        82,
+        -3
+      ],
+      "#x083": [
+        83,
+        -3
+      ],
+      "#x084": [
+        84,
+        -3
+      ],
+      "#x085": [
+        85,
+        -3
+      ],
+      "#x086": [
+        86,
+        -3
+      ],
+      "#x087": [
+        87,
+        -3
+      ],
+      "#x088": [
+        88,
+        -3
+      ],
+      "#x089": [
+        89,
+        -3
+      ],
+      "#x090": [
+        90,
+        -3
+      ],
+      "#x091": [
+        91,
+        -3
+      ],
+      "#x092": [
+        92,
+        -3
+      ],
+      "#x093": [
+        93,
+        -3
+      ],
+      "#x094": [
+        94,
+        -3
+      ],
+      "#x095": [
+        95,
+        -3
+      ],
+      "#x096": [
+        96,
+        -3
+      ],
+      "#x097": [
+        97,
+        -3
+      ],
+      "#x098": [
+        98,
+        -3
+      ],
+      "#x099": [
+        99,
+        -3
+      ],
+      "#x100": [
+        100,
+        -3
+      ],
+      "#x101": [
+        101,
+        -3
+      ],
+      "#x102": [
+        102,
+        -3
+      ],
+      "#x103": [
+        103,
+        -3
+      ],
+      "#x104": [
+        104,
+        -3
+      ],
+      "#x105": [
+        105,
+        -3
+      ],
+      "#x106": [
+        106,
+        -3
+      ],
+      "#x107": [
+        107,
+        -3
+      ],
+      "#x108": [
+        108,
+        -3
+      ],
+      "#x109": [
+        109,
+        -3
+      ],
+      "#x110": [
+        110,
+        -3
+      ],
+      "#x111": [
+        111,
+        -3
+      ],
+      "#x112": [
+        112,
+        -3
+      ],
+      "#x113": [
+        113,
+        -3
+      ],
+      "#x114": [
+        114,
+        -3
+      ],
+      "#x115": [
+        115,
+        -3
+      ],
+      "#x116": [
+        116,
+        -3
+      ],
+      "#x117": [
+        117,
+        -3
+      ],
+      "#x118": [
+        118,
+        -3
+      ],
+      "#x119": [
+        119,
+        -3
+      ],
+      "#x120": [
+        120,
+        -3
+      ],
+      "#x121": [
+        121,
+        -3
+      ],
+      "#x122": [
+        122,
+        -3
+      ],
+      "#x123": [
+        123,
+        -3
+      ],
+      "#x124": [
+        124,
+        -3
+      ],
+      "#x125": [
+        125,
+        -3
+      ],
+      "#x126": [
+        126,
+        -3
+      ],
+      "#x127": [
+        127,
+        -3
+      ],
+      "#x128": [
+        128,
+        -3
+      ],
+      "#x129": [
+        129,
+        -3
+      ],
+      "#x130": [
+        130,
+        -3
+      ],
+      "#x131": [
+        131,
+        -3
+      ],
+      "#x132": [
+        132,
+        -3
+      ],
+      "#x133": [
+        133,
+        -3
+      ],
+      "#x134": [
+        134,
+        -3
+      ],
+      "#x135": [
+        135,
+        -3
+      ],
+      "#x136": [
+        136,
+        -3
+      ],
+      "#x137": [
+        137,
+        -3
+      ],
+      "#x138": [
+        138,
+        -3
+      ],
+      "#x139": [
+        139,
+        -3
+      ],
+      "#x140": [
+        140,
+        -3
+      ],
+      "#x141": [
+        141,
+        -3
+      ],
+      "#x142": [
+        142,
+        -3
+      ],
+      "#x143": [
+        143,
+        -3
+      ],
+      "#x144": [
+        144,
+        -3
+      ],
+      "#x145": [
+        145,
+        -3
+      ],
+      "#x146": [
+        146,
+        -3
+      ],
+      "#x147": [
+        147,
+        -3
+      ],
+      "#x148": [
+        148,
+        -3
+      ],
+      "#x149": [
+        149,
+        -3
+      ],
+      "#x150": [
+        150,
+        -3
+      ],
+      "#x151": [
+        151,
+        -3
+      ],
+      "#x152": [
+        152,
+        -3
+      ],
+      "#x153": [
+        153,
+        -3
+      ],
+      "#x154": [
+        154,
+        -3
+      ],
+      "#x155": [
+        155,
+        -3
+      ],
+      "#x156": [
+        156,
+        -3
+      ],
+      "#x157": [
+        157,
+        -3
+      ],
+      "#x158": [
+        158,
+        -3
+      ],
+      "#x159": [
+        159,
+        -3
+      ],
+      "#x160": [
+        160,
+        -3
+      ],
+      "#x161": [
+        161,
+        -3
+      ],
+      "#x162": [
+        162,
+        -3
+      ],
+      "#x163": [
+        163,
+        -3
+      ],
+      "#x164": [
+        164,
+        -3
+      ],
+      "#x165": [
+        165,
+        -3
+      ],
+      "#x166": [
+        166,
+        -3
+      ],
+      "#x167": [
+        167,
+        -3
+      ],
+      "#x168": [
+        168,
+        -3
+      ],
+      "#x169": [
+        169,
+        -3
+      ],
+      "#x170": [
+        170,
+        -3
+      ],
+      "#x171": [
+        171,
+        -3
+      ],
+      "#x172": [
+        172,
+        -3
+      ],
+      "#x173": [
+        173,
+        -3
+      ],
+      "#x174": [
+        174,
+        -3
+      ],
+      "#x175": [
+        175,
+        -3
+      ],
+      "#x176": [
+        176,
+        -3
+      ],
+      "#x177": [
+        177,
+        -3
+      ],
+      "#x178": [
+        178,
+        -3
+      ],
+      "#x179": [
+        179,
+        -3
+      ],
+      "#x180": [
+        180,
+        -3
+      ],
+      "#x181": [
+        181,
+        -3
+      ],
+      "#x182": [
+        182,
+        -3
+      ],
+      "#x183": [
+        183,
+        -3
+      ],
+      "#x184": [
+        184,
+        -3
+      ],
+      "#x185": [
+        185,
+        -3
+      ],
+      "#x186": [
+        186,
+        -3
+      ],
+      "#x187": [
+        187,
+        -3
+      ],
+      "#x188": [
+        188,
+        -3
+      ],
+      "#x189": [
+        189,
+        -3
+      ],
+      "#x190": [
+        190,
+        -3
+      ],
+      "#x191": [
+        191,
+        -3
+      ],
+      "#x192": [
+        192,
+        -3
+      ],
+      "#x193": [
+        193,
+        -3
+      ],
+      "#x194": [
+        194,
+        -3
+      ],
+      "#x195": [
+        195,
+        -3
+      ],
+      "#x196": [
+        196,
+        -3
+      ],
+      "#x197": [
+        197,
+        -3
+      ],
+      "#x198": [
+        198,
+        -3
+      ],
+      "#x199": [
+        199,
+        -3
+      ],
+      "#x200": [
+        200,
+        -3
+      ],
+      "#x201": [
+        201,
+        -3
+      ],
+      "#x202": [
+        202,
+        -3
+      ],
+      "#x203": [
+        203,
+        -3
+      ],
+      "#x204": [
+        204,
+        -3
+      ],
+      "#x205": [
+        205,
+        -3
+      ],
+      "#x206": [
+        206,
+        -3
+      ],
+      "#x207": [
+        207,
+        -3
+      ],
+      "#x208": [
+        208,
+        -3
+      ],
+      "#x209": [
+        209,
+        -3
+      ],
+      "#x210": [
+        210,
+        -3
+      ],
+      "#x211": [
+        211,
+        -3
+      ],
+      "#x212": [
+        212,
+        -3
+      ],
+      "#x213": [
+        213,
+        -3
+      ],
+      "#x214": [
+        214,
+        -3
+      ],
+      "#x215": [
+        215,
+        -3
+      ],
+      "#x216": [
+        216,
+        -3
+      ],
+      "#x217": [
+        217,
+        -3
+      ],
+      "#x218": [
+        218,
+        -3
+      ],
+      "#x219": [
+        219,
+        -3
+      ],
+      "#x220": [
+        220,
+        -3
+      ],
+      "#x221": [
+        221,
+        -3
+      ],
+      "#x222": [
+        222,
+        -3
+      ],
+      "#x223": [
+        223,
+        -3
+      ],
+      "#x224": [
+        224,
+        -3
+      ]
+    },
+    "offset": "#offset",
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "focused"
+      }
+    ],
+    "controls": [
+      {
+        "default@server_form.ponder_keyframe_state": {
+          "$height": 5,
+          "$alpha": 0.44
+        }
+      },
+      {
+        "hover@server_form.ponder_keyframe_state": {
+          "$height": 8,
+          "$alpha": 0.88
+        }
+      },
+      {
+        "pressed@server_form.ponder_keyframe_state": {
+          "$height": 8,
+          "$alpha": 1
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_name": "#form_button_text",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_name_override": "#raw"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#raw - '§0§r§0§r') = #raw)",
+        "target_property_name": "#visible"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "('%.3s' * (#raw - '§0§r§2§r'))",
+        "target_property_name": "#digits"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "('#x' + #digits)",
+        "target_property_name": "#offset"
+      }
+    ]
+  },
+  "ponder_progress_bar": {
+    "type": "panel",
+    "size": [
+      228,
+      9
+    ],
+    "collection_name": "form_buttons",
+    "controls": [
+      {
+        "track": {
+          "type": "image",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "texture": "textures/ui/ponder/progress_track"
+        }
+      },
+      {
+        "f4_1_rest@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f4_1_fwd@server_form.ponder_progress_fill": {
+          "$width": 0,
+          "$anims": [
+            "@server_form.ponder_progress_anim_4_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f4_1_rev@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_4_reverse_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f4_2_rest@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f4_2_fwd@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_4_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f4_2_rev@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_4_reverse_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f4_3_rest@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f4_3_fwd@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_4_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f4_3_rev@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [
+            "@server_form.ponder_progress_anim_4_reverse_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f4_4_rest@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f4_4_fwd@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_4_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_1_rest@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_1_fwd@server_form.ponder_progress_fill": {
+          "$width": 0,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_1_rev@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_reverse_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f8_2_rest@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_2_fwd@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_2_rev@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_reverse_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f8_3_rest@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_3_fwd@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_3_rev@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_reverse_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f8_4_rest@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_4_fwd@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_4_rev@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_reverse_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f8_5_rest@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_5_fwd@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_5_rev@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_reverse_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f8_6_rest@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_6_fwd@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_6_rev@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_reverse_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f8_7_rest@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_7_fwd@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f8_7_rev@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_reverse_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f8_8_rest@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f8_8_fwd@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [
+            "@server_form.ponder_progress_anim_8_8"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_1_rest@server_form.ponder_progress_fill": {
+          "$width": 19,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_1_fwd@server_form.ponder_progress_fill": {
+          "$width": 0,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_1_rev@server_form.ponder_progress_fill": {
+          "$width": 37,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_2_rest@server_form.ponder_progress_fill": {
+          "$width": 37,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_2_fwd@server_form.ponder_progress_fill": {
+          "$width": 19,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_2_rev@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_3_rest@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_3_fwd@server_form.ponder_progress_fill": {
+          "$width": 37,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_3_rev@server_form.ponder_progress_fill": {
+          "$width": 75,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_4_rest@server_form.ponder_progress_fill": {
+          "$width": 75,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_4_fwd@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_4_rev@server_form.ponder_progress_fill": {
+          "$width": 93,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_5_rest@server_form.ponder_progress_fill": {
+          "$width": 93,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_5_fwd@server_form.ponder_progress_fill": {
+          "$width": 75,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_5_rev@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_6_rest@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_6_fwd@server_form.ponder_progress_fill": {
+          "$width": 93,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_6_rev@server_form.ponder_progress_fill": {
+          "$width": 131,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_7_rest@server_form.ponder_progress_fill": {
+          "$width": 131,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_7_fwd@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_7_rev@server_form.ponder_progress_fill": {
+          "$width": 149,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_8_rest@server_form.ponder_progress_fill": {
+          "$width": 149,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_8_fwd@server_form.ponder_progress_fill": {
+          "$width": 131,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_8"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_8_rev@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_8"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_9_rest@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_9_fwd@server_form.ponder_progress_fill": {
+          "$width": 149,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_9"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_9_rev@server_form.ponder_progress_fill": {
+          "$width": 187,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_9"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_10_rest@server_form.ponder_progress_fill": {
+          "$width": 187,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_10_fwd@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_10"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_10_rev@server_form.ponder_progress_fill": {
+          "$width": 205,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_10"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_11_rest@server_form.ponder_progress_fill": {
+          "$width": 205,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_11_fwd@server_form.ponder_progress_fill": {
+          "$width": 187,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_11"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f12_11_rev@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_reverse_11"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f12_12_rest@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f12_12_fwd@server_form.ponder_progress_fill": {
+          "$width": 205,
+          "$anims": [
+            "@server_form.ponder_progress_anim_12_12"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r12|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_1_rest@server_form.ponder_progress_fill": {
+          "$width": 14,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_1_fwd@server_form.ponder_progress_fill": {
+          "$width": 0,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_1_rev@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_2_rest@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_2_fwd@server_form.ponder_progress_fill": {
+          "$width": 14,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_2_rev@server_form.ponder_progress_fill": {
+          "$width": 42,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_3_rest@server_form.ponder_progress_fill": {
+          "$width": 42,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_3_fwd@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_3_rev@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_4_rest@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_4_fwd@server_form.ponder_progress_fill": {
+          "$width": 42,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_4_rev@server_form.ponder_progress_fill": {
+          "$width": 70,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_5_rest@server_form.ponder_progress_fill": {
+          "$width": 70,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_5_fwd@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_5_rev@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_6_rest@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_6_fwd@server_form.ponder_progress_fill": {
+          "$width": 70,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_6_rev@server_form.ponder_progress_fill": {
+          "$width": 98,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_7_rest@server_form.ponder_progress_fill": {
+          "$width": 98,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_7_fwd@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_7_rev@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_8_rest@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_8_fwd@server_form.ponder_progress_fill": {
+          "$width": 98,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_8"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_8_rev@server_form.ponder_progress_fill": {
+          "$width": 126,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_8"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_9_rest@server_form.ponder_progress_fill": {
+          "$width": 126,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_9_fwd@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_9"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_9_rev@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_9"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_10_rest@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_10_fwd@server_form.ponder_progress_fill": {
+          "$width": 126,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_10"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_10_rev@server_form.ponder_progress_fill": {
+          "$width": 154,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_10"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_11_rest@server_form.ponder_progress_fill": {
+          "$width": 154,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_11_fwd@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_11"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_11_rev@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_11"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_12_rest@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_12_fwd@server_form.ponder_progress_fill": {
+          "$width": 154,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_12"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_12_rev@server_form.ponder_progress_fill": {
+          "$width": 182,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_12"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_13_rest@server_form.ponder_progress_fill": {
+          "$width": 182,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_13_fwd@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_13"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_13_rev@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_13"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_14_rest@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_14_fwd@server_form.ponder_progress_fill": {
+          "$width": 182,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_14"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_14_rev@server_form.ponder_progress_fill": {
+          "$width": 210,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_14"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_15_rest@server_form.ponder_progress_fill": {
+          "$width": 210,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_15_fwd@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_15"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f16_15_rev@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_reverse_15"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f16_16_rest@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r16|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f16_16_fwd@server_form.ponder_progress_fill": {
+          "$width": 210,
+          "$anims": [
+            "@server_form.ponder_progress_anim_16_16"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r16|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_1_rest@server_form.ponder_progress_fill": {
+          "$width": 9,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_1_fwd@server_form.ponder_progress_fill": {
+          "$width": 0,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_1_rev@server_form.ponder_progress_fill": {
+          "$width": 19,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_1"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_2_rest@server_form.ponder_progress_fill": {
+          "$width": 19,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_2_fwd@server_form.ponder_progress_fill": {
+          "$width": 9,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_2_rev@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_2"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_3_rest@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_3_fwd@server_form.ponder_progress_fill": {
+          "$width": 19,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_3_rev@server_form.ponder_progress_fill": {
+          "$width": 37,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_3"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_4_rest@server_form.ponder_progress_fill": {
+          "$width": 37,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_4_fwd@server_form.ponder_progress_fill": {
+          "$width": 28,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_4_rev@server_form.ponder_progress_fill": {
+          "$width": 47,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_4"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_5_rest@server_form.ponder_progress_fill": {
+          "$width": 47,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_5_fwd@server_form.ponder_progress_fill": {
+          "$width": 37,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_5_rev@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_5"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_6_rest@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_6_fwd@server_form.ponder_progress_fill": {
+          "$width": 47,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_6_rev@server_form.ponder_progress_fill": {
+          "$width": 65,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_6"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_7_rest@server_form.ponder_progress_fill": {
+          "$width": 65,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_7_fwd@server_form.ponder_progress_fill": {
+          "$width": 56,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_7_rev@server_form.ponder_progress_fill": {
+          "$width": 75,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_7"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_8_rest@server_form.ponder_progress_fill": {
+          "$width": 75,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_8_fwd@server_form.ponder_progress_fill": {
+          "$width": 65,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_8"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_8_rev@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_8"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_9_rest@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_9_fwd@server_form.ponder_progress_fill": {
+          "$width": 75,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_9"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_9_rev@server_form.ponder_progress_fill": {
+          "$width": 93,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_9"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_10_rest@server_form.ponder_progress_fill": {
+          "$width": 93,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_10_fwd@server_form.ponder_progress_fill": {
+          "$width": 84,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_10"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_10_rev@server_form.ponder_progress_fill": {
+          "$width": 103,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_10"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_11_rest@server_form.ponder_progress_fill": {
+          "$width": 103,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_11_fwd@server_form.ponder_progress_fill": {
+          "$width": 93,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_11"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_11_rev@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_11"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_12_rest@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_12_fwd@server_form.ponder_progress_fill": {
+          "$width": 103,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_12"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_12_rev@server_form.ponder_progress_fill": {
+          "$width": 121,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_12"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_13_rest@server_form.ponder_progress_fill": {
+          "$width": 121,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_13_fwd@server_form.ponder_progress_fill": {
+          "$width": 112,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_13"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_13_rev@server_form.ponder_progress_fill": {
+          "$width": 131,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_13"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_14_rest@server_form.ponder_progress_fill": {
+          "$width": 131,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_14_fwd@server_form.ponder_progress_fill": {
+          "$width": 121,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_14"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_14_rev@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_14"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_15_rest@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_15_fwd@server_form.ponder_progress_fill": {
+          "$width": 131,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_15"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_15_rev@server_form.ponder_progress_fill": {
+          "$width": 149,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_15"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_16_rest@server_form.ponder_progress_fill": {
+          "$width": 149,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_16_fwd@server_form.ponder_progress_fill": {
+          "$width": 140,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_16"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_16_rev@server_form.ponder_progress_fill": {
+          "$width": 159,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_16"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_17_rest@server_form.ponder_progress_fill": {
+          "$width": 159,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_17_fwd@server_form.ponder_progress_fill": {
+          "$width": 149,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_17"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_17_rev@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_17"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_18_rest@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_18_fwd@server_form.ponder_progress_fill": {
+          "$width": 159,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_18"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_18_rev@server_form.ponder_progress_fill": {
+          "$width": 177,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_18"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_19_rest@server_form.ponder_progress_fill": {
+          "$width": 177,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_19_fwd@server_form.ponder_progress_fill": {
+          "$width": 168,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_19"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_19_rev@server_form.ponder_progress_fill": {
+          "$width": 187,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_19"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_20_rest@server_form.ponder_progress_fill": {
+          "$width": 187,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_20_fwd@server_form.ponder_progress_fill": {
+          "$width": 177,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_20"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_20_rev@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_20"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_21_rest@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_21_fwd@server_form.ponder_progress_fill": {
+          "$width": 187,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_21"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_21_rev@server_form.ponder_progress_fill": {
+          "$width": 205,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_21"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_22_rest@server_form.ponder_progress_fill": {
+          "$width": 205,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_22_fwd@server_form.ponder_progress_fill": {
+          "$width": 196,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_22"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_22_rev@server_form.ponder_progress_fill": {
+          "$width": 215,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_22"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_23_rest@server_form.ponder_progress_fill": {
+          "$width": 215,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_23_fwd@server_form.ponder_progress_fill": {
+          "$width": 205,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_23"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "f24_23_rev@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_reverse_23"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and (not ((#t - '§7§r') = #t)))"
+        }
+      },
+      {
+        "f24_24_rest@server_form.ponder_progress_fill": {
+          "$width": 224,
+          "$anims": [],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r24|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+        }
+      },
+      {
+        "f24_24_fwd@server_form.ponder_progress_fill": {
+          "$width": 215,
+          "$anims": [
+            "@server_form.ponder_progress_anim_24_24"
+          ],
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r24|') = #t)) and (not ((#t - '§6§r') = #t)))"
+        }
+      },
+      {
+        "keys": {
+          "type": "panel",
+          "layer": 3,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "collection_name": "form_buttons",
+          "controls": [
+            {
+              "k0@server_form.ponder_keyframe_button": {
+                "collection_index": 15
+              }
+            },
+            {
+              "k1@server_form.ponder_keyframe_button": {
+                "collection_index": 16
+              }
+            },
+            {
+              "k2@server_form.ponder_keyframe_button": {
+                "collection_index": 17
+              }
+            },
+            {
+              "k3@server_form.ponder_keyframe_button": {
+                "collection_index": 18
+              }
+            },
+            {
+              "k4@server_form.ponder_keyframe_button": {
+                "collection_index": 19
+              }
+            },
+            {
+              "k5@server_form.ponder_keyframe_button": {
+                "collection_index": 20
+              }
+            },
+            {
+              "k6@server_form.ponder_keyframe_button": {
+                "collection_index": 21
+              }
+            },
+            {
+              "k7@server_form.ponder_keyframe_button": {
+                "collection_index": 22
+              }
+            },
+            {
+              "k8@server_form.ponder_keyframe_button": {
+                "collection_index": 23
+              }
+            },
+            {
+              "k9@server_form.ponder_keyframe_button": {
+                "collection_index": 24
+              }
+            },
+            {
+              "k10@server_form.ponder_keyframe_button": {
+                "collection_index": 25
+              }
+            },
+            {
+              "k11@server_form.ponder_keyframe_button": {
+                "collection_index": 26
+              }
+            },
+            {
+              "k12@server_form.ponder_keyframe_button": {
+                "collection_index": 27
+              }
+            },
+            {
+              "k13@server_form.ponder_keyframe_button": {
+                "collection_index": 28
+              }
+            },
+            {
+              "k14@server_form.ponder_keyframe_button": {
+                "collection_index": 29
+              }
+            },
+            {
+              "k15@server_form.ponder_keyframe_button": {
+                "collection_index": 30
+              }
+            },
+            {
+              "k16@server_form.ponder_keyframe_button": {
+                "collection_index": 31
+              }
+            },
+            {
+              "k17@server_form.ponder_keyframe_button": {
+                "collection_index": 32
+              }
+            },
+            {
+              "k18@server_form.ponder_keyframe_button": {
+                "collection_index": 33
+              }
+            },
+            {
+              "k19@server_form.ponder_keyframe_button": {
+                "collection_index": 34
+              }
+            },
+            {
+              "k20@server_form.ponder_keyframe_button": {
+                "collection_index": 35
+              }
+            },
+            {
+              "k21@server_form.ponder_keyframe_button": {
+                "collection_index": 36
+              }
+            },
+            {
+              "k22@server_form.ponder_keyframe_button": {
+                "collection_index": 37
+              }
+            },
+            {
+              "k23@server_form.ponder_keyframe_button": {
+                "collection_index": 38
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_bubble_slot": {
+    "$visible|default": "false",
+    "$offset|default": [
+      -24,
+      0
+    ],
+    "type": "panel",
+    "anchor_from": "right_middle",
+    "anchor_to": "right_middle",
+    "offset": "$offset",
+    "size": [
+      184,
+      64
+    ],
+    "clips_children": false,
+    "property_bag": {
+      "#t": ""
+    },
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#t"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "$visible",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "cluster": {
+          "type": "stack_panel",
+          "orientation": "horizontal",
+          "anchor_from": "top_right",
+          "anchor_to": "top_right",
+          "size": [
+            "100%c",
+            "100%cm"
+          ],
+          "controls": [
+            {
+              "line_anchor": {
+                "type": "panel",
+                "size": [
+                  0,
+                  0
+                ],
+                "layer": 4,
+                "controls": [
+                  {
+                    "line": {
+                      "type": "panel",
+                      "anchor_from": "top_right",
+                      "anchor_to": "top_right",
+                      "offset": [
+                        48,
+                        0
+                      ],
+                      "size": [
+                        72,
+                        2
+                      ],
+                      "controls": [
+                        {
+                          "clip": {
+                            "type": "panel",
+                            "anchor_from": "top_left",
+                            "anchor_to": "top_left",
+                            "size": [
+                              0,
+                              2
+                            ],
+                            "clips_children": true,
+                            "disable_anim_fast_forward": true,
+                            "anims": [
+                              "@server_form.ponder_text_bubble_line_clip"
+                            ],
+                            "controls": [
+                              {
+                                "texture": {
+                                  "type": "image",
+                                  "anchor_from": "top_left",
+                                  "anchor_to": "top_left",
+                                  "size": [
+                                    72,
+                                    2
+                                  ],
+                                  "texture": "textures/ui/ponder/text_bubble_line"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "intro": {
+                "type": "panel",
+                "offset": [
+                  6,
+                  0
+                ],
+                "size": [
+                  "100%c",
+                  "100%cm"
+                ],
+                "clips_children": false,
+                "alpha": 0,
+                "propagate_alpha": true,
+                "disable_anim_fast_forward": true,
+                "anims": [
+                  "@server_form.ponder_text_bubble_alpha_wait",
+                  "@server_form.ponder_text_bubble_offset_wait"
+                ],
+                "controls": [
+                  {
+                    "body": {
+                      "type": "image",
+                      "layer": 0,
+                      "size": [
+                        "100%c + 20px",
+                        "100%cm + 16px"
+                      ],
+                      "texture": "textures/ui/ponder/text_bubble_frame",
+                      "controls": [
+                        {
+                          "text": {
+                            "type": "label",
+                            "layer": 3,
+                            "anchor_from": "top_left",
+                            "anchor_to": "top_left",
+                            "offset": [
+                              10,
+                              8
+                            ],
+                            "size": [
+                              "default",
+                              "default"
+                            ],
+                            "max_size": [
+                              164,
+                              "default"
+                            ],
+                            "text": "#text",
+                            "text_alignment": "left",
+                            "color": [
+                              0.964706,
+                              0.964706,
+                              0.898039
+                            ],
+                            "shadow": false,
+                            "localize": false,
+                            "line_padding": 1,
+                            "font_scale_factor": 0.9,
+                            "bindings": [
+                              {
+                                "binding_type": "view",
+                                "source_control_name": "bubble_source",
+                                "source_property_name": "(#raw - '§0§r§0§r')",
+                                "target_property_name": "#text"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_bubbles": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "form_buttons",
+    "controls": [
+      {
+        "bubble_source@server_form.ponder_payload_state": {
+          "collection_index": 7
+        }
+      },
+      {
+        "top@server_form.ponder_bubble_slot": {
+          "layer": 20,
+          "$offset": [
+            -24,
+            -64
+          ],
+          "$visible": "(not ((#t - '§9§r§0§r') = #t))"
+        }
+      },
+      {
+        "middle@server_form.ponder_bubble_slot": {
+          "layer": 20,
+          "$offset": [
+            -24,
+            -32
+          ],
+          "$visible": "(not ((#t - '§9§r§1§r') = #t))"
+        }
+      },
+      {
+        "bottom@server_form.ponder_bubble_slot": {
+          "layer": 20,
+          "$offset": [
+            -24,
+            0
+          ],
+          "$visible": "(not ((#t - '§9§r§2§r') = #t))"
+        }
+      }
+    ]
+  },
+  "ponder_next_up": {
+    "type": "panel",
+    "collection_name": "form_buttons",
+    "size": [
+      "100%cm + 20px",
+      "100%cm + 12px"
+    ],
+    "max_size": [
+      218,
+      45
+    ],
+    "anchor_from": "bottom_middle",
+    "anchor_to": "bottom_middle",
+    "offset": [
+      28,
+      -62
+    ],
+    "layer": 25,
+    "alpha": 0,
+    "propagate_alpha": true,
+    "disable_anim_fast_forward": true,
+    "anims": [
+      "@server_form.ponder_next_up_wait"
+    ],
+    "property_bag": {
+      "#t": ""
+    },
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#t"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#t - '§5§r') = #t))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "next_source@server_form.ponder_payload_state": {
+          "collection_index": 8
+        }
+      },
+      {
+        "frame": {
+          "type": "image",
+          "texture": "textures/ui/ponder/text_bubble_frame",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "label": {
+          "type": "label",
+          "layer": 1,
+          "text": "#text",
+          "localize": false,
+          "shadow": true,
+          "text_alignment": "center",
+          "color": [
+            0.933333,
+            0.933333,
+            0.933333
+          ],
+          "size": [
+            "default",
+            "default"
+          ],
+          "max_size": [
+            190,
+            30
+          ],
+          "font_scale_factor": 0.9,
+          "bindings": [
+            {
+              "binding_type": "view",
+              "source_control_name": "next_source",
+              "source_property_name": "(#raw - '§0§r§0§r')",
+              "target_property_name": "#text"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_footer": {
+    "type": "panel",
+    "size": [
+      246,
+      60
+    ],
+    "anchor_from": "bottom_middle",
+    "anchor_to": "bottom_middle",
+    "offset": [
+      0,
+      -9
+    ],
+    "layer": 30,
+    "alpha": 0,
+    "propagate_alpha": true,
+    "disable_anim_fast_forward": true,
+    "anims": [
+      "@server_form.ponder_footer_intro_alpha"
+    ],
+    "controls": [
+      {
+        "progress@server_form.ponder_progress_bar": {
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            0,
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_scene_layer": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "form_buttons",
+    "property_bag": {
+      "#t": ""
+    },
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#t"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#t - '§0§r§1§r|scene|') = #t))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "header@server_form.ponder_header": {
+          "layer": 15
+        }
+      },
+      {
+        "sidebar@server_form.ponder_sidebar": {
+          "layer": 16
+        }
+      },
+      {
+        "bubbles@server_form.ponder_bubbles": {}
+      },
+      {
+        "nav@server_form.ponder_nav": {
+          "layer": 30
+        }
+      },
+      {
+        "next_up@server_form.ponder_next_up": {}
+      },
+      {
+        "footer@server_form.ponder_footer": {}
+      }
+    ]
+  },
+  "ponder_card_state": {
+    "$background|default": "textures/ui/ponder/button_bg_default",
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "background": {
+          "type": "image",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "texture": "$background"
+        }
+      },
+      {
+        "icon": {
+          "type": "image",
+          "layer": 1,
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            6
+          ],
+          "size": [
+            24,
+            24
+          ],
+          "bindings": [
+            {
+              "binding_name": "#form_button_texture",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons",
+              "binding_name_override": "#texture"
+            },
+            {
+              "binding_name": "#form_button_texture_file_system",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons",
+              "binding_name_override": "#texture_file_system"
+            }
+          ]
+        }
+      },
+      {
+        "label": {
+          "type": "label",
+          "layer": 2,
+          "text": "#text",
+          "localize": false,
+          "shadow": true,
+          "color": [
+            0.933333,
+            0.933333,
+            0.933333
+          ],
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            0,
+            -4
+          ],
+          "size": [
+            "100% - 4px",
+            22
+          ],
+          "font_scale_factor": 0.75,
+          "text_alignment": "center",
+          "bindings": [
+            {
+              "binding_name": "#form_button_text",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons",
+              "binding_name_override": "#raw"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(#raw - '§0§r§0§r' - '§a§r§a§r' - '§8§r§8§r' - '§7')",
+              "target_property_name": "#text"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ponder_card": {
+    "type": "button",
+    "size": [
+      40,
+      56
+    ],
+    "$pressed_button_name": "button.form_button_click",
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "locked_control": "locked",
+    "focus_enabled": true,
+    "sound_name": "random.click",
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "focused"
+      }
+    ],
+    "controls": [
+      {
+        "default@server_form.ponder_card_state": {}
+      },
+      {
+        "hover@server_form.ponder_card_state": {
+          "$background": "textures/ui/ponder/button_bg_hover"
+        }
+      },
+      {
+        "pressed@server_form.ponder_card_state": {
+          "$background": "textures/ui/ponder/button_bg_pressed"
+        }
+      },
+      {
+        "locked@server_form.ponder_card_state": {
+          "$background": "textures/ui/ponder/button_bg_disabled"
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      },
+      {
+        "binding_name": "#form_button_text",
+        "binding_type": "collection",
+        "binding_collection_name": "form_buttons",
+        "binding_name_override": "#raw"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#raw - '§0§r§0§r') = #raw)",
+        "target_property_name": "#visible"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#raw - '§8§r§8§r') = #raw)",
+        "target_property_name": "#enabled"
+      }
+    ]
+  },
+  "ponder_index_layer": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "collection_name": "form_buttons",
+    "property_bag": {
+      "#t": ""
+    },
+    "bindings": [
+      {
+        "binding_name": "#title_text",
+        "binding_name_override": "#t"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#t - '|index|') = #t))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "header@server_form.ponder_header": {
+          "layer": 15
+        }
+      },
+      {
+        "grid": {
+          "type": "panel",
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            -66,
+            80
+          ],
+          "size": [
+            172,
+            116
+          ],
+          "layer": 16,
+          "controls": [
+            {
+              "card_0@server_form.ponder_card": {
+                "collection_index": 39,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "card_1@server_form.ponder_card": {
+                "collection_index": 40,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  44,
+                  0
+                ]
+              }
+            },
+            {
+              "card_2@server_form.ponder_card": {
+                "collection_index": 41,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  88,
+                  0
+                ]
+              }
+            },
+            {
+              "card_3@server_form.ponder_card": {
+                "collection_index": 42,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  132,
+                  0
+                ]
+              }
+            },
+            {
+              "card_4@server_form.ponder_card": {
+                "collection_index": 43,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  0,
+                  60
+                ]
+              }
+            },
+            {
+              "card_5@server_form.ponder_card": {
+                "collection_index": 44,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  44,
+                  60
+                ]
+              }
+            },
+            {
+              "card_6@server_form.ponder_card": {
+                "collection_index": 45,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  88,
+                  60
+                ]
+              }
+            },
+            {
+              "card_7@server_form.ponder_card": {
+                "collection_index": 46,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  132,
+                  60
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "page_previous@server_form.ponder_icon_button": {
+          "collection_index": 47,
+          "$icon": "textures/ui/ponder/icon_prev",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            -28,
+            -28
+          ],
+          "layer": 30
+        }
+      },
+      {
+        "close@server_form.ponder_icon_button": {
+          "collection_index": 1,
+          "$icon": "textures/ui/ponder/icon_close",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            0,
+            -28
+          ],
+          "layer": 30
+        }
+      },
+      {
+        "page_next@server_form.ponder_icon_button": {
+          "collection_index": 48,
+          "$icon": "textures/ui/ponder/icon_next",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            28,
+            -28
+          ],
+          "layer": 30
+        }
+      },
+      {
+        "back@server_form.ponder_icon_button": {
+          "collection_index": 5,
+          "$icon": "textures/ui/ponder/icon_back",
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            -70,
+            -28
+          ],
+          "layer": 30
+        }
+      },
+      {
+        "items@server_form.ponder_icon_button": {
+          "collection_index": 49,
+          "$icon": "textures/ui/ponder/icon_items",
+          "anchor_from": "top_right",
+          "anchor_to": "top_right",
+          "offset": [
+            -60,
+            20
+          ],
+          "layer": 30
+        }
+      },
+      {
+        "tags@server_form.ponder_icon_button": {
+          "collection_index": 50,
+          "$icon": "textures/ui/ponder/icon_tags",
+          "anchor_from": "top_right",
+          "anchor_to": "top_right",
+          "offset": [
+            -28,
+            20
+          ],
+          "layer": 30
+        }
+      }
+    ]
+  },
+  "ponder_form_panel": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "scene@server_form.ponder_scene_layer": {}
+      },
+      {
+        "index@server_form.ponder_index_layer": {}
+      }
+    ]
+  },
+  "ponder_form_screen_layer": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "layer": 90,
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "content@server_form.ponder_form_panel": {}
+      }
+    ]
+  },
+  "ponder_form_additional_screen_content": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "ponder_form_screen_layer@server_form.ponder_form_screen_layer": {}
       }
     ]
   }

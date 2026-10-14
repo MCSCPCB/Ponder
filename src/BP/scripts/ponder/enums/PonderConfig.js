@@ -1,4 +1,4 @@
-// Shared by the pack and build tools. A stage never uses player/body coordinates.
+// 脚本与 RP/ui/server_form.json 共享的约定，见 docs/UI_PROTOCOL.md。
 export const TITLE_MARKER = "§0§r§1§r";
 export const HIDDEN = "§0§r§0§r";
 export const DISABLED = "§8§r§8§r";
@@ -22,15 +22,30 @@ export const PALETTE = Object.freeze({
   blue: 0x5f6caf, slow: 0x22ff22, medium: 0x0084ff, fast: 0xff55ff,
   input: 0x7fcde0, output: 0xddc166,
 });
-// Fixed collection indices are a protocol shared with generated JSON UI.
+// 表单按钮的固定序号。JSON UI 按序号读取，两边必须同步。
 export const SLOTS = Object.freeze({
-  previous: 0, close: 1, next: 2, replay: 3, play: 4, comfy: 5,
-  back: 6, items: 7, tags: 8, header: 9, status: 10, nextUp: 11,
-  sidebar: 12, keyframes: 18, cards: 42, pagePrevious: 50, pageNext: 51,
-  count: 52,
+  previous: 0, close: 1, next: 2, replay: 3, comfy: 4, back: 5,
+  header: 6, bubble: 7, nextUp: 8,
+  sidebar: 9, // 9..14，最多 LIMITS.sidebar 个
+  keyframes: 15, // 15..38，最多 LIMITS.keyframes 个，每个关键帧一个透明按钮
+  cards: 39, // 39..46，索引页每页 LIMITS.indexPageSize 张卡片
+  pagePrevious: 47, pageNext: 48,
+  items: 49, tags: 50, // 场景页侧栏之外的索引入口，索引页和场景页共用
+  count: 51,
 });
+// 标题里的段标记。
+export const SCENE_MARKER = "|scene|";
+export const ANIMATE_FORWARD = "§6§r";
+export const ANIMATE_REVERSE = "§7§r";
+// 关键帧按钮文本前缀，后面紧跟三位像素位置和 ^。
+export const KEYFRAME_MARKER = "§0§r§2§r";
+export const FINISHED_MARKER = "§5§r";
+// 档位用一个字符编码，避免多位数字被当作多个格式码。
+export const TIER_CODES = Object.freeze({ 4: "a", 8: "b", 12: "c", 16: "d", 24: "e" });
+export const TIER_MARKER = tier => `§4§r§${TIER_CODES[tier]}§r`;
+export const BUBBLE_SLOT_MARKER = Object.freeze({ top: "§9§r§0§r", middle: "§9§r§1§r", bottom: "§9§r§2§r" });
 
-// Fade timings follow Java: sections fade over 15 ticks, text and input windows over 5 ticks each side.
+// 淡入淡出时长，取自 Java：区域 15 tick，文字窗口前后各 5 tick。
 export const FADE_IN_TICKS = 15;
 export const FADE_TICKS = 15;
 export const TEXT_FADE_TICKS = 5;

@@ -152,15 +152,6 @@ async function perform(session, action) {
       applyCamera(session, session.scene.camera);
       session.renderer.particles(-1, 0);
       break;
-    case "play":
-      if (session.clock.finished) {
-        session.clock.seek(0);
-        await session.renderer.render(stateAt(session.scene, 0), { reset: true, effects: true });
-        applyCamera(session, session.scene.camera);
-        session.renderer.particles(-1, 0);
-        session.clock.playing = true;
-      } else session.clock.playing = !session.clock.playing;
-      break;
     case "comfy":
       session.comfy = session.clock.comfy = !session.clock.comfy;
       session.clock.divider = 0;
@@ -173,7 +164,8 @@ async function showForm(session) {
   for (let attempt = 0; attempt <= LIMITS.formBusyRetries; attempt++) {
     if (session.closed || epoch !== session.formEpoch) return;
     snapshotNavigation(session);
-    const model = buildFormModel(registry, session.nav, session.clock, session.locale);
+    const model = buildFormModel(registry, session.nav, session.clock, session.locale, { previousStep: session.shownStep });
+    session.shownStep = model.step;
     const form = new ActionFormData().title(model.title).body(model.body);
     for (const slot of model.slots) form.button(slot.text, slot.icon);
     session.formPending = true;
