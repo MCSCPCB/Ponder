@@ -1,10 +1,11 @@
 import { assemblyDemoScene } from "./assemblyDemo.js";
 import { forgeDemoScene } from "./forgeDemo.js";
-import { redstoneLampDemoScene } from "./redstoneLampDemo.js";
+import { redstoneLampDemoScene, lampStatesScene } from "./redstoneLampDemo.js";
 
-// Add new scene modules here after choosing a stage preset and keeping their step count inside the supported progress presets.
+// UI progress/keyframe presets are generated from this list by `npm run build`.
 export const PONDER_SCENES = [
   assemblyDemoScene,
   forgeDemoScene,
   redstoneLampDemoScene,
+  lampStatesScene,
 ];

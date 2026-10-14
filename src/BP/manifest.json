@@ -1,38 +1,38 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Ponder Demo Behavior",
-    "description": "Minimal stick-triggered Ponder-style demo.",
+    "name": "Ponder · Behavior",
+    "description": "Isolated real-world tutorials, per-player sessions and recovery.",
     "min_engine_version": [1, 21, 0],
     "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
-    "version": [1, 0, 0]
+    "version": [2, 0, 1]
   },
   "modules": [
     {
       "type": "data",
       "uuid": "383511fd-65d3-40a2-91e2-3d66bbd472e9",
-      "version": [1, 0, 0]
+      "version": [2, 0, 1]
     },
     {
       "type": "script",
       "language": "javascript",
       "uuid": "934adfd5-d6b5-4567-af10-eaaa8a68c3f5",
       "entry": "scripts/index.js",
-      "version": [1, 0, 0]
+      "version": [2, 0, 1]
     }
   ],
   "dependencies": [
     {
       "uuid": "73ea98eb-f333-4c8f-989c-e8936d1b4e35",
-      "version": [1, 0, 0]
+      "version": [2, 0, 1]
     },
     {
       "module_name": "@minecraft/server",
-      "version": "1.18.0"
+      "version": "alpha"
     },
     {
       "module_name": "@minecraft/server-ui",
-      "version": "1.3.0"
+      "version": "alpha"
     }
   ]
 }

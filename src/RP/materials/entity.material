@@ -1,0 +1,17 @@
+{
+  "materials": {
+    "version": "1.0.0",
+    "ponder_depth:entity_alphablend": {
+      "+states": [
+        "DisableCulling",
+        "DisableDepthWrite"
+      ]
+    },
+    "ponder_through:ponder_depth": {
+      "+states": [
+        "DisableDepthTest"
+      ],
+      "depthFunc": "Always"
+    }
+  }
+}

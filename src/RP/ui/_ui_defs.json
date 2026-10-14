@@ -1,5 +1,6 @@
 {
   "ui_defs": [
+    "ui/ponder.generated.json",
     "ui/server_form.json"
   ]
 }

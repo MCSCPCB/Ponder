@@ -1,66 +1,31 @@
-import {
-  DEFAULT_SCENE_MESSAGES,
-  MAX_SIDE_ICON_COUNT,
-  PROGRESS_MARKER,
-  TITLE_MARKER,
-} from "./constants.js";
+import { normalizeScene, namespaced, validIconPath, validId, validateTitle } from "./core/scene.js";
 import { STAGE_PRESETS } from "./config/presets.js";
 import { PONDER_SCENES } from "./config/scenes/index.js";
+import { PONDER_TAGS } from "./config/tags.js";
 
-function normalizeScene(rawScene) {
-  const structureById = new Map();
-  const rawSpecialBlockIcons = Array.isArray(rawScene.specialBlockIcons)
-    ? rawScene.specialBlockIcons
-    : [];
-  const specialBlockIcons = rawSpecialBlockIcons
-    .map((specialBlockIcon) => ({
-      iconPath:
-        typeof specialBlockIcon?.iconPath === "string" ? specialBlockIcon.iconPath : "",
-      tooltipText:
-        typeof specialBlockIcon?.tooltipText === "string"
-          ? specialBlockIcon.tooltipText
-          : "",
-    }))
-    .filter((specialBlockIcon) => specialBlockIcon.iconPath)
-    .slice(0, MAX_SIDE_ICON_COUNT);
-
-  for (const structure of rawScene.structures) {
-    if (structureById.has(structure.id)) {
-      continue;
-    }
-
-    structureById.set(structure.id, structure);
+export function createRegistry(rawScenes, rawTags, presets = {}) {
+  const scenes = rawScenes.map(s => normalizeScene(s, presets)).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+  const byId = new Map(), byItem = new Map(), tags = new Map();
+  for (const tag of [...rawTags].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))) {
+    if (!validId(tag.id) || tags.has(tag.id)) throw new Error(`Duplicate/invalid tag ${tag.id}`);
+    validateTitle(tag.title, "tag title");
+    if (!validIconPath(tag.iconPath) || !Number.isFinite(tag.order ?? 0)) throw new Error(`Invalid tag metadata ${tag.id}`);
+    tags.set(tag.id, { ...tag, scenes: [] });
   }
-
-  return {
-    ...rawScene,
-    messages: {
-      ...DEFAULT_SCENE_MESSAGES,
-      ...rawScene.messages,
-    },
-    specialBlockIcons,
-    structureById,
-  };
-}
-
-function createSceneIndexes(rawScenes) {
-  const sceneByItem = new Map();
-
-  for (const rawScene of rawScenes) {
-    const scene = normalizeScene(rawScene);
-    for (const itemId of scene.entryItems) {
-      sceneByItem.set(itemId, scene);
+  for (const scene of scenes) {
+    if (byId.has(scene.id)) throw new Error(`Duplicate scene ${scene.id}`);
+    byId.set(scene.id, scene);
+    for (const itemId of new Set(scene.entryItems)) {
+      if (!namespaced(itemId)) throw new Error("Invalid entry item");
+      if (!byItem.has(itemId)) byItem.set(itemId, []);
+      byItem.get(itemId).push(scene);
+    }
+    for (const tagId of new Set(scene.tags)) {
+      if (!tags.has(tagId)) throw new Error(`Unknown tag ${tagId} in ${scene.id}`);
+      tags.get(tagId).scenes.push(scene.id);
     }
   }
-
-  return sceneByItem;
+  return { scenes, byId, byItem, tags };
 }
-
-const ENTRY_SCENE_BY_ITEM = createSceneIndexes(PONDER_SCENES);
-
-export const getSceneForItem = (itemId) => ENTRY_SCENE_BY_ITEM.get(itemId);
-export const getStagePreset = (scene) => STAGE_PRESETS[scene.stagePresetId];
-export const getSceneTitlePrefix = (scene) => {
-  const preset = getStagePreset(scene);
-  return `${TITLE_MARKER}${preset.uiTitleMarker}${PROGRESS_MARKER}`;
-};
+export const registry = createRegistry(PONDER_SCENES, PONDER_TAGS, STAGE_PRESETS);
+export const getScenesForItem = itemId => registry.byItem.get(itemId) ?? [];

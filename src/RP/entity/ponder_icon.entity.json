@@ -1,0 +1,40 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "ponder:icon",
+      "materials": {
+        "depth": "ponder_depth",
+        "through": "ponder_through"
+      },
+      "textures": {
+        "white": "textures/ui/ponder/white",
+        "icon0": "textures/ui/ponder/logo",
+        "icon1": "textures/ui/ponder/pointer",
+        "icon2": "textures/ui/ponder/icon_use",
+        "icon3": "textures/ui/ponder/icon_attack",
+        "icon4": "textures/ui/ponder/icon_scroll",
+        "icon5": "textures/ui/ponder/icon_slot",
+        "icon6": "textures/ui/ponder/icon_touch",
+        "icon7": "textures/items/stick",
+        "icon8": "textures/blocks/furnace_front_off",
+        "icon9": "textures/items/iron_ingot",
+        "icon10": "textures/blocks/redstone_lamp_off"
+      },
+      "geometry": {
+        "default": "geometry.ponder.icon"
+      },
+      "animations": {
+        "update": "animation.ponder.icon"
+      },
+      "scripts": {
+        "animate": [
+          "update"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.ponder.icon"
+      ]
+    }
+  }
+}

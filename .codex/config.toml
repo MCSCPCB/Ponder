@@ -1,0 +1,2 @@
+# Compact Ponder conversations before large histories reach the provider.
+model_auto_compact_token_limit = 100000

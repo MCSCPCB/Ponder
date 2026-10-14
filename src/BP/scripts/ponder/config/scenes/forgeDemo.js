@@ -1,251 +1,36 @@
-import {
-  defineBlockStructure,
-  defineBoxStructure,
-  defineStage,
-} from "../factories.js";
-
+import { defineBlockStructure as block, defineBoxStructure as box, defineStage as step, tiledBase } from "../factories.js";
+import { bilingual as text } from "../../i18n.js";
+const base = tiledBase(12);
 export const forgeDemoScene = {
-  id: "forge_demo",
-  title: "Forge Walkthrough",
-  iconPath: "textures/items/blaze_rod",
-  specialBlockIcons: [
-    {
-      iconPath: "textures/items/coal",
-      tooltipText: "Blast Furnace",
-    },
-    {
-      iconPath: "textures/items/iron_ingot",
-      tooltipText: "Anvil",
-    },
-  ],
-  entryItems: ["minecraft:blaze_rod"],
-  stagePresetId: "demo_16x16x16",
-  tickingAreaName: "ponder_demo_forge",
+  id: "forge_demo", title: text("熔炼工坊", "Forge walkthrough"),
+  itemTitle: text("烈焰棒", "Blaze rod"),
+  description: text("组合方块、教学实体、掉落物与运镜。", "Combine blocks, teaching entities, items and camera motion."),
+  iconPath: "textures/blocks/furnace_front_off", entryItems: ["minecraft:blaze_rod"],
+  stagePresetId: "demo_16x16x16", focus: { x: 5.5, y: 2.5, z: 5.5 },
+  tags: ["crafting", "basics"], order: 1, initial: base.map(b => b.id),
   structures: [
-    defineBoxStructure(
-      "forge_base",
-      "minecraft:deepslate_bricks",
-      { x: 0, y: 0, z: 0 },
-      { x: 15, y: 0, z: 15 },
-    ),
-    defineBoxStructure(
-      "forge_floor",
-      "minecraft:smooth_stone",
-      { x: 1, y: 1, z: 1 },
-      { x: 14, y: 1, z: 14 },
-    ),
-    defineBoxStructure(
-      "pillar_nw",
-      "minecraft:polished_blackstone_bricks",
-      { x: 0, y: 1, z: 0 },
-      { x: 0, y: 6, z: 0 },
-    ),
-    defineBoxStructure(
-      "pillar_ne",
-      "minecraft:polished_blackstone_bricks",
-      { x: 15, y: 1, z: 0 },
-      { x: 15, y: 6, z: 0 },
-    ),
-    defineBoxStructure(
-      "pillar_sw",
-      "minecraft:polished_blackstone_bricks",
-      { x: 0, y: 1, z: 15 },
-      { x: 0, y: 6, z: 15 },
-    ),
-    defineBoxStructure(
-      "pillar_se",
-      "minecraft:polished_blackstone_bricks",
-      { x: 15, y: 1, z: 15 },
-      { x: 15, y: 6, z: 15 },
-    ),
-    defineBoxStructure(
-      "wall_north",
-      "minecraft:stone_bricks",
-      { x: 1, y: 2, z: 0 },
-      { x: 14, y: 5, z: 0 },
-    ),
-    defineBoxStructure(
-      "wall_south",
-      "minecraft:stone_bricks",
-      { x: 1, y: 2, z: 15 },
-      { x: 14, y: 5, z: 15 },
-    ),
-    defineBoxStructure(
-      "wall_west",
-      "minecraft:stone_bricks",
-      { x: 0, y: 2, z: 1 },
-      { x: 0, y: 5, z: 14 },
-    ),
-    defineBoxStructure(
-      "wall_east",
-      "minecraft:stone_bricks",
-      { x: 15, y: 2, z: 1 },
-      { x: 15, y: 5, z: 14 },
-    ),
-    defineBoxStructure(
-      "entry_frame",
-      "minecraft:cut_copper",
-      { x: 5, y: 2, z: 1 },
-      { x: 10, y: 5, z: 2 },
-    ),
-    defineBoxStructure(
-      "west_catwalk",
-      "minecraft:spruce_planks",
-      { x: 2, y: 2, z: 11 },
-      { x: 5, y: 2, z: 13 },
-    ),
-    defineBoxStructure(
-      "east_catwalk",
-      "minecraft:spruce_planks",
-      { x: 10, y: 2, z: 2 },
-      { x: 13, y: 2, z: 4 },
-    ),
-    defineBoxStructure(
-      "scaffold_bridge",
-      "minecraft:oak_planks",
-      { x: 6, y: 2, z: 3 },
-      { x: 9, y: 2, z: 5 },
-    ),
-    defineBoxStructure(
-      "core_plinth",
-      "minecraft:polished_andesite",
-      { x: 6, y: 2, z: 6 },
-      { x: 9, y: 3, z: 9 },
-    ),
-    defineBoxStructure(
-      "roof_north",
-      "minecraft:dark_oak_log",
-      { x: 1, y: 7, z: 1 },
-      { x: 14, y: 7, z: 1 },
-    ),
-    defineBoxStructure(
-      "roof_south",
-      "minecraft:dark_oak_log",
-      { x: 1, y: 7, z: 14 },
-      { x: 14, y: 7, z: 14 },
-    ),
-    defineBoxStructure(
-      "roof_west",
-      "minecraft:dark_oak_log",
-      { x: 1, y: 7, z: 2 },
-      { x: 1, y: 7, z: 13 },
-    ),
-    defineBoxStructure(
-      "roof_east",
-      "minecraft:dark_oak_log",
-      { x: 14, y: 7, z: 2 },
-      { x: 14, y: 7, z: 13 },
-    ),
-    defineBoxStructure(
-      "roof_spine",
-      "minecraft:dark_oak_planks",
-      { x: 3, y: 8, z: 7 },
-      { x: 12, y: 8, z: 8 },
-    ),
-    defineBoxStructure(
-      "skylight",
-      "minecraft:tinted_glass",
-      { x: 5, y: 9, z: 5 },
-      { x: 10, y: 9, z: 10 },
-    ),
-    defineBoxStructure(
-      "chimney_left",
-      "minecraft:stone_bricks",
-      { x: 2, y: 6, z: 12 },
-      { x: 3, y: 9, z: 13 },
-    ),
-    defineBoxStructure(
-      "chimney_right",
-      "minecraft:stone_bricks",
-      { x: 12, y: 6, z: 2 },
-      { x: 13, y: 9, z: 3 },
-    ),
-    defineBlockStructure("smelter_left", "minecraft:blast_furnace", {
-      x: 3,
-      y: 2,
-      z: 6,
-    }),
-    defineBlockStructure("smelter_right", "minecraft:blast_furnace", {
-      x: 12,
-      y: 2,
-      z: 9,
-    }),
-    defineBlockStructure("anvil_left", "minecraft:anvil", { x: 4, y: 2, z: 9 }),
-    defineBlockStructure("anvil_right", "minecraft:anvil", { x: 11, y: 2, z: 6 }),
-    defineBlockStructure("power_core_gold", "minecraft:gold_block", {
-      x: 7,
-      y: 4,
-      z: 7,
-    }),
-    defineBlockStructure("power_core_redstone", "minecraft:redstone_block", {
-      x: 8,
-      y: 4,
-      z: 8,
-    }),
-    defineBlockStructure("beacon_nw", "minecraft:sea_lantern", { x: 1, y: 8, z: 1 }),
-    defineBlockStructure("beacon_ne", "minecraft:sea_lantern", { x: 14, y: 8, z: 1 }),
-    defineBlockStructure("beacon_sw", "minecraft:sea_lantern", { x: 1, y: 8, z: 14 }),
-    defineBlockStructure("beacon_se", "minecraft:sea_lantern", { x: 14, y: 8, z: 14 }),
+    ...base, box("hearth", "minecraft:stone_bricks", { x: 3, y: 1, z: 3 }, { x: 7, y: 1, z: 7 }),
+    block("furnace", "minecraft:furnace", { x: 5, y: 2, z: 4 }, { "minecraft:cardinal_direction": "south" }),
+    block("anvil", "minecraft:anvil", { x: 7, y: 2, z: 5 }),
+    box("chimney", "minecraft:bricks", { x: 4, y: 2, z: 6 }, { x: 6, y: 5, z: 6 }),
   ],
+  air: [{ from: { x: 3, y: 2, z: 3 }, to: { x: 8, y: 4, z: 5 } }],
   stages: [
-    defineStage({
-      bubbleSlot: "top",
-      description:
-        "Block out the 16 by 16 footprint first so the rest of the forge has a clear base to land on.",
-      add: ["forge_base", "forge_floor"],
-    }),
-    defineStage({
-      description:
-        "Raise the perimeter walls and anchor the four corners with taller blackstone pillars.",
-      add: [
-        "pillar_nw",
-        "pillar_ne",
-        "pillar_sw",
-        "pillar_se",
-        "wall_north",
-        "wall_south",
-        "wall_west",
-        "wall_east",
-      ],
-    }),
-    defineStage({
-      bubbleSlot: "middle",
-      description:
-        "Add the copper entry frame and temporary walkways so the workshop has a readable circulation path.",
-      add: ["entry_frame", "west_catwalk", "east_catwalk", "scaffold_bridge"],
-    }),
-    defineStage({
-      description:
-        "Swap out the temporary bridge and drop in the processing plinth together with the furnace and anvil stations.",
-      add: ["core_plinth", "smelter_left", "smelter_right", "anvil_left", "anvil_right"],
-      remove: ["scaffold_bridge"],
-    }),
-    defineStage({
-      bubbleSlot: "bottom",
-      description:
-        "Cap the hall with a dark oak ring, then close the center with a long skylight strip.",
-      add: [
-        "roof_north",
-        "roof_south",
-        "roof_west",
-        "roof_east",
-        "roof_spine",
-        "skylight",
-      ],
-    }),
-    defineStage({
-      description:
-        "Finish the forge with chimneys, a glowing core, and four corner lights to frame the final silhouette.",
-      add: [
-        "chimney_left",
-        "chimney_right",
-        "power_core_gold",
-        "power_core_redstone",
-        "beacon_nw",
-        "beacon_ne",
-        "beacon_sw",
-        "beacon_se",
-      ],
-    }),
+    step({ add: ["hearth"], target: { x: 5.5, y: 1.5, z: 5.5 },
+      description: text("先搭建工坊的底座。演示区外壳和照明由会话管理。", "Start with a forge base. The session provides an enclosed, illuminated demonstration area.") }),
+    step({ add: ["furnace"], color: "input", target: { x: 5.5, y: 2.5, z: 4.5 },
+      description: text("熔炉的朝向由方块状态指定。回退恢复的是脚本定义的状态。", "Block states set the furnace's facing. Seeking restores authored state."),
+      instructions: [{ op: "controls", id: "slot_hint", action: "slot", target: { x: 5.5, y: 2.5, z: 4.5 }, iconPath: "textures/items/iron_ingot", duration: 70, side: "left" }] }),
+    step({ add: ["anvil", "chimney"], target: { x: 7.5, y: 2.5, z: 5.5 },
+      description: text("显示更多区域。轮廓框的目标由脚本指定，不依赖鼠标识别。", "Reveal more of the build. Scripts choose outline targets; there is no world picking."),
+      instructions: [{ op: "outline", id: "anvil_outline", region: { from: { x: 7, y: 2, z: 5 }, to: { x: 7, y: 2, z: 5 } }, color: "output", duration: 95 }] }),
+    step({ color: "output", target: { x: 6, y: 3, z: 4 },
+      description: text("教学掉落物有自己的生命周期。跳转不会重复触发瞬时粒子。", "Teaching items have a managed lifetime. Seeking does not replay one-shot particles."),
+      instructions: [{ op: "spawn", id: "ingot", itemId: "minecraft:iron_ingot", position: { x: 6, y: 3, z: 4 }, duration: 180 },
+        { op: "particle", particleId: "minecraft:basic_smoke_particle", position: { x: 5.5, y: 5.5, z: 6.5 } }] }),
+    step({ target: { x: 6, y: 2, z: 4 }, description: text("包围盒可跟踪教学实体。原生物理仍然正常运行。", "An outline can track a teaching entity. Native physics continues to run."),
+      instructions: [{ op: "outline", id: "item_outline", track: "ingot", color: "green", duration: 75 },
+        { op: "camera", yaw: 80, duration: 80 }] }),
+    step({ description: text("可以重播，或从主题索引继续探索。退出时会清理整个会话。", "Replay the lesson or explore the topic index. Exiting cleans up the session.") }),
   ],
 };

@@ -1,0 +1,227 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.ponder.text": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "rotation": [
+            "q.camera_rotation(0) - q.body_x_rotation",
+            "q.camera_rotation(1) - q.body_y_rotation",
+            0
+          ],
+          "scale": "8 * q.property('ponder:scale')"
+        },
+        "glyph0": {
+          "position": [
+            "2*math.mod(q.property('ponder:p0'),512)",
+            "-2*math.floor(q.property('ponder:p0')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g0')<0?0:(math.floor(math.max(0,q.property('ponder:g0'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        },
+        "glyph1": {
+          "position": [
+            "2*math.mod(q.property('ponder:p1'),512)",
+            "-2*math.floor(q.property('ponder:p1')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g1')<0?0:(math.floor(math.max(0,q.property('ponder:g1'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        },
+        "glyph2": {
+          "position": [
+            "2*math.mod(q.property('ponder:p2'),512)",
+            "-2*math.floor(q.property('ponder:p2')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g2')<0?0:(math.floor(math.max(0,q.property('ponder:g2'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        },
+        "glyph3": {
+          "position": [
+            "2*math.mod(q.property('ponder:p3'),512)",
+            "-2*math.floor(q.property('ponder:p3')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g3')<0?0:(math.floor(math.max(0,q.property('ponder:g3'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        },
+        "glyph4": {
+          "position": [
+            "2*math.mod(q.property('ponder:p4'),512)",
+            "-2*math.floor(q.property('ponder:p4')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g4')<0?0:(math.floor(math.max(0,q.property('ponder:g4'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        },
+        "glyph5": {
+          "position": [
+            "2*math.mod(q.property('ponder:p5'),512)",
+            "-2*math.floor(q.property('ponder:p5')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g5')<0?0:(math.floor(math.max(0,q.property('ponder:g5'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        },
+        "glyph6": {
+          "position": [
+            "2*math.mod(q.property('ponder:p6'),512)",
+            "-2*math.floor(q.property('ponder:p6')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g6')<0?0:(math.floor(math.max(0,q.property('ponder:g6'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        },
+        "glyph7": {
+          "position": [
+            "2*math.mod(q.property('ponder:p7'),512)",
+            "-2*math.floor(q.property('ponder:p7')/512)",
+            0
+          ],
+          "scale": [
+            "q.property('ponder:g7')<0?0:(math.floor(math.max(0,q.property('ponder:g7'))/1048576)+1)/16",
+            1,
+            1
+          ]
+        }
+      }
+    },
+    "animation.ponder.frame": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "rotation": [
+            "q.camera_rotation(0) - q.body_x_rotation",
+            "q.camera_rotation(1) - q.body_y_rotation",
+            0
+          ]
+        },
+        "fill": {
+          "scale": [
+            "q.property('ponder:width')",
+            "q.property('ponder:height')",
+            1
+          ]
+        },
+        "top": {
+          "position": [
+            0,
+            "q.property('ponder:height')*8",
+            -0.12
+          ],
+          "scale": [
+            "q.property('ponder:width')",
+            0.025,
+            1
+          ]
+        },
+        "bottom": {
+          "position": [
+            0,
+            "-q.property('ponder:height')*8",
+            -0.12
+          ],
+          "scale": [
+            "q.property('ponder:width')",
+            0.025,
+            1
+          ]
+        },
+        "left": {
+          "position": [
+            "-q.property('ponder:width')*8",
+            0,
+            -0.12
+          ],
+          "scale": [
+            0.025,
+            "q.property('ponder:height')",
+            1
+          ]
+        },
+        "right": {
+          "position": [
+            "q.property('ponder:width')*8",
+            0,
+            -0.12
+          ],
+          "scale": [
+            0.025,
+            "q.property('ponder:height')",
+            1
+          ]
+        }
+      }
+    },
+    "animation.ponder.line": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "rotation": [
+            "q.property('ponder:pitch')",
+            "q.property('ponder:yaw')",
+            0
+          ]
+        },
+        "edge": {
+          "scale": [
+            "q.property('ponder:width')*1.8",
+            "q.property('ponder:width')*1.8",
+            "q.property('ponder:length')"
+          ]
+        },
+        "core": {
+          "scale": [
+            "q.property('ponder:width')",
+            "q.property('ponder:width')",
+            "q.property('ponder:length')"
+          ]
+        }
+      }
+    },
+    "animation.ponder.icon": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "rotation": [
+            "q.camera_rotation(0) - q.body_x_rotation",
+            "q.camera_rotation(1) - q.body_y_rotation",
+            0
+          ]
+        },
+        "icon": {
+          "rotation": [
+            0,
+            0,
+            "q.property('ponder:angle')"
+          ],
+          "scale": "q.property('ponder:size')"
+        }
+      }
+    }
+  }
+}

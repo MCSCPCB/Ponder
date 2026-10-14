@@ -1,102 +1,37 @@
-import {
-  defineBlockStructure,
-  defineEntityStructure,
-  defineStage,
-} from "../factories.js";
-
-const platformTiles = [];
-const platformTileIds = [];
-
-for (let x = 1; x <= 6; x += 1) {
-  for (let z = 1; z <= 6; z += 1) {
-    const id = `platform_${x}_${z}`;
-    platformTileIds.push(id);
-    platformTiles.push(
-      defineBlockStructure(
-        id,
-        (x + z) % 2 === 0 ? "minecraft:light_gray_terracotta" : "minecraft:snow",
-        { x, y: 0, z },
-      ),
-    );
-  }
-}
-
+import { defineBlockStructure as block, defineStage as step, tiledBase } from "../factories.js";
+import { bilingual as text } from "../../i18n.js";
+const base = tiledBase(8);
 export const redstoneLampDemoScene = {
-  id: "redstone_lamp_demo",
-  title: "红石灯",
-  iconPath: "textures/blocks/redstone_lamp_off",
-  entryItems: ["minecraft:redstone_lamp"],
-  stagePresetId: "demo_8x8x8",
-  tickingAreaName: "ponder_demo_redstone_lamp",
-  specialBlockIcons: [
-    {
-      iconPath: "textures/blocks/redstone_block",
-      tooltipText: "红石块会持续输出信号，且不能关闭。",
-    },
-  ],
-  messages: {
-    inUse: "这个思索正在被其他玩家使用。",
-    invalidDimension: "这个思索当前只能在主世界使用。",
-    missingStages: "这个思索没有配置任何步骤。",
-  },
-  structures: [
-    ...platformTiles,
-    defineBlockStructure("lamp_off", "minecraft:redstone_lamp", {
-      x: 3,
-      y: 1,
-      z: 3,
-    }),
-    defineBlockStructure("adjacent_power_block", "minecraft:redstone_block", {
-      x: 2,
-      y: 1,
-      z: 3,
-    }),
-    defineBlockStructure("top_dust", "minecraft:redstone_wire", {
-      x: 3,
-      y: 2,
-      z: 3,
-    }),
-    defineBlockStructure("relay_lamp_on", "minecraft:redstone_lamp", {
-      x: 4,
-      y: 1,
-      z: 3,
-    }),
-    defineEntityStructure(
-      "pp",
-      "minecraft:armor_stand",
-      { x: 3, y: 2, z: 3 },
-      {
-        rotation: { x: 0, y: 180 },
-        //spawnEvent: "minecraft:entity_spawned",
-        nameTag: "PP",
-        triggerEvents: [],
-      },
-    ),
+  id: "redstone_lamp_demo", title: text("点亮红石灯", "Lighting a redstone lamp"),
+  itemTitle: text("红石灯", "Redstone lamp"),
+  description: text("真实红石信号与教学时间轴相互独立。", "Real redstone simulation and the tutorial run independently."),
+  iconPath: "textures/blocks/redstone_lamp_off", entryItems: ["minecraft:redstone_lamp"],
+  stagePresetId: "demo_8x8x8", tags: ["redstone", "basics"], order: 2,
+  initial: base.map(b => b.id), structures: [...base,
+    block("lamp", "minecraft:redstone_lamp", { x: 3, y: 1, z: 3 }),
+    block("power", "minecraft:redstone_block", { x: 2, y: 1, z: 3 }),
+    block("relay", "minecraft:redstone_lamp", { x: 4, y: 1, z: 3 }),
   ],
   stages: [
-    defineStage({
-      description: "红石灯默认不会自己发亮，只有收到红石信号才会立刻点亮。",
-      bubbleSlot: "top",
-      add: [...platformTileIds, "lamp_off", "pp"],
-      remove: [],
-    }),
-    defineStage({
-      description: "毗邻的开启电源或毗邻的充能方块都能直接点亮红石灯。",
-      bubbleSlot: "top",
-      add: ["adjacent_power_block"],
-      remove: [],
-    }),
-    defineStage({
-      description: "指向红石灯的红石粉、中继器、比较器也能点亮它，包括红石灯上方的红石粉。",
-      bubbleSlot: "middle",
-      add: ["top_dust"],
-      remove: [],
-    }),
-    defineStage({
-      description: "红石灯失去信号后要过 4 游戏刻才会熄灭，而且它本身是红石导体，被充能时也能继续带动相邻元件。",
-      bubbleSlot: "bottom",
-      add: ["relay_lamp_on"],
-      remove: [],
-    }),
+    step({ add: ["lamp"], target: { x: 3.5, y: 1.5, z: 3.5 },
+      description: text("红石灯需要红石信号才能点亮。", "A redstone lamp needs a signal to light up.") }),
+    step({ add: ["power"], color: "input", target: { x: 2.5, y: 1.5, z: 3.5 },
+      description: text("相邻红石块持续提供电源，由游戏原生红石逻辑更新灯的状态。", "An adjacent redstone block supplies power. Native redstone logic updates the lamp.") }),
+    step({ add: ["relay"], color: "output", target: { x: 4.5, y: 1.5, z: 3.5 },
+      description: text("红石灯是导体。暂停教学时，红石、水流和生物并不会暂停。", "The lamp is conductive. Pausing the tutorial does not pause redstone, fluids or mobs.") }),
+    step({ remove: ["power"], target: { x: 3.5, y: 1.5, z: 3.5 },
+      description: text("移除电源后观察熄灭。接下来的场景展示脚本定义的区域恢复。", "Remove the power and watch the light go out. The next scene demonstrates region restoration.") }),
+  ],
+};
+export const lampStatesScene = {
+  ...redstoneLampDemoScene, id: "lamp_states", order: 3,
+  title: text("恢复与重播", "Restore and replay"),
+  description: text("同一物品关联的第二个场景。", "A second scene for the same item."),
+  stages: [
+    step({ add: ["lamp", "power"], description: text("同一物品可以注册多个有序场景。", "An item can have several ordered scenes.") }),
+    step({ target: { x: 3.5, y: 1.5, z: 3.5 }, description: text("替换方块，再跳转到关键帧，比较脚本控制的状态。", "Replace a block, then seek to a keyframe to compare authored states."),
+      instructions: [{ op: "block", position: { x: 3, y: 1, z: 3 }, blockId: "minecraft:glass" }] }),
+    step({ description: text("恢复原始定义不会恢复任意历史红石状态；世界模拟重新接管。", "Restoring the blueprint is not a rewind of redstone history. Native simulation takes over."),
+      instructions: [{ op: "restore", region: { from: { x: 3, y: 1, z: 3 }, to: { x: 3, y: 1, z: 3 } } }] }),
   ],
 };

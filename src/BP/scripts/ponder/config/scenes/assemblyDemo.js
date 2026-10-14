@@ -1,153 +1,30 @@
-import {
-  defineBlockStructure,
-  defineBoxStructure,
-  defineStage,
-} from "../factories.js";
-
+import { defineBlockStructure as block, defineBoxStructure as box, defineStage as step, tiledBase } from "../factories.js";
+import { bilingual as text } from "../../i18n.js";
+const base = tiledBase(8);
 export const assemblyDemoScene = {
-  id: "assembly_demo",
-  title: "Assembly and Use",
-  iconPath: "textures/items/stick",
-  specialBlockIcons: [
-    {
-      iconPath: "textures/items/brick",
-      tooltipText: "Barrel",
-    },
-    {
-      iconPath: "textures/items/iron_ingot",
-      tooltipText: "Blast Furnace",
-    },
-    {
-      iconPath: "textures/items/redstone_dust",
-      tooltipText: "Redstone Block",
-    },
-  ],
-  entryItems: ["minecraft:stick"],
-  stagePresetId: "demo_8x8x8",
-  tickingAreaName: "ponder_demo_assembly",
+  id: "assembly_demo", title: text("结构的装配与观察", "Assembly and observation"),
+  itemTitle: text("木棍", "Stick"),
+  description: text("逐步展示真实方块，并学习时间轴操作。", "Build with real blocks and explore the timeline."),
+  iconPath: "textures/items/stick", entryItems: ["minecraft:stick"],
+  stagePresetId: "demo_8x8x8", tags: ["basics", "crafting"], order: 0,
+  initial: base.map(b => b.id),
   structures: [
-    defineBoxStructure(
-      "stone_base",
-      "minecraft:stone_bricks",
-      { x: 0, y: 0, z: 0 },
-      { x: 7, y: 0, z: 7 },
-    ),
-    defineBoxStructure(
-      "deck",
-      "minecraft:spruce_planks",
-      { x: 1, y: 1, z: 1 },
-      { x: 6, y: 1, z: 6 },
-    ),
-    defineBoxStructure(
-      "post_nw",
-      "minecraft:oak_log",
-      { x: 1, y: 1, z: 1 },
-      { x: 1, y: 4, z: 1 },
-    ),
-    defineBoxStructure(
-      "post_ne",
-      "minecraft:oak_log",
-      { x: 6, y: 1, z: 1 },
-      { x: 6, y: 4, z: 1 },
-    ),
-    defineBoxStructure(
-      "post_sw",
-      "minecraft:oak_log",
-      { x: 1, y: 1, z: 6 },
-      { x: 1, y: 4, z: 6 },
-    ),
-    defineBoxStructure(
-      "post_se",
-      "minecraft:oak_log",
-      { x: 6, y: 1, z: 6 },
-      { x: 6, y: 4, z: 6 },
-    ),
-    defineBoxStructure(
-      "beam_north",
-      "minecraft:oak_log",
-      { x: 1, y: 5, z: 1 },
-      { x: 6, y: 5, z: 1 },
-    ),
-    defineBoxStructure(
-      "beam_south",
-      "minecraft:oak_log",
-      { x: 1, y: 5, z: 6 },
-      { x: 6, y: 5, z: 6 },
-    ),
-    defineBoxStructure(
-      "beam_west",
-      "minecraft:oak_log",
-      { x: 1, y: 5, z: 1 },
-      { x: 1, y: 5, z: 6 },
-    ),
-    defineBoxStructure(
-      "beam_east",
-      "minecraft:oak_log",
-      { x: 6, y: 5, z: 1 },
-      { x: 6, y: 5, z: 6 },
-    ),
-    defineBoxStructure(
-      "machine_core",
-      "minecraft:polished_andesite",
-      { x: 3, y: 1, z: 3 },
-      { x: 4, y: 2, z: 4 },
-    ),
-    defineBoxStructure(
-      "roof",
-      "minecraft:tinted_glass",
-      { x: 2, y: 6, z: 2 },
-      { x: 5, y: 6, z: 5 },
-    ),
-    defineBlockStructure("barrel", "minecraft:barrel", { x: 2, y: 2, z: 5 }),
-    defineBlockStructure("furnace", "minecraft:blast_furnace", { x: 5, y: 2, z: 2 }),
-    defineBlockStructure("gold_core", "minecraft:gold_block", { x: 3, y: 3, z: 3 }),
-    defineBlockStructure("redstone_core", "minecraft:redstone_block", {
-      x: 4,
-      y: 3,
-      z: 4,
-    }),
-    defineBlockStructure("diamond_cap", "minecraft:diamond_block", { x: 0, y: 1, z: 2 }),
-    defineBlockStructure("emerald_cap", "minecraft:emerald_block", { x: 7, y: 1, z: 5 }),
-    defineBlockStructure("amethyst_cap", "minecraft:amethyst_block", { x: 1, y: 6, z: 5 }),
+    ...base, box("pillars", "minecraft:stone_bricks", { x: 2, y: 1, z: 2 }, { x: 2, y: 3, z: 4 }),
+    block("table", "minecraft:crafting_table", { x: 4, y: 1, z: 3 }),
+    box("roof", "minecraft:oak_planks", { x: 2, y: 4, z: 2 }, { x: 5, y: 4, z: 4 }),
   ],
+  regions: { wall: { from: { x: 2, y: 1, z: 2 }, to: { x: 2, y: 3, z: 4 } } },
   stages: [
-    defineStage({
-      bubbleSlot: "top",
-      description:
-        "Lay down the stone base and plank deck. This is the footprint the rest of the scene grows from.",
-      add: ["stone_base", "deck"],
-    }),
-    defineStage({
-      description:
-        "Raise the oak posts and tie them together with a beam ring so the stage reads clearly from every angle.",
-      add: [
-        "post_nw",
-        "post_ne",
-        "post_sw",
-        "post_se",
-        "beam_north",
-        "beam_south",
-        "beam_west",
-        "beam_east",
-      ],
-    }),
-    defineStage({
-      bubbleSlot: "middle",
-      description:
-        "Drop the processing core into the middle, then bolt on the side machines that make the build feel functional.",
-      add: ["machine_core", "barrel", "furnace"],
-    }),
-    defineStage({
-      description:
-        "Cap the top with tinted glass and energize the center with bright accent blocks. Drag the preview to inspect the final pass.",
-      add: [
-        "roof",
-        "gold_core",
-        "redstone_core",
-        "diamond_cap",
-        "emerald_cap",
-        "amethyst_cap",
-      ],
-    }),
+    step({ add: ["pillars"], target: { x: 2.5, y: 2, z: 3 },
+      description: text("结构由真实方块构成。关键帧按钮可以回到教学中的任意步骤。", "These are real blocks. Select a keyframe to return to an earlier tutorial step."),
+      instructions: [{ op: "outline", id: "wall_outline", region: { from: { x: 2, y: 1, z: 2 }, to: { x: 2, y: 3, z: 4 } }, color: "green", duration: 90 }] }),
+    step({ add: ["table"], target: { x: 4.5, y: 1.5, z: 3.5 },
+      description: text("工作台用于合成。右侧的舒适阅读按钮只会放慢教学时间轴。", "Use a crafting table for crafting. Comfortable reading slows the tutorial, not the world."),
+      instructions: [{ op: "controls", id: "use_table", action: "use", target: { x: 4.5, y: 1.5, z: 3.5 }, iconPath: "textures/items/stick", duration: 70, side: "left" }] }),
+    step({ add: ["roof"], color: "input", target: { x: 3.5, y: 4.5, z: 3.5 },
+      description: text("镜头围绕结构移动，文字与指示线跟随相机构图，而玩家始终留在原地。", "The camera orbits the structure. Labels follow its framing while you stay in place."),
+      instructions: [{ op: "camera", yaw: 100, duration: 80 }] }),
+    step({ target: { x: 2.5, y: 2, z: 3 }, description: text("区域可以立即隐藏或恢复。这里不使用实体伪方块或平滑移动。", "Regions can be hidden or restored instantly, without fake block entities or block sliding."),
+      instructions: [{ op: "region", id: "wall", visible: false }] }),
   ],
 };
