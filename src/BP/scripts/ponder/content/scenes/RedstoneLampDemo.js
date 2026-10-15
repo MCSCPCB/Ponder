@@ -2,7 +2,7 @@ import {
   defineBlockStructure,
   defineEntityStructure,
   defineStage,
-} from "../factories.js";
+} from "../../foundation/PonderScene.js";
 
 const platformTiles = [];
 const platformTileIds = [];
@@ -27,18 +27,12 @@ export const redstoneLampDemoScene = {
   iconPath: "textures/blocks/redstone_lamp_off",
   entryItems: ["minecraft:redstone_lamp"],
   stagePresetId: "demo_8x8x8",
-  tickingAreaName: "ponder_demo_redstone_lamp",
   specialBlockIcons: [
     {
       iconPath: "textures/blocks/redstone_block",
       tooltipText: "红石块会持续输出信号，且不能关闭。",
     },
   ],
-  messages: {
-    inUse: "这个思索正在被其他玩家使用。",
-    invalidDimension: "这个思索当前只能在主世界使用。",
-    missingStages: "这个思索没有配置任何步骤。",
-  },
   structures: [
     ...platformTiles,
     defineBlockStructure("lamp_off", "minecraft:redstone_lamp", {

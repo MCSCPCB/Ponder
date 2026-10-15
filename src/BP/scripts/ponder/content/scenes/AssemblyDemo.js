@@ -2,7 +2,7 @@ import {
   defineBlockStructure,
   defineBoxStructure,
   defineStage,
-} from "../factories.js";
+} from "../../foundation/PonderScene.js";
 
 export const assemblyDemoScene = {
   id: "assembly_demo",
@@ -24,7 +24,6 @@ export const assemblyDemoScene = {
   ],
   entryItems: ["minecraft:stick"],
   stagePresetId: "demo_8x8x8",
-  tickingAreaName: "ponder_demo_assembly",
   structures: [
     defineBoxStructure(
       "stone_base",

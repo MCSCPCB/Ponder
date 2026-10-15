@@ -1,6 +1,6 @@
 import { world } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { handlePonderItemUse } from "./ponder/runtime.js";
+import { handlePonderItemUse, installPonder } from "./ponder/foundation/ui/PonderUI.js";
 
 function showVanillaFormTest(player) {
   const form = new ActionFormData()
@@ -11,6 +11,8 @@ function showVanillaFormTest(player) {
 
   void form.show(player);
 }
+
+installPonder();
 
 world.afterEvents.itemUse.subscribe((event) => {
   if (event.source?.typeId !== "minecraft:player") {

@@ -1,0 +1,4 @@
+ponder.ui.pondering=思索……
+ponder.ui.busy=同时进行的思索数量过多
+ponder.ui.busy.maximum=配置的最大值为：%1
+ponder.ui.no_space=思索已取消：没有足够的空间放置情景

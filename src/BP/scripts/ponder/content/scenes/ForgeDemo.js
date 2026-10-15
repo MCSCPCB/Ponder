@@ -2,7 +2,7 @@ import {
   defineBlockStructure,
   defineBoxStructure,
   defineStage,
-} from "../factories.js";
+} from "../../foundation/PonderScene.js";
 
 export const forgeDemoScene = {
   id: "forge_demo",
@@ -20,7 +20,6 @@ export const forgeDemoScene = {
   ],
   entryItems: ["minecraft:blaze_rod"],
   stagePresetId: "demo_16x16x16",
-  tickingAreaName: "ponder_demo_forge",
   structures: [
     defineBoxStructure(
       "forge_base",

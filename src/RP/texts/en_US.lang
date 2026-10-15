@@ -1,0 +1,4 @@
+ponder.ui.pondering=Pondering about...
+ponder.ui.busy=There are too many Ponder sessions running.
+ponder.ui.busy.maximum=The configured maximum is: %1
+ponder.ui.no_space=Pondering cancelled: Not enough space for this scene
