@@ -1,11 +1,9 @@
 export const add = (a, b) => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
 export const sub = (a, b) => ({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z });
-export const mul = (a, n) => ({ x: a.x * n, y: a.y * n, z: a.z * n });
 export const length = (v) => Math.hypot(v.x, v.y, v.z);
 export const distance = (a, b) => length(sub(a, b));
 export const inside = (p, b) => ["x", "y", "z"].every(k => p[k] >= b.from[k] && p[k] <= b.to[k]);
 export const overlaps = (a, b) => ["x", "y", "z"].every(k => a.from[k] <= b.to[k] && b.from[k] <= a.to[k]);
-export const volume = (b) => (b.to.x - b.from.x + 1) * (b.to.y - b.from.y + 1) * (b.to.z - b.from.z + 1);
 export const expand = (b, n) => ({
   from: { x: b.from.x - n, y: b.from.y - n, z: b.from.z - n },
   to: { x: b.to.x + n, y: b.to.y + n, z: b.to.z + n },

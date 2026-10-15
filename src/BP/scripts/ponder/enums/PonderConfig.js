@@ -48,19 +48,26 @@ export const STAGE_PRESETS = {
 };
 
 export const SESSION_TAG = "ponder:owned";
-export const JOURNAL_KEY = "ponder:leases_v3";
-export const PLAYER_STATE_KEY = "ponder:restore_v2";
+export const JOURNAL_KEY = "ponder:leases";
+export const PLAYER_STATE_KEY = "ponder:restore";
 export const LIGHT_BLOCK = "minecraft:light_block_15";
-export const SHELL_BLOCK = "minecraft:white_concrete";
+// 场景背后的纯色背景，铺成舞台外壳：自发光、无阴影，颜色是纯白叠 UI 原 34% 黑色遮罩后的结果。
+export const BACKDROP_BLOCK = "ponder:backdrop";
+// 正在运动的那段世界（Java WorldSectionElement），用手持方块显示。
+export const WORLD_SECTION_ENTITY = "ponder:world_section";
+// 结构盒与摄像机外至少留这么多格光源：外壳不贴着结构（避免红石导通、活塞推壳等），也不贴着镜头。
+export const STAGE_MARGIN = 2;
 // 舞台网格的起点，致敬边境之地起始坐标 12,550,821 的尾数。
 export const STAGE_BASE = 100821;
 // 舞台的任何一格都不超过这个坐标，避免远距离精度问题。
 export const STAGE_MAX_COORD = 125508;
+// 主世界云层所在高度。云会画在方块外壳里面，舞台不能与它相交，优先放在云层上方。
+export const CLOUD_BAND = Object.freeze({ from: 192, to: 208 });
 export const CAMERA_FOV = 48;
 export const LIMITS = Object.freeze({
   // 同时进行的思索数量上限。
   sessions: 4,
   allocationAttempts: 24, safetyBuffer: 3, playerClearance: 96,
-  stageVolume: 1200000, nativeEntities: 128,
+  nativeEntities: 128,
   formBusyRetries: 3,
 });

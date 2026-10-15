@@ -2,19 +2,19 @@
     "format_version": "1.10.0",
     "minecraft:client_entity": {
         "description": {
-            "identifier": "entity:ponder_block",
+            "identifier": "ponder:world_section",
             "materials": {
                 "default": "zombie"
             },
             "textures": {
-                "default": "textures/empty"
+                "default": "textures/special/ponder/blank"
             },
             "animations": {
-                "ponder_block": "animation.ponder_block"
+                "world_section": "animation.ponder.world_section"
             },
             "scripts": {
                 "animate": [
-                    "ponder_block"
+                    "world_section"
                 ]
             },
             "geometry": {

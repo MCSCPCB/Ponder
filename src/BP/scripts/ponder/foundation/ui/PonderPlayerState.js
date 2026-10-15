@@ -6,7 +6,7 @@ export function capturePlayer(player) {
   const input = {};
   for (const category of new Set(Object.values(InputPermissionCategory).filter(v => typeof v === "number")))
     input[category] = player.inputPermissions.isPermissionCategoryEnabled(category);
-  const snapshot = { version: 2, hidden: player.onScreenDisplay.getHiddenHudElements(), input };
+  const snapshot = { hidden: player.onScreenDisplay.getHiddenHudElements(), input };
   // Persist before changing anything. Rejoin/reload can restore even without a session.
   player.setDynamicProperty(PLAYER_STATE_KEY, JSON.stringify(snapshot));
   player.inputPermissions.setPermissionCategory(InputPermissionCategory.Movement, false);
@@ -18,8 +18,7 @@ export function restorePlayer(player) {
   if (!player?.isValid) return false;
   const raw = player.getDynamicProperty(PLAYER_STATE_KEY);
   if (!raw) return true;
-  const snapshot = JSON.parse(String(raw));
-  if (snapshot.version !== 2 || !Array.isArray(snapshot.hidden) || !snapshot.input) throw new Error("Invalid player recovery snapshot");
+  const snapshot = JSON.parse(raw);
   // Each operation is independently attempted; retain the snapshot if any fails.
   const errors = [];
   const attempt = action => { try { action(); } catch (error) { errors.push(error); } };

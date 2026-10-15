@@ -17,7 +17,7 @@ const sessions = new Map();
 const nativeByproducts = new Set(["minecraft:item", "minecraft:xp_orb", "minecraft:falling_block"]);
 const LOADING_REFRESH_TICKS = 40;
 const busyMessage = () => raw(translate(ui("busy")), "\n", translate(ui("busy.maximum"), LIMITS.sessions));
-let installed = false, booting = false;
+let booting = false;
 
 function restoreSafely(player) {
   try { restorePlayer(player); }
@@ -32,9 +32,9 @@ async function boot() {
   } catch (error) { console.error(`[Ponder] Startup recovery: ${error}`); }
   finally { booting = false; }
 }
+// The player can leave while the stage loads.
 function actionBar(player, message) {
-  try { if (player.isValid) player.onScreenDisplay.setActionBar(message); }
-  catch (error) { console.warn(`[Ponder] Action bar: ${error}`); }
+  if (player.isValid) player.onScreenDisplay.setActionBar(message);
 }
 function applyCamera(session) {
   const { camera } = session.scene, origin = session.lease.origin;
@@ -52,10 +52,7 @@ export function closeSession(session, reason = "closed") {
   session.formEpoch++;
   session.animationToken++;
   const drained = session.gate.close();
-  if (session.formPending) {
-    try { if (session.player.isValid) uiManager.closeAllForms(session.player); }
-    catch (error) { console.warn(`[Ponder] Form close (${reason}): ${error}`); }
-  }
+  if (session.formPending && session.player.isValid) uiManager.closeAllForms(session.player);
   restoreSafely(session.player);
   session.closePromise = (async () => {
     try {
@@ -201,8 +198,6 @@ function tick() {
   }
 }
 export function installPonder() {
-  if (installed) return;
-  installed = true;
   world.afterEvents.entityHurt.subscribe(event => {
     if (event.damage > 0) void closePlayer(event.hurtEntity.id, "hurt");
   });

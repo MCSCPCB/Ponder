@@ -1,4 +1,5 @@
 import { BlockPermutation } from "@minecraft/server";
+import { LIGHT_BLOCK, WORLD_SECTION_ENTITY } from "../../enums/PonderConfig.js";
 import { add } from "../VecHelper.js";
 import { job, safeRemove, waitTicks } from "./StageJobs.js";
 import { markOwned } from "./StageOwnership.js";
@@ -83,7 +84,7 @@ export class PonderLevelRenderer {
     };
   }
 
-  /** Writes block and box structures in batches; `blockId` overrides them (air to clear). */
+  /** Writes block and box structures in batches; `blockId` overrides them (stage light to clear). */
   async writeStructures(structures, live, blockId) {
     const self = this, resolved = new Map();
     const permutation = id => {
@@ -134,7 +135,7 @@ export class PonderLevelRenderer {
   }
 
   async clearStructures(structures, live) {
-    await this.writeStructures(structures, live, "minecraft:air");
+    await this.writeStructures(structures, live, LIGHT_BLOCK);
     for (const structure of structures) {
       if (structure.kind !== "entity") continue;
       this.check(live);
@@ -142,16 +143,16 @@ export class PonderLevelRenderer {
     }
   }
 
-  /** The stage box is the scene's own space: cleared cells are air, never stage light. */
+  /** Empty stage cells hold stage light, so nothing in the scene sits in shadow at night. */
   async clearStage(live) {
     this.check(live);
     for (const entity of this.dimension.getEntities({ tags: [this.lease.tag, STAGE_ENTITY_TAG] })) safeRemove(entity);
     const box = { from: this.toStageLocation(this.scene.stageBox.from), to: this.toStageLocation(this.scene.stageBox.to) };
-    const air = BlockPermutation.resolve("minecraft:air"), self = this;
+    const light = BlockPermutation.resolve(LIGHT_BLOCK), self = this;
     await job((function* () {
       for (const slab of slabs(box)) {
         self.check(live);
-        self.dimension.fillBlocks(nativeVolume(slab), air);
+        self.dimension.fillBlocks(nativeVolume(slab), light);
         yield;
       }
     })());
@@ -180,7 +181,7 @@ export class PonderLevelRenderer {
       const finalLocation = this.toStageLocation(animatedBlock.position);
       const startLocation = { x: finalLocation.x + 0.5, y: finalLocation.y + FALL_START_HEIGHT, z: finalLocation.z + 0.5 };
       const entity = attempt(
-        () => this.dimension.spawnEntity("entity:ponder_block", startLocation),
+        () => this.dimension.spawnEntity(WORLD_SECTION_ENTITY, startLocation),
         `Failed to spawn temp animation entity for block "${animatedBlock.blockId}" in scene "${this.scene.id}".`,
       );
       if (!entity) continue;
@@ -202,7 +203,7 @@ export class PonderLevelRenderer {
       for (const entry of spawned) {
         this.check(live);
         attempt(
-          () => this.dimension.runCommand(`replaceitem entity @e[type=entity:ponder_block,tag=${entry.entityTag}] slot.weapon.mainhand 0 ${entry.itemId}`),
+          () => this.dimension.runCommand(`replaceitem entity @e[type=${WORLD_SECTION_ENTITY},tag=${entry.entityTag}] slot.weapon.mainhand 0 ${entry.itemId}`),
           `Failed to equip temp animation entity with item "${entry.itemId}" in scene "${this.scene.id}".`,
         );
       }
@@ -217,7 +218,7 @@ export class PonderLevelRenderer {
       for (const { entityTag, startLocation, finalLocation } of spawned) {
         const y = lerpNumber(startLocation.y, finalLocation.y, progress);
         attempt(
-          () => this.dimension.runCommand(`tp @e[type=entity:ponder_block,tag=${entityTag}] ${formatCommandNumber(finalLocation.x)} ${formatCommandNumber(y)} ${formatCommandNumber(finalLocation.z)}`),
+          () => this.dimension.runCommand(`tp @e[type=${WORLD_SECTION_ENTITY},tag=${entityTag}] ${formatCommandNumber(finalLocation.x)} ${formatCommandNumber(y)} ${formatCommandNumber(finalLocation.z)}`),
           `Failed to move temp animation entity "${entityTag}".`,
         );
       }

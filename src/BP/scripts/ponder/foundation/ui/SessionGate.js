@@ -4,7 +4,6 @@
  */
 export class SessionGate {
   constructor() { this.closed = false; this.version = 0; this.tail = Promise.resolve(); }
-  token() { return this.version; }
   current(token) { return !this.closed && token === this.version; }
   invalidate() { return ++this.version; }
   close() { this.closed = true; this.invalidate(); return this.tail; }

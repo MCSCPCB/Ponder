@@ -2,7 +2,7 @@
     "format_version": "1.21.0",
     "minecraft:entity": {
         "description": {
-            "identifier": "entity:ponder_block",
+            "identifier": "ponder:world_section",
             "is_spawnable": false,
             "is_summonable": true,
             "is_experimental": false

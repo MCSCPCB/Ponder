@@ -1,0 +1,76 @@
+{
+  "block_sounds": {
+    "ponder_silent": {
+      "volume": 0,
+      "pitch": 0,
+      "events": {
+        "default": "",
+        "item.use.on": {
+          "sound": "ponder.silent",
+          "pitch": 0
+        },
+        "break": {
+          "sound": "ponder.silent",
+          "volume": 0,
+          "pitch": 0
+        },
+        "hit": {
+          "sound": "ponder.silent",
+          "volume": 0,
+          "pitch": 0
+        },
+        "place": {
+          "sound": "ponder.silent",
+          "volume": 0,
+          "pitch": 0
+        },
+        "power.on": {
+          "sound": "ponder.silent",
+          "pitch": 0
+        },
+        "power.off": {
+          "sound": "ponder.silent",
+          "pitch": 0
+        }
+      }
+    }
+  },
+  "interactive_sounds": {
+    "block_sounds": {
+      "ponder_silent": {
+        "events": {
+          "default": "",
+          "fall": {
+            "sound": "ponder.silent",
+            "volume": 0
+          },
+          "step": {
+            "sound": "ponder.silent",
+            "volume": 0
+          },
+          "jump": {
+            "sound": "ponder.silent",
+            "volume": 0
+          },
+          "land": {
+            "sound": "ponder.silent",
+            "volume": 0
+          }
+        },
+        "volume": 0,
+        "pitch": 0
+      }
+    }
+  },
+  "entity_sounds": {
+    "entities": {
+      "ponder:world_section": {
+        "volume": 0,
+        "events": {
+          "hurt": "ponder.silent",
+          "death": "ponder.silent"
+        }
+      }
+    }
+  }
+}

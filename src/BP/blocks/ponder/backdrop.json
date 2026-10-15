@@ -1,0 +1,27 @@
+{
+    "format_version": "1.26.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "ponder:backdrop",
+            "menu_category": {
+                "category": "none"
+            }
+        },
+        "components": {
+            "minecraft:light_emission": 15,
+            "minecraft:destructible_by_mining": false,
+            "minecraft:destructible_by_explosion": false,
+            "minecraft:geometry": {
+                "identifier": "minecraft:geometry.full_block"
+            },
+            "minecraft:material_instances": {
+                "*": {
+                    "texture": "ponder:backdrop",
+                    "render_method": "opaque",
+                    "ambient_occlusion": false,
+                    "face_dimming": false
+                }
+            }
+        }
+    }
+}

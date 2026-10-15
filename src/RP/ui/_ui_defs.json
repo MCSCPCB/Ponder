@@ -1,5 +1,5 @@
 {
   "ui_defs": [
-    "ui/server_form.json"
+    "ui/ponder/ponder_ui.json"
   ]
 }

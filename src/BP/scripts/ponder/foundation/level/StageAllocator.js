@@ -1,6 +1,8 @@
 import { BlockPermutation, BlockVolume, StructureSaveMode, world } from "@minecraft/server";
-import { JOURNAL_KEY, LIGHT_BLOCK, LIMITS, SHELL_BLOCK, STAGE_BASE, STAGE_MAX_COORD } from "../../enums/PonderConfig.js";
-import { add, distance, expand, inside, overlaps } from "../VecHelper.js";
+import {
+  BACKDROP_BLOCK, CLOUD_BAND, JOURNAL_KEY, LIGHT_BLOCK, LIMITS, STAGE_BASE, STAGE_MAX_COORD,
+} from "../../enums/PonderConfig.js";
+import { add, distance, expand, overlaps } from "../VecHelper.js";
 import { assertLive, job, safeRemove } from "./StageJobs.js";
 
 /** Slabs keep individual native volume operations below 4096 blocks. */
@@ -16,12 +18,38 @@ const absolute = (b, origin) => ({ from: add(b.from, origin), to: add(b.to, orig
 const center = b => ({ x: (b.from.x + b.to.x) / 2, y: (b.from.y + b.to.y) / 2, z: (b.from.z + b.to.z) / 2 });
 const LEASE_PREFIX = "ponder_eae14a5a_";
 const SNAPSHOT_PREFIX = "ponder:snap_";
-// Structures are saved in 64-block cubes, inside the native structure size limit.
+// Structures are saved at most 64 blocks tall, inside the native structure size limit.
 const SNAPSHOT_STEP = 64;
 const GRID = 8, SPACING = 192;
-const PHASES = ["reserved", "snapshot", "building", "ready", "cleaning"];
 // World content has been replaced in these phases, so release must put the snapshot back.
 const BUILT = ["building", "ready", "cleaning"];
+
+/**
+ * Candidate origin heights, highest first: high air is the emptiest. In the overworld the
+ * stage stays clear of the cloud band, which draws through any block shell: above it first,
+ * then below it.
+ */
+function originHeights(dimension, localSafe) {
+  const height = dimension.heightRange;
+  const lowest = height.min + 1 - localSafe.from.y, highest = height.max - 2 - localSafe.to.y;
+  const ranges = dimension.id === "minecraft:overworld"
+    ? [[Math.max(lowest, CLOUD_BAND.to + 1 - localSafe.from.y), highest],
+      [lowest, Math.min(highest, CLOUD_BAND.from - 1 - localSafe.to.y)]]
+    : [[lowest, highest]];
+  const heights = [];
+  for (const [low, high] of ranges) {
+    if (low > high) continue;
+    for (const factor of [1, .72, .45, .2]) heights.push(Math.floor(low + (high - low) * factor));
+  }
+  return [...new Set(heights)];
+}
+
+/** Snapshot structures of a lease, from the origin-relative corners kept in the journal. */
+function snapshotsOf(lease) {
+  return lease.origin ? lease.snapshots.map(([x, y, z], i) => ({
+    id: `${SNAPSHOT_PREFIX}${lease.id}_${i}`, from: add(lease.origin, { x, y, z }),
+  })) : [];
+}
 
 export function nearbyPlayer(dimension, safe) {
   const p = center(safe), radius = distance(safe.from, safe.to) / 2 + LIMITS.playerClearance;
@@ -45,80 +73,31 @@ export class StageAllocator {
   persist() {
     // In-memory reservations count against capacity immediately, but a reservation
     // without coordinates has neither a ticking area nor anything to recover.
-    const data = JSON.stringify({ version: 3, leases: [...this.leases.values()].filter(l => l.room) });
-    if (data.length > 30000) throw new Error("Lease journal exceeds dynamic-property budget");
-    world.setDynamicProperty(JOURNAL_KEY, data);
+    world.setDynamicProperty(JOURNAL_KEY, JSON.stringify([...this.leases.values()].filter(l => l.room)));
   }
-  get manager() {
-    const manager = world.tickingAreaManager;
-    if (!manager?.createTickingArea) throw new Error("unavailable");
-    return manager;
-  }
+  get manager() { return world.tickingAreaManager; }
+  /** Puts back every stage a crash or /reload left in the world, then removes our leftovers. */
   async recover() {
     this.ready = false;
     try {
       const raw = world.getDynamicProperty(JOURNAL_KEY);
-      const recovered = new Map(this.leases);
-      if (raw !== undefined) {
-        if (typeof raw !== "string") throw new Error("Invalid lease journal");
-        const saved = JSON.parse(raw);
-        if (saved?.version !== 3) throw new Error("Invalid lease journal");
-        // Validate the complete set first: Map insertion would otherwise hide a
-        // duplicate ID and destructive cleanup could run before a later failure.
-        this.validateLeases(saved.leases);
-        for (const lease of saved.leases) recovered.set(lease.id, lease);
-      }
-      this.validateLeases([...recovered.values()].filter(lease => lease.room));
-      this.leases = recovered;
+      for (const lease of raw === undefined ? [] : JSON.parse(raw)) this.leases.set(lease.id, lease);
       for (const lease of [...this.leases.values()]) await this.release(lease);
       // Only remove our own orphaned handles, never another pack's.
       for (const area of this.manager.getAllTickingAreas()) {
         if (area.identifier.startsWith(LEASE_PREFIX) && !this.leases.has(area.identifier))
           this.manager.removeTickingArea(area.identifier);
       }
+      const kept = new Set([...this.leases.values()].flatMap(l => snapshotsOf(l).map(s => s.id)));
       for (const id of world.structureManager.getWorldStructureIds()) {
-        if (id.startsWith(SNAPSHOT_PREFIX) && ![...this.leases.values()].some(l => l.snapshots?.some(s => s.id === id)))
-          world.structureManager.delete(id);
+        if (id.startsWith(SNAPSHOT_PREFIX) && !kept.has(id)) world.structureManager.delete(id);
       }
       this.ready = true; this.recoveryError = undefined;
     } catch (error) {
+      // The journal stays; the next attempt retries the stages that could not be put back.
       this.recoveryError = error;
       console.error(`[Ponder] Recovery deferred; journal retained: ${error}`);
     }
-  }
-  validateLeases(leases) {
-    if (!Array.isArray(leases) || leases.length > LIMITS.sessions) throw new Error("Invalid lease journal");
-    const ids = new Set(), owners = new Set(), previous = [];
-    for (const lease of leases) {
-      if (!this.validLease(lease)) throw new Error("Invalid lease bounds; manual recovery required");
-      if (ids.has(lease.id) || owners.has(lease.ownerId))
-        throw new Error("Duplicate lease identity; manual recovery required");
-      if (previous.some(other => other.dimensionId === lease.dimensionId && overlaps(other.safe, lease.safe)))
-        throw new Error("Overlapping leases; manual recovery required");
-      ids.add(lease.id); owners.add(lease.ownerId); previous.push(lease);
-    }
-  }
-  validLease(lease) {
-    if (!lease || !/^ponder_eae14a5a_[a-z0-9_]{1,64}$/.test(lease.id) || !PHASES.includes(lease.phase))
-      return false;
-    if (lease.tag !== `ponder:s_${lease.id}` || typeof lease.ownerId !== "string" || !lease.ownerId || lease.ownerId.length > 128) return false;
-    if (!["minecraft:overworld", "minecraft:nether", "minecraft:the_end"].includes(lease.dimensionId)) return false;
-    for (const b of [lease.room, lease.safe]) {
-      if (!b || !["x", "y", "z"].every(k => Number.isInteger(b.from?.[k]) && Number.isInteger(b.to?.[k]) && b.from[k] <= b.to[k])) return false;
-      const count = ["x", "y", "z"].reduce((n, k) => n * (b.to[k] - b.from[k] + 1), 1);
-      if (count > LIMITS.stageVolume || count < 1) return false;
-      if ([b.from.x, b.from.z, b.to.x, b.to.z].some(n => Math.abs(n) > STAGE_MAX_COORD)) return false;
-    }
-    if (!lease.origin || !["x", "y", "z"].every(k => Number.isInteger(lease.origin[k]))) return false;
-    const expectedSafe = expand(lease.room, LIMITS.safetyBuffer);
-    if (!["x", "y", "z"].every(k => lease.safe.from[k] === expectedSafe.from[k] && lease.safe.to[k] === expectedSafe.to[k])) return false;
-    if (!Array.isArray(lease.snapshots) || !lease.snapshots.every(s =>
-      typeof s?.id === "string" && s.id.startsWith(`${SNAPSHOT_PREFIX}${lease.id}_`) &&
-      ["x", "y", "z"].every(k => Number.isInteger(s.from?.[k])) && inside(s.from, lease.safe))) return false;
-    const height = world.getDimension(lease.dimensionId).heightRange;
-    return lease.safe.from.y >= height.min && lease.safe.to.y < height.max &&
-      inside(lease.room.from, lease.safe) && inside(lease.room.to, lease.safe) &&
-      inside(lease.origin, lease.room);
   }
   /** Other leases, nearby players, entities and bedrock all rule a candidate out. */
   occupied(dimension, safe, ignoredId) {
@@ -133,15 +112,13 @@ export class StageAllocator {
     if (!this.ready) throw new Error("recovering");
     if (this.full) throw new Error("busy");
     const dimension = session.dimension, manager = this.manager;
-    const height = dimension.heightRange;
     const localSafe = expand(scene.room, LIMITS.safetyBuffer);
-    const lowOrigin = height.min + 1 - localSafe.from.y;
-    const highOrigin = height.max - 2 - localSafe.to.y;
-    if (lowOrigin > highOrigin) throw new Error("noSpace");
+    const heights = originHeights(dimension, localSafe);
+    if (!heights.length) throw new Error("noSpace");
     // Reserve before the first await. This is the allocation lock for concurrent users.
     const serial = ++this.serial;
     const id = `${LEASE_PREFIX}${Date.now().toString(36)}_${serial.toString(36)}`;
-    const lease = { id, ownerId: session.player.id, dimensionId: dimension.id, phase: "reserved",
+    const lease = { id, dimensionId: dimension.id, phase: "reserved",
       tag: `ponder:s_${id}`, origin: undefined, room: undefined, safe: undefined, snapshots: [] };
     this.leases.set(id, lease);
     session.lease = lease;
@@ -150,10 +127,9 @@ export class StageAllocator {
         assertLive(session);
         // A fixed GRID x GRID block of cells from STAGE_BASE outwards; the index wraps.
         const cell = (serial * 29 + attempt) % (GRID * GRID);
-        const yFactors = [1, .72, .45, .2];
         const origin = {
           x: STAGE_BASE + (cell % GRID) * SPACING,
-          y: Math.floor(lowOrigin + (highOrigin - lowOrigin) * yFactors[attempt % yFactors.length]),
+          y: heights[attempt % heights.length],
           z: STAGE_BASE + Math.floor(cell / GRID) * SPACING,
         };
         const room = absolute(scene.room, origin), safe = absolute(localSafe, origin);
@@ -166,8 +142,9 @@ export class StageAllocator {
         this.persist();
         await manager.createTickingArea(id, options);
         assertLive(session);
+        // Bedrock in the room could not be put back.
         const bedrock = await job((function* () {
-          for (const slab of slabs(safe)) {
+          for (const slab of slabs(room)) {
             assertLive(session);
             if (dimension.containsBlock(nativeVolume(slab), { includeTypes: ["minecraft:bedrock"] }, false)) return true;
             yield;
@@ -196,43 +173,47 @@ export class StageAllocator {
       throw error;
     }
   }
-  /** Saves what the world had in the safe volume, so release can put it back exactly. */
+  /**
+   * Saves what the world had in the room (the lit box and its shell), so release can put it
+   * back exactly. The journal keeps each piece's corner relative to the origin and derives
+   * the structure id from the index.
+   */
   async snapshot(session, lease) {
-    const dimension = session.dimension, pieces = [...slabs(lease.safe, SNAPSHOT_STEP)];
-    lease.snapshots = pieces.map((piece, i) => ({ id: `${SNAPSHOT_PREFIX}${lease.id}_${i}`, from: piece.from }));
+    const dimension = session.dimension, o = lease.origin;
+    const pieces = [...slabs(lease.room, SNAPSHOT_STEP)];
+    lease.snapshots = pieces.map(({ from }) => [from.x - o.x, from.y - o.y, from.z - o.z]);
     lease.phase = "snapshot"; this.persist();
+    const ids = snapshotsOf(lease).map(s => s.id);
     await job((function* () {
       for (const [i, piece] of pieces.entries()) {
         assertLive(session); assertStageClear(dimension, lease);
-        const { id } = lease.snapshots[i];
-        if (world.structureManager.get(id)) world.structureManager.delete(id);
-        world.structureManager.createFromWorld(id, dimension, piece.from, piece.to,
+        if (world.structureManager.get(ids[i])) world.structureManager.delete(ids[i]);
+        world.structureManager.createFromWorld(ids[i], dimension, piece.from, piece.to,
           { includeBlocks: true, includeEntities: false, saveMode: StructureSaveMode.World });
         yield;
       }
     })());
   }
-  /** Light fills the room outside the stage box; the box itself is the scene's own air. */
+  /**
+   * The six shell faces go in first, so nothing flows or falls into the room while it is
+   * cleared; then the lit box is filled from the top down, so loose blocks above are gone
+   * before anything under them is.
+   */
   async build(session, lease, scene) {
-    const dimension = session.dimension, b = lease.room, box = absolute(scene.stageBox, lease.origin);
+    const dimension = session.dimension, b = lease.room, lit = absolute(scene.lit, lease.origin);
     // Resolve before writing: a missing block ID cannot leave a partially built room.
-    const light = BlockPermutation.resolve(LIGHT_BLOCK), shell = BlockPermutation.resolve(SHELL_BLOCK);
-    const air = BlockPermutation.resolve("minecraft:air");
+    const light = BlockPermutation.resolve(LIGHT_BLOCK), shell = BlockPermutation.resolve(BACKDROP_BLOCK);
+    const faces = ["x", "y", "z"].flatMap(axis => [b.from[axis], b.to[axis]]
+      .map(value => ({ from: { ...b.from, [axis]: value }, to: { ...b.to, [axis]: value } })));
+    const layers = [];
+    for (let y = lit.to.y; y >= lit.from.y; y -= 16)
+      layers.push({ from: { ...lit.from, y: Math.max(lit.from.y, y - 15) }, to: { ...lit.to, y } });
     await job((function* () {
-      for (const slab of slabs(b)) {
-        assertLive(session); assertStageClear(dimension, lease);
-        dimension.fillBlocks(nativeVolume(slab), light); yield;
-      }
-      for (const slab of slabs(box)) {
-        assertLive(session); assertStageClear(dimension, lease);
-        dimension.fillBlocks(nativeVolume(slab), air); yield;
-      }
-      for (const axis of ["x", "y", "z"]) {
-        for (const value of [b.from[axis], b.to[axis]]) {
-          const face = { from: { ...b.from, [axis]: value }, to: { ...b.to, [axis]: value } };
-          for (const slab of slabs(face)) {
+      for (const [boxes, permutation] of [[faces, shell], [layers, light]]) {
+        for (const box of boxes) {
+          for (const slab of slabs(box)) {
             assertLive(session); assertStageClear(dimension, lease);
-            dimension.fillBlocks(nativeVolume(slab), shell); yield;
+            dimension.fillBlocks(nativeVolume(slab), permutation); yield;
           }
         }
       }
@@ -251,9 +232,10 @@ export class StageAllocator {
     if (!lease.room) { this.leases.delete(lease.id); this.persist(); return; }
     const manager = this.manager, structures = world.structureManager;
     const dimension = world.getDimension(lease.dimensionId);
+    const snapshots = snapshotsOf(lease);
     if (BUILT.includes(lease.phase)) {
-      if (!this.validLease(lease)) throw new Error("Invalid lease; refusing destructive cleanup");
-      if (!lease.snapshots.length || lease.snapshots.some(s => !structures.get(s.id)))
+      // Without every snapshot the world cannot be put back; keep the journal and the area.
+      if (!snapshots.length || snapshots.some(s => !structures.get(s.id)))
         throw new Error("Stage snapshot missing; manual recovery required");
       // A visitor teleported into the owned room must not lose the floor under them.
       assertStageClear(dimension, lease);
@@ -266,7 +248,7 @@ export class StageAllocator {
       assertStageClear(dimension, lease);
       for (const entity of dimension.getEntities({ tags: [lease.tag] })) safeRemove(entity);
       await job((function* () {
-        for (const snapshot of lease.snapshots) {
+        for (const snapshot of snapshots) {
           assertStageClear(dimension, lease);
           structures.place(snapshot.id, dimension, snapshot.from, { includeBlocks: true, includeEntities: false });
           yield;
@@ -277,7 +259,7 @@ export class StageAllocator {
       for (const entity of dimension.getEntities({ tags: [lease.tag] }))
         safeRemove(entity);
     }
-    for (const snapshot of lease.snapshots ?? []) if (structures.get(snapshot.id)) structures.delete(snapshot.id);
+    for (const snapshot of snapshots) if (structures.get(snapshot.id)) structures.delete(snapshot.id);
     if (manager.hasTickingArea(lease.id)) manager.removeTickingArea(lease.id);
     this.leases.delete(lease.id); this.persist();
   }
