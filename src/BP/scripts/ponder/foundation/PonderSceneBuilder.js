@@ -34,7 +34,7 @@ export class PonderSceneBuilder {
   configureBasePlate(xOffset, zOffset, size) { this.data.basePlate = { xOffset, zOffset, size }; }
   scaleSceneView(factor) { this.data.viewScale = factor; }
   setSceneOffsetY(offset) { this.data.viewOffsetY = offset; }
-  removeShadow() { /* The platform shadow is a GUI effect with no counterpart here. */ }
+  removeShadow() { this.data.hidePlatformShadow = true; }
 
   showBasePlate() {
     const { xOffset, zOffset, size } = this.data.basePlate;
@@ -128,6 +128,11 @@ class WorldInstructions {
     this.b.push({ op: "block", selection: SelectionImpl.fromTo(position, position), cycleState: property });
   }
   toggleRedstonePower(selection) { this.b.push({ op: "block", selection, toggleState: ["powered", "power"] }); }
+  /**
+   * Java modifyBlockEntityNBT. Data is { sign: { front, back }, items: [{ slot, itemId, amount }] },
+   * merged into what the block already holds.
+   */
+  modifyBlockEntity(selection, data) { this.b.push({ op: "blockEntity", selection, data }); }
   incrementBlockBreakingProgress(position) { this.b.push({ op: "breakProgress", position }); }
 
   createEntity(entityTypeId, position, options = {}) {
@@ -202,7 +207,7 @@ class TextElementBuilder {
 class InputElementBuilder {
   constructor(builder, location, pointing, duration) {
     this.event = builder.push({ op: "controls", id: `controls_${++builder.textSerial}`, target: location,
-      pointing, duration, action: "use",
+      pointing, duration,
       side: { left: "left", right: "right", up: "top", down: "bottom" }[pointing] ?? "auto" });
   }
   withItem(itemId) { this.event.itemId = itemId; return this; }
@@ -239,11 +244,15 @@ class SpecialInstructions {
     this.b.push({ op: "spawn", id: link.id, entityTypeId: "minecraft:minecart", position: location, rotation: { x: 0, y: angle } });
     return link;
   }
-  createBirb(location) {
+  /** pose: "poi" faces the point of interest, "dance" spins in place, "cursor" faces the camera. */
+  createBirb(location, pose = "poi") {
     const link = this.b.newLink("entity");
-    this.b.push({ op: "spawn", id: link.id, entityTypeId: "minecraft:parrot", position: location });
+    this.b.push({ op: "spawn", id: link.id, entityTypeId: "minecraft:parrot", position: location, pose, rotation: { x: 0, y: 180 } });
     return link;
   }
+  changeBirbPose(link, pose) { this.b.push({ op: "updateEntity", id: link.id, pose }); }
+  /** Where birbs look; it eases toward the target a quarter of the way each tick. */
+  movePointOfInterest(location) { this.b.push({ op: "poi", position: location }); }
   moveCart(link, offset, duration) { this.b.push({ op: "moveEntity", id: link.id, offset, duration }); }
   moveParrot(link, offset, duration) { this.b.push({ op: "moveEntity", id: link.id, offset, duration }); }
   rotateCart(link, yRotation, duration) { this.b.push({ op: "rotateEntity", id: link.id, yaw: yRotation, duration }); }

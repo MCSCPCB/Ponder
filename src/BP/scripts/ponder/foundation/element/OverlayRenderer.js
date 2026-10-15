@@ -9,11 +9,11 @@ import { safeRemove } from "../level/StageJobs.js";
 /** 物品图标统一走贴图路径，不做 item_id_aux 映射。 */
 const itemIconPath = itemId => `textures/items/${itemId.split(":").pop()}`;
 const directionIndex = { right: 0, bottom: 1, left: 2, top: 3 };
-const actionIcons = { use: "use", attack: "attack", scroll: "scroll", slot: "slot" };
+const actionIcons = { use: "use", attack: "attack", scroll: "scroll" };
 export class OverlayRenderer {
   constructor(session, scene) { this.session = session; this.scene = scene; this.entities = new Map(); }
   render(state, tracked) {
-    const layout = layoutAnnotations(this.scene, state, this.session.locale, this.session.inputMode, tracked);
+    const layout = layoutAnnotations(this.scene, state, this.session.locale, tracked);
     const desired = new Map();
     const addEntity = (id, type, position, properties) => desired.set(id, { type, position, properties });
     const line = (id, from, to, color, alpha = 1, through = true, width = .022) => {
@@ -54,10 +54,12 @@ export class OverlayRenderer {
       if (a.op === "controls") {
         const unit = this.scene.textScale, cy = rect.y + rect.h / 2;
         let x = rect.x + 6 * unit + (text.width ? text.width * unit : 0);
-        const iconPath = a.iconPath ?? `textures/ui/ponder/icon_${this.session.inputMode === "touch" ? "touch" : actionIcons[a.action] ?? "use"}`;
-        addEntity(`${a.id}:icon`, "icon", layout.view.point(x + 12 * unit, cy, .04),
-          { ...common, color: 0xffffff, icon: iconIndex(iconPath), size: 24 * unit, angle: 0 });
-        x += 24 * unit;
+        const iconPath = a.iconPath ?? (a.action ? `textures/ui/ponder/icon_${actionIcons[a.action]}` : undefined);
+        if (iconPath) {
+          addEntity(`${a.id}:icon`, "icon", layout.view.point(x + 12 * unit, cy, .04),
+            { ...common, color: 0xffffff, icon: iconIndex(iconPath), size: 24 * unit, angle: 0 });
+          x += 24 * unit;
+        }
         if (a.itemId) {
           const itemIcon = itemIconPath(a.itemId);
           addEntity(`${a.id}:item`, "icon", layout.view.point(x + 12 * unit, cy, .042),

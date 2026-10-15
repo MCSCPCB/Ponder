@@ -28,18 +28,6 @@
       }
     ]
   },
-  "main_screen_content/server_form_factory": {
-    "bindings": [
-      {
-        "binding_name": "#title_text"
-      },
-      {
-        "binding_type": "view",
-        "source_property_name": "((#title_text - '§0§r§1§r') = #title_text)",
-        "target_property_name": "#visible"
-      }
-    ]
-  },
   "long_form": {
     "bindings": [
       {
@@ -2530,7 +2518,7 @@
     ]
   },
   "ponder_header_content": {
-    "type": "panel",
+    "type": "collection_panel",
     "size": [
       "100%c",
       "100%cm"
@@ -2578,7 +2566,7 @@
             {
               "pondering_label": {
                 "type": "label",
-                "text": "ponder.ui.ponder",
+                "text": "ponder.ui.pondering",
                 "localize": true,
                 "color": [
                   0.639216,
@@ -2679,7 +2667,8 @@
           ]
         }
       }
-    ]
+    ],
+    "collection_name": "form_buttons"
   },
   "ponder_header": {
     "type": "panel",
@@ -2892,7 +2881,7 @@
     ]
   },
   "ponder_sidebar": {
-    "type": "panel",
+    "type": "collection_panel",
     "size": [
       "100%",
       "100%"
@@ -3005,7 +2994,7 @@
     ]
   },
   "ponder_nav": {
-    "type": "panel",
+    "type": "collection_panel",
     "size": [
       "100%",
       "100%"
@@ -3087,7 +3076,6 @@
     ]
   },
   "ponder_progress_fill": {
-    "$width|default": 0,
     "$anims|default": [],
     "$visible|default": "false",
     "type": "panel",
@@ -3098,10 +3086,7 @@
       2,
       3
     ],
-    "size": [
-      "$width",
-      3
-    ],
+    "size": "$size",
     "clips_children": true,
     "property_bag": {
       "#t": ""
@@ -3132,20 +3117,24 @@
         "source_property_name": "$visible",
         "target_property_name": "#visible"
       }
+    ],
+    "$size|default": [
+      "0px",
+      "3px"
     ]
   },
   "ponder_keyframe_state": {
-    "$height|default": 5,
     "$alpha|default": 0.44,
     "type": "image",
     "texture": "textures/ui/ponder/progress_keyframe",
-    "size": [
-      2,
-      "$height"
-    ],
+    "size": "$size",
     "alpha": "$alpha",
     "anchor_from": "left_middle",
-    "anchor_to": "left_middle"
+    "anchor_to": "left_middle",
+    "$size|default": [
+      "2px",
+      "5px"
+    ]
   },
   "ponder_keyframe_button": {
     "type": "button",
@@ -4063,7 +4052,6 @@
         -3
       ]
     },
-    "offset": "#offset",
     "button_mappings": [
       {
         "from_button_id": "button.menu_select",
@@ -4079,20 +4067,29 @@
     "controls": [
       {
         "default@server_form.ponder_keyframe_state": {
-          "$height": 5,
-          "$alpha": 0.44
+          "$alpha": 0.44,
+          "$size": [
+            "2px",
+            "5px"
+          ]
         }
       },
       {
         "hover@server_form.ponder_keyframe_state": {
-          "$height": 8,
-          "$alpha": 0.88
+          "$alpha": 0.88,
+          "$size": [
+            "2px",
+            "8px"
+          ]
         }
       },
       {
         "pressed@server_form.ponder_keyframe_state": {
-          "$height": 8,
-          "$alpha": 1
+          "$alpha": 1,
+          "$size": [
+            "2px",
+            "8px"
+          ]
         }
       }
     ],
@@ -4114,18 +4111,18 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "('%.3s' * (#raw - '§0§r§2§r'))",
-        "target_property_name": "#digits"
+        "source_property_name": "(#raw - '§0§r§2§r')",
+        "target_property_name": "#kf"
       },
       {
         "binding_type": "view",
-        "source_property_name": "('#x' + #digits)",
+        "source_property_name": "('#x' + ('%.3s' * #kf))",
         "target_property_name": "#offset"
       }
     ]
   },
   "ponder_progress_bar": {
-    "type": "panel",
+    "type": "collection_panel",
     "size": [
       228,
       9
@@ -4144,1562 +4141,2123 @@
       },
       {
         "f4_1_rest@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f4_1_fwd@server_form.ponder_progress_fill": {
-          "$width": 0,
           "$anims": [
             "@server_form.ponder_progress_anim_4_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "0px",
+            "3px"
+          ]
         }
       },
       {
         "f4_1_rev@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_4_reverse_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r1|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f4_2_rest@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f4_2_fwd@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_4_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f4_2_rev@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_4_reverse_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r2|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f4_3_rest@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f4_3_fwd@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_4_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f4_3_rev@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [
             "@server_form.ponder_progress_anim_4_reverse_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r3|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f4_4_rest@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f4_4_fwd@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_4_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§a§r4|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f8_1_rest@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f8_1_fwd@server_form.ponder_progress_fill": {
-          "$width": 0,
           "$anims": [
             "@server_form.ponder_progress_anim_8_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "0px",
+            "3px"
+          ]
         }
       },
       {
         "f8_1_rev@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_8_reverse_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r1|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f8_2_rest@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f8_2_fwd@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [
             "@server_form.ponder_progress_anim_8_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f8_2_rev@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [
             "@server_form.ponder_progress_anim_8_reverse_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r2|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f8_3_rest@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f8_3_fwd@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_8_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f8_3_rev@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_8_reverse_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r3|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f8_4_rest@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f8_4_fwd@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [
             "@server_form.ponder_progress_anim_8_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f8_4_rev@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [
             "@server_form.ponder_progress_anim_8_reverse_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r4|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f8_5_rest@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f8_5_fwd@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_8_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f8_5_rev@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_8_reverse_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r5|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f8_6_rest@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f8_6_fwd@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [
             "@server_form.ponder_progress_anim_8_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f8_6_rev@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [
             "@server_form.ponder_progress_anim_8_reverse_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r6|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f8_7_rest@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f8_7_fwd@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_8_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f8_7_rev@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [
             "@server_form.ponder_progress_anim_8_reverse_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r7|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f8_8_rest@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f8_8_fwd@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [
             "@server_form.ponder_progress_anim_8_8"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§b§r8|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f12_1_rest@server_form.ponder_progress_fill": {
-          "$width": 19,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "19px",
+            "3px"
+          ]
         }
       },
       {
         "f12_1_fwd@server_form.ponder_progress_fill": {
-          "$width": 0,
           "$anims": [
             "@server_form.ponder_progress_anim_12_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "0px",
+            "3px"
+          ]
         }
       },
       {
         "f12_1_rev@server_form.ponder_progress_fill": {
-          "$width": 37,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r1|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "37px",
+            "3px"
+          ]
         }
       },
       {
         "f12_2_rest@server_form.ponder_progress_fill": {
-          "$width": 37,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "37px",
+            "3px"
+          ]
         }
       },
       {
         "f12_2_fwd@server_form.ponder_progress_fill": {
-          "$width": 19,
           "$anims": [
             "@server_form.ponder_progress_anim_12_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "19px",
+            "3px"
+          ]
         }
       },
       {
         "f12_2_rev@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r2|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f12_3_rest@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f12_3_fwd@server_form.ponder_progress_fill": {
-          "$width": 37,
           "$anims": [
             "@server_form.ponder_progress_anim_12_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "37px",
+            "3px"
+          ]
         }
       },
       {
         "f12_3_rev@server_form.ponder_progress_fill": {
-          "$width": 75,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r3|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "75px",
+            "3px"
+          ]
         }
       },
       {
         "f12_4_rest@server_form.ponder_progress_fill": {
-          "$width": 75,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "75px",
+            "3px"
+          ]
         }
       },
       {
         "f12_4_fwd@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_12_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f12_4_rev@server_form.ponder_progress_fill": {
-          "$width": 93,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r4|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "93px",
+            "3px"
+          ]
         }
       },
       {
         "f12_5_rest@server_form.ponder_progress_fill": {
-          "$width": 93,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "93px",
+            "3px"
+          ]
         }
       },
       {
         "f12_5_fwd@server_form.ponder_progress_fill": {
-          "$width": 75,
           "$anims": [
             "@server_form.ponder_progress_anim_12_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "75px",
+            "3px"
+          ]
         }
       },
       {
         "f12_5_rev@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r5|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f12_6_rest@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f12_6_fwd@server_form.ponder_progress_fill": {
-          "$width": 93,
           "$anims": [
             "@server_form.ponder_progress_anim_12_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "93px",
+            "3px"
+          ]
         }
       },
       {
         "f12_6_rev@server_form.ponder_progress_fill": {
-          "$width": 131,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r6|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "131px",
+            "3px"
+          ]
         }
       },
       {
         "f12_7_rest@server_form.ponder_progress_fill": {
-          "$width": 131,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "131px",
+            "3px"
+          ]
         }
       },
       {
         "f12_7_fwd@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_12_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f12_7_rev@server_form.ponder_progress_fill": {
-          "$width": 149,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r7|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "149px",
+            "3px"
+          ]
         }
       },
       {
         "f12_8_rest@server_form.ponder_progress_fill": {
-          "$width": 149,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "149px",
+            "3px"
+          ]
         }
       },
       {
         "f12_8_fwd@server_form.ponder_progress_fill": {
-          "$width": 131,
           "$anims": [
             "@server_form.ponder_progress_anim_12_8"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "131px",
+            "3px"
+          ]
         }
       },
       {
         "f12_8_rev@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_8"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r8|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f12_9_rest@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f12_9_fwd@server_form.ponder_progress_fill": {
-          "$width": 149,
           "$anims": [
             "@server_form.ponder_progress_anim_12_9"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "149px",
+            "3px"
+          ]
         }
       },
       {
         "f12_9_rev@server_form.ponder_progress_fill": {
-          "$width": 187,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_9"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r9|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "187px",
+            "3px"
+          ]
         }
       },
       {
         "f12_10_rest@server_form.ponder_progress_fill": {
-          "$width": 187,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "187px",
+            "3px"
+          ]
         }
       },
       {
         "f12_10_fwd@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_12_10"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f12_10_rev@server_form.ponder_progress_fill": {
-          "$width": 205,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_10"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r10|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "205px",
+            "3px"
+          ]
         }
       },
       {
         "f12_11_rest@server_form.ponder_progress_fill": {
-          "$width": 205,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "205px",
+            "3px"
+          ]
         }
       },
       {
         "f12_11_fwd@server_form.ponder_progress_fill": {
-          "$width": 187,
           "$anims": [
             "@server_form.ponder_progress_anim_12_11"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "187px",
+            "3px"
+          ]
         }
       },
       {
         "f12_11_rev@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [
             "@server_form.ponder_progress_anim_12_reverse_11"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r11|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f12_12_rest@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f12_12_fwd@server_form.ponder_progress_fill": {
-          "$width": 205,
           "$anims": [
             "@server_form.ponder_progress_anim_12_12"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r12|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§c§r12|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "205px",
+            "3px"
+          ]
         }
       },
       {
         "f16_1_rest@server_form.ponder_progress_fill": {
-          "$width": 14,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "14px",
+            "3px"
+          ]
         }
       },
       {
         "f16_1_fwd@server_form.ponder_progress_fill": {
-          "$width": 0,
           "$anims": [
             "@server_form.ponder_progress_anim_16_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "0px",
+            "3px"
+          ]
         }
       },
       {
         "f16_1_rev@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r1|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f16_2_rest@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f16_2_fwd@server_form.ponder_progress_fill": {
-          "$width": 14,
           "$anims": [
             "@server_form.ponder_progress_anim_16_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "14px",
+            "3px"
+          ]
         }
       },
       {
         "f16_2_rev@server_form.ponder_progress_fill": {
-          "$width": 42,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r2|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "42px",
+            "3px"
+          ]
         }
       },
       {
         "f16_3_rest@server_form.ponder_progress_fill": {
-          "$width": 42,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "42px",
+            "3px"
+          ]
         }
       },
       {
         "f16_3_fwd@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [
             "@server_form.ponder_progress_anim_16_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f16_3_rev@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r3|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f16_4_rest@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f16_4_fwd@server_form.ponder_progress_fill": {
-          "$width": 42,
           "$anims": [
             "@server_form.ponder_progress_anim_16_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "42px",
+            "3px"
+          ]
         }
       },
       {
         "f16_4_rev@server_form.ponder_progress_fill": {
-          "$width": 70,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r4|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "70px",
+            "3px"
+          ]
         }
       },
       {
         "f16_5_rest@server_form.ponder_progress_fill": {
-          "$width": 70,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "70px",
+            "3px"
+          ]
         }
       },
       {
         "f16_5_fwd@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_16_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f16_5_rev@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r5|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f16_6_rest@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f16_6_fwd@server_form.ponder_progress_fill": {
-          "$width": 70,
           "$anims": [
             "@server_form.ponder_progress_anim_16_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "70px",
+            "3px"
+          ]
         }
       },
       {
         "f16_6_rev@server_form.ponder_progress_fill": {
-          "$width": 98,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r6|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "98px",
+            "3px"
+          ]
         }
       },
       {
         "f16_7_rest@server_form.ponder_progress_fill": {
-          "$width": 98,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "98px",
+            "3px"
+          ]
         }
       },
       {
         "f16_7_fwd@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [
             "@server_form.ponder_progress_anim_16_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f16_7_rev@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r7|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f16_8_rest@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f16_8_fwd@server_form.ponder_progress_fill": {
-          "$width": 98,
           "$anims": [
             "@server_form.ponder_progress_anim_16_8"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "98px",
+            "3px"
+          ]
         }
       },
       {
         "f16_8_rev@server_form.ponder_progress_fill": {
-          "$width": 126,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_8"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r8|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "126px",
+            "3px"
+          ]
         }
       },
       {
         "f16_9_rest@server_form.ponder_progress_fill": {
-          "$width": 126,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "126px",
+            "3px"
+          ]
         }
       },
       {
         "f16_9_fwd@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_16_9"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f16_9_rev@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_9"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r9|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f16_10_rest@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f16_10_fwd@server_form.ponder_progress_fill": {
-          "$width": 126,
           "$anims": [
             "@server_form.ponder_progress_anim_16_10"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "126px",
+            "3px"
+          ]
         }
       },
       {
         "f16_10_rev@server_form.ponder_progress_fill": {
-          "$width": 154,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_10"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r10|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "154px",
+            "3px"
+          ]
         }
       },
       {
         "f16_11_rest@server_form.ponder_progress_fill": {
-          "$width": 154,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "154px",
+            "3px"
+          ]
         }
       },
       {
         "f16_11_fwd@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [
             "@server_form.ponder_progress_anim_16_11"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f16_11_rev@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_11"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r11|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f16_12_rest@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f16_12_fwd@server_form.ponder_progress_fill": {
-          "$width": 154,
           "$anims": [
             "@server_form.ponder_progress_anim_16_12"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "154px",
+            "3px"
+          ]
         }
       },
       {
         "f16_12_rev@server_form.ponder_progress_fill": {
-          "$width": 182,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_12"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r12|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "182px",
+            "3px"
+          ]
         }
       },
       {
         "f16_13_rest@server_form.ponder_progress_fill": {
-          "$width": 182,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "182px",
+            "3px"
+          ]
         }
       },
       {
         "f16_13_fwd@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_16_13"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f16_13_rev@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_13"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r13|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f16_14_rest@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f16_14_fwd@server_form.ponder_progress_fill": {
-          "$width": 182,
           "$anims": [
             "@server_form.ponder_progress_anim_16_14"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "182px",
+            "3px"
+          ]
         }
       },
       {
         "f16_14_rev@server_form.ponder_progress_fill": {
-          "$width": 210,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_14"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r14|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "210px",
+            "3px"
+          ]
         }
       },
       {
         "f16_15_rest@server_form.ponder_progress_fill": {
-          "$width": 210,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "210px",
+            "3px"
+          ]
         }
       },
       {
         "f16_15_fwd@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [
             "@server_form.ponder_progress_anim_16_15"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f16_15_rev@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [
             "@server_form.ponder_progress_anim_16_reverse_15"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r15|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f16_16_rest@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r16|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r16|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f16_16_fwd@server_form.ponder_progress_fill": {
-          "$width": 210,
           "$anims": [
             "@server_form.ponder_progress_anim_16_16"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r16|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§d§r16|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "210px",
+            "3px"
+          ]
         }
       },
       {
         "f24_1_rest@server_form.ponder_progress_fill": {
-          "$width": 9,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "9px",
+            "3px"
+          ]
         }
       },
       {
         "f24_1_fwd@server_form.ponder_progress_fill": {
-          "$width": 0,
           "$anims": [
             "@server_form.ponder_progress_anim_24_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "0px",
+            "3px"
+          ]
         }
       },
       {
         "f24_1_rev@server_form.ponder_progress_fill": {
-          "$width": 19,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_1"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r1|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "19px",
+            "3px"
+          ]
         }
       },
       {
         "f24_2_rest@server_form.ponder_progress_fill": {
-          "$width": 19,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "19px",
+            "3px"
+          ]
         }
       },
       {
         "f24_2_fwd@server_form.ponder_progress_fill": {
-          "$width": 9,
           "$anims": [
             "@server_form.ponder_progress_anim_24_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "9px",
+            "3px"
+          ]
         }
       },
       {
         "f24_2_rev@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_2"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r2|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f24_3_rest@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f24_3_fwd@server_form.ponder_progress_fill": {
-          "$width": 19,
           "$anims": [
             "@server_form.ponder_progress_anim_24_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "19px",
+            "3px"
+          ]
         }
       },
       {
         "f24_3_rev@server_form.ponder_progress_fill": {
-          "$width": 37,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_3"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r3|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "37px",
+            "3px"
+          ]
         }
       },
       {
         "f24_4_rest@server_form.ponder_progress_fill": {
-          "$width": 37,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "37px",
+            "3px"
+          ]
         }
       },
       {
         "f24_4_fwd@server_form.ponder_progress_fill": {
-          "$width": 28,
           "$anims": [
             "@server_form.ponder_progress_anim_24_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "28px",
+            "3px"
+          ]
         }
       },
       {
         "f24_4_rev@server_form.ponder_progress_fill": {
-          "$width": 47,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_4"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r4|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "47px",
+            "3px"
+          ]
         }
       },
       {
         "f24_5_rest@server_form.ponder_progress_fill": {
-          "$width": 47,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "47px",
+            "3px"
+          ]
         }
       },
       {
         "f24_5_fwd@server_form.ponder_progress_fill": {
-          "$width": 37,
           "$anims": [
             "@server_form.ponder_progress_anim_24_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "37px",
+            "3px"
+          ]
         }
       },
       {
         "f24_5_rev@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_5"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r5|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f24_6_rest@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f24_6_fwd@server_form.ponder_progress_fill": {
-          "$width": 47,
           "$anims": [
             "@server_form.ponder_progress_anim_24_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "47px",
+            "3px"
+          ]
         }
       },
       {
         "f24_6_rev@server_form.ponder_progress_fill": {
-          "$width": 65,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_6"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r6|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "65px",
+            "3px"
+          ]
         }
       },
       {
         "f24_7_rest@server_form.ponder_progress_fill": {
-          "$width": 65,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "65px",
+            "3px"
+          ]
         }
       },
       {
         "f24_7_fwd@server_form.ponder_progress_fill": {
-          "$width": 56,
           "$anims": [
             "@server_form.ponder_progress_anim_24_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "56px",
+            "3px"
+          ]
         }
       },
       {
         "f24_7_rev@server_form.ponder_progress_fill": {
-          "$width": 75,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_7"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r7|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "75px",
+            "3px"
+          ]
         }
       },
       {
         "f24_8_rest@server_form.ponder_progress_fill": {
-          "$width": 75,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "75px",
+            "3px"
+          ]
         }
       },
       {
         "f24_8_fwd@server_form.ponder_progress_fill": {
-          "$width": 65,
           "$anims": [
             "@server_form.ponder_progress_anim_24_8"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "65px",
+            "3px"
+          ]
         }
       },
       {
         "f24_8_rev@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_8"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r8|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f24_9_rest@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f24_9_fwd@server_form.ponder_progress_fill": {
-          "$width": 75,
           "$anims": [
             "@server_form.ponder_progress_anim_24_9"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "75px",
+            "3px"
+          ]
         }
       },
       {
         "f24_9_rev@server_form.ponder_progress_fill": {
-          "$width": 93,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_9"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r9|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "93px",
+            "3px"
+          ]
         }
       },
       {
         "f24_10_rest@server_form.ponder_progress_fill": {
-          "$width": 93,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "93px",
+            "3px"
+          ]
         }
       },
       {
         "f24_10_fwd@server_form.ponder_progress_fill": {
-          "$width": 84,
           "$anims": [
             "@server_form.ponder_progress_anim_24_10"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "84px",
+            "3px"
+          ]
         }
       },
       {
         "f24_10_rev@server_form.ponder_progress_fill": {
-          "$width": 103,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_10"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r10|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "103px",
+            "3px"
+          ]
         }
       },
       {
         "f24_11_rest@server_form.ponder_progress_fill": {
-          "$width": 103,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "103px",
+            "3px"
+          ]
         }
       },
       {
         "f24_11_fwd@server_form.ponder_progress_fill": {
-          "$width": 93,
           "$anims": [
             "@server_form.ponder_progress_anim_24_11"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "93px",
+            "3px"
+          ]
         }
       },
       {
         "f24_11_rev@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_11"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r11|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f24_12_rest@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f24_12_fwd@server_form.ponder_progress_fill": {
-          "$width": 103,
           "$anims": [
             "@server_form.ponder_progress_anim_24_12"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "103px",
+            "3px"
+          ]
         }
       },
       {
         "f24_12_rev@server_form.ponder_progress_fill": {
-          "$width": 121,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_12"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r12|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "121px",
+            "3px"
+          ]
         }
       },
       {
         "f24_13_rest@server_form.ponder_progress_fill": {
-          "$width": 121,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "121px",
+            "3px"
+          ]
         }
       },
       {
         "f24_13_fwd@server_form.ponder_progress_fill": {
-          "$width": 112,
           "$anims": [
             "@server_form.ponder_progress_anim_24_13"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "112px",
+            "3px"
+          ]
         }
       },
       {
         "f24_13_rev@server_form.ponder_progress_fill": {
-          "$width": 131,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_13"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r13|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "131px",
+            "3px"
+          ]
         }
       },
       {
         "f24_14_rest@server_form.ponder_progress_fill": {
-          "$width": 131,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "131px",
+            "3px"
+          ]
         }
       },
       {
         "f24_14_fwd@server_form.ponder_progress_fill": {
-          "$width": 121,
           "$anims": [
             "@server_form.ponder_progress_anim_24_14"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "121px",
+            "3px"
+          ]
         }
       },
       {
         "f24_14_rev@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_14"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r14|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f24_15_rest@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f24_15_fwd@server_form.ponder_progress_fill": {
-          "$width": 131,
           "$anims": [
             "@server_form.ponder_progress_anim_24_15"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "131px",
+            "3px"
+          ]
         }
       },
       {
         "f24_15_rev@server_form.ponder_progress_fill": {
-          "$width": 149,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_15"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r15|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "149px",
+            "3px"
+          ]
         }
       },
       {
         "f24_16_rest@server_form.ponder_progress_fill": {
-          "$width": 149,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "149px",
+            "3px"
+          ]
         }
       },
       {
         "f24_16_fwd@server_form.ponder_progress_fill": {
-          "$width": 140,
           "$anims": [
             "@server_form.ponder_progress_anim_24_16"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "140px",
+            "3px"
+          ]
         }
       },
       {
         "f24_16_rev@server_form.ponder_progress_fill": {
-          "$width": 159,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_16"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r16|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "159px",
+            "3px"
+          ]
         }
       },
       {
         "f24_17_rest@server_form.ponder_progress_fill": {
-          "$width": 159,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "159px",
+            "3px"
+          ]
         }
       },
       {
         "f24_17_fwd@server_form.ponder_progress_fill": {
-          "$width": 149,
           "$anims": [
             "@server_form.ponder_progress_anim_24_17"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "149px",
+            "3px"
+          ]
         }
       },
       {
         "f24_17_rev@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_17"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r17|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f24_18_rest@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f24_18_fwd@server_form.ponder_progress_fill": {
-          "$width": 159,
           "$anims": [
             "@server_form.ponder_progress_anim_24_18"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "159px",
+            "3px"
+          ]
         }
       },
       {
         "f24_18_rev@server_form.ponder_progress_fill": {
-          "$width": 177,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_18"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r18|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "177px",
+            "3px"
+          ]
         }
       },
       {
         "f24_19_rest@server_form.ponder_progress_fill": {
-          "$width": 177,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "177px",
+            "3px"
+          ]
         }
       },
       {
         "f24_19_fwd@server_form.ponder_progress_fill": {
-          "$width": 168,
           "$anims": [
             "@server_form.ponder_progress_anim_24_19"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "168px",
+            "3px"
+          ]
         }
       },
       {
         "f24_19_rev@server_form.ponder_progress_fill": {
-          "$width": 187,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_19"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r19|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "187px",
+            "3px"
+          ]
         }
       },
       {
         "f24_20_rest@server_form.ponder_progress_fill": {
-          "$width": 187,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "187px",
+            "3px"
+          ]
         }
       },
       {
         "f24_20_fwd@server_form.ponder_progress_fill": {
-          "$width": 177,
           "$anims": [
             "@server_form.ponder_progress_anim_24_20"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "177px",
+            "3px"
+          ]
         }
       },
       {
         "f24_20_rev@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_20"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r20|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f24_21_rest@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f24_21_fwd@server_form.ponder_progress_fill": {
-          "$width": 187,
           "$anims": [
             "@server_form.ponder_progress_anim_24_21"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "187px",
+            "3px"
+          ]
         }
       },
       {
         "f24_21_rev@server_form.ponder_progress_fill": {
-          "$width": 205,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_21"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r21|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "205px",
+            "3px"
+          ]
         }
       },
       {
         "f24_22_rest@server_form.ponder_progress_fill": {
-          "$width": 205,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "205px",
+            "3px"
+          ]
         }
       },
       {
         "f24_22_fwd@server_form.ponder_progress_fill": {
-          "$width": 196,
           "$anims": [
             "@server_form.ponder_progress_anim_24_22"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "196px",
+            "3px"
+          ]
         }
       },
       {
         "f24_22_rev@server_form.ponder_progress_fill": {
-          "$width": 215,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_22"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r22|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "215px",
+            "3px"
+          ]
         }
       },
       {
         "f24_23_rest@server_form.ponder_progress_fill": {
-          "$width": 215,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "215px",
+            "3px"
+          ]
         }
       },
       {
         "f24_23_fwd@server_form.ponder_progress_fill": {
-          "$width": 205,
           "$anims": [
             "@server_form.ponder_progress_anim_24_23"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "205px",
+            "3px"
+          ]
         }
       },
       {
         "f24_23_rev@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [
             "@server_form.ponder_progress_anim_24_reverse_23"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and (not ((#t - '§7§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r23|') = #t)) and (not ((#t - '§7§r') = #t)))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f24_24_rest@server_form.ponder_progress_fill": {
-          "$width": 224,
           "$anims": [],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r24|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r24|') = #t)) and ((#t - '§6§r') = #t) and ((#t - '§7§r') = #t))",
+          "$size": [
+            "224px",
+            "3px"
+          ]
         }
       },
       {
         "f24_24_fwd@server_form.ponder_progress_fill": {
-          "$width": 215,
           "$anims": [
             "@server_form.ponder_progress_anim_24_24"
           ],
-          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r24|') = #t)) and (not ((#t - '§6§r') = #t)))"
+          "$visible": "((not ((#t - '§0§r§1§r|scene|§4§r§e§r24|') = #t)) and (not ((#t - '§6§r') = #t)))",
+          "$size": [
+            "215px",
+            "3px"
+          ]
         }
       },
       {
         "keys": {
-          "type": "panel",
+          "type": "collection_panel",
           "layer": 3,
           "size": [
             "100%",
@@ -5833,7 +6391,7 @@
     ]
   },
   "ponder_next_up": {
-    "type": "panel",
+    "type": "collection_panel",
     "collection_name": "form_buttons",
     "size": [
       "100%cm + 20px",
@@ -5953,7 +6511,7 @@
     ]
   },
   "ponder_scene_layer": {
-    "type": "panel",
+    "type": "collection_panel",
     "size": [
       "100%",
       "100%"
@@ -6155,7 +6713,7 @@
     ]
   },
   "ponder_index_layer": {
-    "type": "panel",
+    "type": "collection_panel",
     "size": [
       "100%",
       "100%"
@@ -6183,7 +6741,7 @@
       },
       {
         "grid": {
-          "type": "panel",
+          "type": "collection_panel",
           "anchor_from": "top_middle",
           "anchor_to": "top_middle",
           "offset": [
@@ -6284,7 +6842,8 @@
                 ]
               }
             }
-          ]
+          ],
+          "collection_name": "form_buttons"
         }
       },
       {

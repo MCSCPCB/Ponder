@@ -3,7 +3,7 @@ import { add, cameraAt, clamp, mul } from "../VecHelper.js";
 
 const OPS = new Set(["show", "hide", "detach", "restore", "block", "rotateSection", "moveSection", "sectionAnchor",
   "text", "controls", "outline", "line", "valueBox", "particle", "spawn", "updateEntity", "moveEntity",
-  "rotateEntity", "removeEntity", "camera", "breakProgress"]);
+  "rotateEntity", "removeEntity", "camera", "breakProgress", "blockEntity", "poi"]);
 const ZERO = Object.freeze({ x: 0, y: 0, z: 0 });
 const progress = (event, tick) => event.duration ? clamp((tick - event.at) / event.duration, 0, 1) : Number(tick >= event.at);
 
@@ -52,8 +52,9 @@ export function compileSchedule(instructions) {
 /** Replays authored state; native redstone and AI history are never replayed. */
 export function stateAt(scene, requestedTick) {
   const tick = clamp(Math.floor(requestedTick), 0, scene.timeline.duration);
-  const patches = new Map(), shown = new Map(), batches = new Map(), leaving = [], sections = new Map();
-  const overlays = new Map(), entities = new Map(), cameraTracks = [];
+  const cracks = new Map(), patches = new Map(), shown = new Map(), batches = new Map(), leaving = [], sections = new Map();
+  const overlays = new Map(), entities = new Map(), cameraTracks = [], poiTracks = [];
+  const breaks = [];
   const section = id => {
     if (!sections.has(id)) sections.set(id, { id, moves: [], rotations: [] });
     return sections.get(id);
@@ -101,52 +102,97 @@ export function stateAt(scene, requestedTick) {
               if (name in states) states[name] = typeof states[name] === "boolean" ? !states[name] : states[name] ? 0 : 15;
             next = { blockId: current.blockId, states };
           }
-          if (next) patches.set(k, { blockId: next.blockId, states: next.states ?? {} });
+          // Java：spawnParticles 时在替换前对旧方块调用 addBlockDestroyEffects。
+          if (e.particles && !air) {
+            const [x, y, z] = k.split(",").map(Number);
+            breaks.push({ at: e.at, position: { x, y, z }, block: current });
+          }
+          if (next) {
+            const data = e.block ? e.block.data : current?.data;
+            patches.set(k, data ? { blockId: next.blockId, states: next.states ?? {}, data } : { blockId: next.blockId, states: next.states ?? {} });
+          }
         }
         break;
+      case "blockEntity":
+        for (const k of e.selection.keys) {
+          const current = describe(k);
+          if (current && current.blockId !== "minecraft:air")
+            patches.set(k, { ...current, data: { ...current.data, ...e.data } });
+        }
+        break;
+      case "breakProgress": {
+        // Java：每次调用加一档，第 9 次破坏方块并清零；档位 0..8 对应 destroy_stage_0..8。
+        const k = key(e.position), stage = (cracks.get(k) ?? -1) + 1;
+        if (stage >= 9) {
+          const before = describe(k);
+          cracks.delete(k);
+          patches.set(k, { blockId: "minecraft:air", states: {} });
+          breaks.push({ at: e.at, position: e.position, block: before });
+        } else cracks.set(k, stage);
+        break;
+      }
       case "moveSection": section(e.link).moves.push(e); break;
       case "rotateSection": section(e.link).rotations.push(e); break;
       case "sectionAnchor":
         if (e.rotationCenter) section(e.link).center = e.rotationCenter;
+        if (e.stabilization) section(e.link).anchor = e.stabilization;
         break;
       case "text": case "controls":
         overlays.set(e.id, { ...e, expires: e.at + e.duration + 2 * TEXT_FADE_TICKS }); break;
       case "outline": case "line": case "valueBox": {
+        // Java ChasingAABBOutline: the drawn box closes half the distance to its target every tick.
         const previous = overlays.get(e.id);
-        overlays.set(e.id, { ...e, expires: e.at + e.duration, fromBox: e.chase ? previous?.box : undefined });
+        overlays.set(e.id, { ...e, expires: e.at + e.duration, chaseFrom: e.chase ? previous?.box ?? previous?.chaseFrom : undefined });
         break;
       }
       case "spawn":
-        entities.set(e.id, { ...e, kind: e.itemId ? "item" : "entity", birth: e.order, revision: e.order,
+        entities.set(e.id, { ...e, kind: e.itemId ? "item" : "entity", birth: e.order, revision: e.order, poseAt: e.at,
           moves: [], turns: [], expires: e.duration ? e.at + e.duration : Infinity });
         break;
       case "updateEntity":
         if (entities.has(e.id)) {
           // A later name/position change must not repeat a spawn impulse or event.
           const { impulse, event, ...before } = entities.get(e.id);
-          entities.set(e.id, { ...before, ...e, op: "spawn", revision: e.order });
+          entities.set(e.id, { ...before, ...e, op: "spawn", revision: e.order, poseAt: e.pose ? e.at : before.poseAt });
         }
         break;
       case "moveEntity": entities.get(e.id)?.moves.push(e); break;
       case "rotateEntity": entities.get(e.id)?.turns.push(e); break;
       case "removeEntity": entities.delete(e.id); break;
       case "camera": cameraTracks.push(e); break;
+      case "poi": poiTracks.push(e); break;
     }
   }
   for (const [id, o] of overlays) if (o.expires <= tick) overlays.delete(id);
+  // Java PonderScene: the point of interest starts at (0, 4, 0) and chases each target at 25% per tick.
+  let poi = { x: 0, y: 4, z: 0 }, poiTarget = poi, poiSince = 0;
+  const approach = (from, to, ticks) => {
+    const t = 1 - .75 ** Math.max(0, ticks);
+    return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t, z: from.z + (to.z - from.z) * t };
+  };
+  for (const e of poiTracks) { poi = approach(poi, poiTarget, e.at - poiSince); poiTarget = e.position; poiSince = e.at; }
+  poi = approach(poi, poiTarget, tick - poiSince);
   for (const [id, entity] of entities) {
     if (entity.expires <= tick) { entities.delete(id); continue; }
-    let position = entity.position, yaw = entity.rotation?.y ?? 0;
+    let position = entity.position, yaw = entity.rotation?.y ?? 0, facing;
     for (const m of entity.moves) position = add(position, mul(m.offset, progress(m, tick)));
     for (const t of entity.turns) yaw += t.yaw * progress(t, tick);
-    entities.set(id, { ...entity, position, rotation: { x: entity.rotation?.x ?? 0, y: yaw } });
+    if (entity.pose === "dance") yaw -= 2 * (tick - entity.poseAt);
+    else if (entity.pose === "poi") facing = poi;
+    entities.set(id, { ...entity, position, facing, rotation: { x: entity.rotation?.x ?? 0, y: yaw } });
+  }
+  for (const overlay of overlays.values()) {
+    if (!overlay.chaseFrom) continue;
+    const t = 1 - .5 ** Math.max(0, tick - overlay.at);
+    const lerpBox = (a, b) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t });
+    overlay.box = { from: lerpBox(overlay.chaseFrom.from, overlay.box.from), to: lerpBox(overlay.chaseFrom.to, overlay.box.to) };
   }
   const poses = new Map();
   for (const s of sections.values()) poses.set(s.id, {
-    center: s.center, ...pose(s.moves, "offset", tick, "offset", "move"), ...pose(s.rotations, "rotation", tick, "rotation", "spin"),
+    center: s.center, anchor: s.anchor, ...pose(s.moves, "offset", tick, "offset", "move"), ...pose(s.rotations, "rotation", tick, "rotation", "spin"),
   });
-  return { tick, patches, shown, batches, leaving: leaving.filter(l => tick < l.at + l.fade), sections: poses,
-    overlays, entities, camera: cameraAt(scene.camera, cameraTracks, tick), describe };
+  return { tick, cracks, breaks, patches, shown, batches, leaving: leaving.filter(l => tick < l.at + l.fade), sections: poses,
+    overlays, entities, poi, camera: cameraAt(scene.camera, cameraTracks, tick), describe };
 }
 
 /** Section value now, plus the straight-line motion still in flight for the client to interpolate. */

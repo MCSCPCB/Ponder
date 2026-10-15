@@ -1,6 +1,5 @@
 import { buildScene, namespaced, validIconPath, validId, validateTitle } from "../PonderScene.js";
-import { PONDER_SCENES } from "../../content/BasePonderPlugin.js";
-import { PONDER_TAGS } from "../../content/PonderTags.js";
+import { PONDER_SCENES, PONDER_TAGS } from "../../content/BasePonderPlugin.js";
 
 /**
  * Index metadata is registered up front. A scene's storyboard runs on first
@@ -11,8 +10,7 @@ export function createRegistry(entries, rawTags) {
   const scenes = entries.map(entry => {
     if (!validId(entry.id)) throw new Error(`Invalid scene id ${entry.id}`);
     validateTitle(entry.title, "scene title");
-    if (entry.itemTitle) validateTitle(entry.itemTitle, "item title");
-    return { ...entry, itemTitle: entry.itemTitle ?? entry.title, description: entry.description ?? entry.title,
+    return { ...entry,
       iconPath: entry.iconPath ?? "textures/ui/ponder/logo", tags: entry.tags ?? [], order: entry.order ?? 0 };
   }).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
   const byId = new Map(), byItem = new Map(), tags = new Map(), built = new Map();

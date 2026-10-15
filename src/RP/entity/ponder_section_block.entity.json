@@ -32,16 +32,19 @@
           "v.az = (v.rz ?? 0) + ((v.sz ?? 0) - (v.rz ?? 0)) * v.st;"
         ],
         "animate": [
-          "pose"
+          "pose",
+          "item",
+          "grow"
         ]
       },
       "animations": {
-        "pose": "animation.ponder.section"
+        "pose": "animation.ponder.section",
+        "item": "animation.ponder.section_item",
+        "grow": "animation.ponder.section_grow"
       },
       "render_controllers": [
         "controller.render.ponder.section_block"
-      ],
-      "held_item_scale": "(v.s ?? 0) > 0 ? 2.678 * math.max(v.fade ?? 1, 0.001) : 0.001"
+      ]
     }
   }
 }

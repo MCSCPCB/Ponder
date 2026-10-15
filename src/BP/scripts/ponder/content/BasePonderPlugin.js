@@ -1,6 +1,6 @@
-import { assemblyDemo } from "./scenes/AssemblyDemo.js";
-import { forgeDemo } from "./scenes/ForgeDemo.js";
-import { redstoneLampDemo, lampStatesDemo } from "./scenes/RedstoneLampDemo.js";
+import { blocksDemo, coordinateDemo, sectionsDemo } from "./DebugScenes.js";
 
-/** Registered scenes. Each entry pairs a schematic with the storyboard that reveals it. */
-export const PONDER_SCENES = [assemblyDemo, forgeDemo, redstoneLampDemo, lampStatesDemo];
+/** Java BasePonderPlugin + DebugPonderPlugin: registered scenes and tags. */
+export const PONDER_SCENES = [coordinateDemo, blocksDemo, sectionsDemo];
+/** Java's debug scenes register no tags of their own. */
+export const PONDER_TAGS = [];

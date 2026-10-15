@@ -10,8 +10,8 @@ import { key, positions } from "./VecHelper.js";
  *   - defineSchematic(): hand-written declarations
  *   - loadSchematic():   a `.mcstructure` shipped in the behavior pack
  */
-export const fill = (blockId, from, to, states = {}) => ({ kind: "fill", blockId, from, to, states });
-export const place = (blockId, position, states = {}) => ({ kind: "place", blockId, position, states });
+export const fill = (blockId, from, to, states = {}, data) => ({ kind: "fill", blockId, from, to, states, data });
+export const place = (blockId, position, states = {}, data) => ({ kind: "place", blockId, position, states, data });
 
 /** Alternating two-block floor at y = 0, covering x/z in [1, width - 2]. */
 export function checkerFloor(width, depth = width, even = "minecraft:snow", odd = "minecraft:light_gray_terracotta") {
@@ -21,12 +21,14 @@ export function checkerFloor(width, depth = width, even = "minecraft:snow", odd 
   return entries;
 }
 
+const describeBlock = ({ blockId, states, data }) => data ? { blockId, states, data } : { blockId, states };
+
 export function defineSchematic({ size, entries = [], air = [] }) {
   const blocks = new Map(), airKeys = new Set();
   for (const entry of entries) {
     if (entry.kind === "fill") {
-      for (const p of positions({ from: entry.from, to: entry.to })) blocks.set(key(p), { blockId: entry.blockId, states: entry.states });
-    } else blocks.set(key(entry.position), { blockId: entry.blockId, states: entry.states });
+      for (const p of positions({ from: entry.from, to: entry.to })) blocks.set(key(p), describeBlock(entry));
+    } else blocks.set(key(entry.position), describeBlock(entry));
   }
   for (const box of air) for (const p of positions(box)) airKeys.add(key(p));
   return { size, blocks, air: airKeys };
@@ -34,7 +36,8 @@ export function defineSchematic({ size, entries = [], air = [] }) {
 
 /**
  * Reads a `.mcstructure` from the behavior pack. Must run in a writable tick.
- * Entities stored in the structure are not exposed to scripts and are ignored.
+ * Entities and block entity data (signs, containers) stored in the structure are not
+ * exposed by the Structure API; author them with modifyBlockEntity instead.
  */
 export function loadSchematic(structureName) {
   const structure = world.structureManager.get(resolveSchematicId(structureName));

@@ -1,4 +1,4 @@
-// 脚本与 RP/ui/server_form.json 共享的约定，见 docs/UI_PROTOCOL.md。
+// 脚本与 RP/ui/server_form.json 共享的约定，两边必须同步。
 export const TITLE_MARKER = "§0§r§1§r";
 export const HIDDEN = "§0§r§0§r";
 export const DISABLED = "§8§r§8§r";
@@ -55,3 +55,4 @@ export const DIRECTION_VECTORS = Object.freeze({
   north: { x: 0, y: 0, z: -1 }, south: { x: 0, y: 0, z: 1 },
   west: { x: -1, y: 0, z: 0 }, east: { x: 1, y: 0, z: 0 },
 });
+

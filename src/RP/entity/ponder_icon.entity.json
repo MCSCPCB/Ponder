@@ -13,13 +13,7 @@
         "icon1": "textures/ui/ponder/pointer",
         "icon2": "textures/ui/ponder/icon_use",
         "icon3": "textures/ui/ponder/icon_attack",
-        "icon4": "textures/ui/ponder/icon_scroll",
-        "icon5": "textures/ui/ponder/icon_slot",
-        "icon6": "textures/ui/ponder/icon_touch",
-        "icon7": "textures/items/stick",
-        "icon8": "textures/blocks/furnace_front_off",
-        "icon9": "textures/items/iron_ingot",
-        "icon10": "textures/blocks/redstone_lamp_off"
+        "icon4": "textures/ui/ponder/icon_scroll"
       },
       "geometry": {
         "default": "geometry.ponder.icon"

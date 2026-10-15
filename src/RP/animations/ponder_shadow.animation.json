@@ -1,0 +1,18 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.ponder.shadow": {
+      "loop": true,
+      "bones": {
+        "shadow0": { "position": [0, 0, "-(q.property('ponder:size') * 8 + 0.1)"], "scale": ["q.property('ponder:size')", 1, 1] },
+        "shadow1": { "position": ["q.property('ponder:size') * 8 + 0.1", 0, 0], "rotation": [0, 90, 0], "scale": ["q.property('ponder:size')", 1, 1] },
+        "shadow2": { "position": [0, 0, "q.property('ponder:size') * 8 + 0.1"], "scale": ["q.property('ponder:size')", 1, 1] },
+        "shadow3": { "position": ["-(q.property('ponder:size') * 8 + 0.1)", 0, 0], "rotation": [0, 90, 0], "scale": ["q.property('ponder:size')", 1, 1] },
+        "glow0": { "position": [0, 0, "-(q.property('ponder:size') * 8 + 0.1)"], "scale": ["q.property('ponder:size')", "0.5 + q.property('ponder:flash') * 0.75", 1] },
+        "glow1": { "position": ["q.property('ponder:size') * 8 + 0.1", 0, 0], "rotation": [0, 90, 0], "scale": ["q.property('ponder:size')", "0.5 + q.property('ponder:flash') * 0.75", 1] },
+        "glow2": { "position": [0, 0, "q.property('ponder:size') * 8 + 0.1"], "scale": ["q.property('ponder:size')", "0.5 + q.property('ponder:flash') * 0.75", 1] },
+        "glow3": { "position": ["-(q.property('ponder:size') * 8 + 0.1)", 0, 0], "rotation": [0, 90, 0], "scale": ["q.property('ponder:size')", "0.5 + q.property('ponder:flash') * 0.75", 1] }
+      }
+    }
+  }
+}

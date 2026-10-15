@@ -1,6 +1,6 @@
 /**
  * 进度条分档。JSON UI 的动画时长是常量，脚本无法传入，所以预置若干档，
- * 每档把条分成等长的段，每段一个固定时长的尺寸动画（见 docs/UI_PROTOCOL.md）。
+ * 每档把条分成等长的段，每段一个固定时长的尺寸动画。
  */
 export const PROGRESS_TIERS = Object.freeze([4, 8, 12, 16, 24]);
 export const PROGRESS_WIDTH = 224;

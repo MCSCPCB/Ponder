@@ -1,4 +1,12 @@
+import { ItemTypes } from "@minecraft/server";
 import { LIMITS } from "../../enums/PonderConfig.js";
+import { translate } from "../registration/PonderLocalization.js";
+
+/** Java shows an item by its own name; the client translates the item lang key. */
+export const itemName = id => {
+  const key = ItemTypes.get(id)?.localizationKey;
+  return key ? translate(key) : id;
+};
 
 export const scenePage = (sceneId, context = { kind: "all" }) =>
   ({ kind: "scene", sceneId, context, tick: 0, playing: true });
@@ -25,17 +33,16 @@ export function scenesInContext(registry, context = { kind: "all" }) {
 export function indexEntries(registry, page) {
   if (page.kind === "items")
     return [...registry.byItem].map(([id, scenes]) => ({
-      id, title: scenes[0].itemTitle ?? scenes[0].title,
-      description: `${scenes.length}`, iconPath: scenes[0].iconPath,
+      id, title: itemName(id), iconPath: scenes[0].iconPath,
       target: scenes.length === 1 ? scenePage(scenes[0].id, { kind: "item", id }) : { kind: "item", id, page: 0 },
     }));
   if (page.kind === "tags")
     return [...registry.tags.values()].map(tag => ({
-      ...tag, title: tag.title, description: tag.description, target: { kind: "tag", id: tag.id, page: 0 },
+      ...tag, target: { kind: "tag", id: tag.id, page: 0 },
     }));
   const context = { kind: page.kind, id: page.id };
   return scenesInContext(registry, context).map(scene => ({
-    id: scene.id, title: scene.title, description: scene.description, iconPath: scene.iconPath,
+    id: scene.id, title: scene.title, iconPath: scene.iconPath,
     target: scenePage(scene.id, context),
   }));
 }

@@ -11,15 +11,14 @@ export const validId = id => typeof id === "string" && identifier.test(id);
 export const namespaced = id => typeof id === "string" && /^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(id);
 export const validIconPath = path => typeof path === "string" && /^textures\/[a-zA-Z0-9_/.-]+$/.test(path) && !path.includes("..");
 export function validateTitle(value, label) {
-  if (!["en_US", "zh_CN"].every(locale => typeof localize(value, locale) === "string" && localize(value, locale).trim()))
-    throw new Error(`Missing localized ${label}`);
+  if (!localize(value).trim()) throw new Error(`Missing ${label}`);
 }
 
 /**
  * Builds a scene from its registration entry: the schematic provides the world,
  * the storyboard records the instructions that reveal and change it.
  *
- * entry = { id, schematic, storyboard, entryItems, tags, order, iconPath, itemTitle, description }
+ * entry = { id, schematic, storyboard, entryItems, tags, order, iconPath }
  * `schematic` is a { size, blocks, air } table or a function returning one, so a
  * `.mcstructure` can be read lazily at a writable tick.
  */
@@ -33,18 +32,19 @@ export function buildScene(entry) {
   const builder = new PonderSceneBuilder(data);
   entry.storyboard(builder, createSceneBuildingUtil(schematic));
   validateTitle(data.title, "scene title");
-  if (entry.itemTitle) validateTitle(entry.itemTitle, "item title");
   const timeline = compileSchedule(builder.finish());
   const bounds = { from: { x: 0, y: 0, z: 0 }, to: { x: size.x - 1, y: size.y - 1, z: size.z - 1 } };
   const focus = entry.focus ?? { x: size.x / 2, y: Math.max(1, size.y / 3), z: size.z / 2 };
-  const camera = { yaw: 35, pitch: 32, distance: 22 + Math.max(size.x, size.z), focus, ...entry.camera };
+  // Java: scaleSceneView(f) zooms the whole view by f; setSceneOffsetY(y) lifts it by y blocks.
+  const baseFocus = { x: focus.x, y: focus.y - (data.viewOffsetY ?? 0), z: focus.z };
+  const camera = { yaw: 35, pitch: 32, distance: (22 + Math.max(size.x, size.z)) / (data.viewScale ?? 1), focus: baseFocus, ...entry.camera };
   if (![camera.yaw, camera.pitch, camera.distance].every(Number.isFinite) || camera.distance < 8 || camera.distance > 64 || Math.abs(camera.pitch) > 75)
     throw new Error("Invalid camera (distance 8..64, pitch -75..75)");
   const scene = {
-    id: entry.id, title: data.title, itemTitle: entry.itemTitle ?? data.title, description: entry.description ?? data.title,
+    id: entry.id, title: data.title,
     iconPath: entry.iconPath ?? "textures/ui/ponder/logo", entryItems: entry.entryItems, tags: entry.tags ?? [],
     order: entry.order ?? 0, nextUpEnabled: data.nextUpEnabled, textScale: entry.textScale ?? 0.055,
-    schematic, size, bounds, focus, camera, timeline, basePlate: data.basePlate,
+    schematic, size, bounds, focus, camera, timeline, basePlate: data.basePlate, hidePlatformShadow: Boolean(data.hidePlatformShadow),
   };
   if (!validIconPath(scene.iconPath)) throw new Error("Invalid scene iconPath");
   scene.contentBounds = contentBounds(schematic) ?? bounds;

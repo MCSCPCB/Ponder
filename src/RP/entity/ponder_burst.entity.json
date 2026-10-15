@@ -1,0 +1,32 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "ponder:burst",
+      "materials": {
+        "default": "entity_alphablend"
+      },
+      "textures": {
+        "default": "textures/ui/ponder/white"
+      },
+      "geometry": {
+        "default": "geometry.ponder.crack"
+      },
+      "particle_effects": {
+        "burst": "ponder:block_burst"
+      },
+      "animations": {
+        "burst": "animation.ponder.burst"
+      },
+      "scripts": {
+        "should_update_bones_and_effects_offscreen": true,
+        "animate": [
+          "burst"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.ponder.hidden"
+      ]
+    }
+  }
+}

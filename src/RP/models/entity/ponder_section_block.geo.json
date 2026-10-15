@@ -8,53 +8,23 @@
         "texture_height": 16,
         "visible_bounds_width": 96,
         "visible_bounds_height": 96,
-        "visible_bounds_offset": [
-          0,
-          0,
-          0
-        ]
+        "visible_bounds_offset": [0, 0, 0]
       },
       "bones": [
-        {
-          "name": "root",
-          "pivot": [
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "sync",
-          "parent": "root",
-          "pivot": [
-            0,
-            0,
-            0
-          ]
-        },
-        {
-          "name": "slide",
-          "parent": "root",
-          "pivot": [
-            0,
-            9,
-            0
-          ]
-        },
-        {
-          "name": "rightItem",
-          "parent": "slide",
-          "pivot": [
-            4,
-            10,
-            -4
-          ],
-          "rotation": [
-            -20,
-            135,
-            0
-          ]
-        }
+        { "name": "root", "pivot": [0, 0, 0] },
+        { "name": "sync", "parent": "root", "pivot": [0, 0, 0] },
+        { "name": "center_in", "parent": "root", "pivot": [0, 0, 0] },
+        { "name": "spin_x", "parent": "center_in", "pivot": [0, 0, 0] },
+        { "name": "spin_y", "parent": "spin_x", "pivot": [0, 0, 0] },
+        { "name": "spin_z", "parent": "spin_y", "pivot": [0, 0, 0] },
+        { "name": "center_out", "parent": "spin_z", "pivot": [0, 0, 0] },
+        { "name": "anchor_in", "parent": "center_out", "pivot": [0, 0, 0] },
+        { "name": "steady_x", "parent": "anchor_in", "pivot": [0, 0, 0] },
+        { "name": "steady_y", "parent": "steady_x", "pivot": [0, 0, 0] },
+        { "name": "steady_z", "parent": "steady_y", "pivot": [0, 0, 0] },
+        { "name": "anchor_out", "parent": "steady_z", "pivot": [0, 0, 0] },
+        { "name": "model", "parent": "anchor_out", "pivot": [0, -8, 0] },
+        { "name": "rightitem", "parent": "model", "pivot": [0, -8, 0] }
       ]
     }
   ]

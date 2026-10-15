@@ -4,21 +4,44 @@
     "description": {
       "identifier": "ponder:section_block",
       "is_spawnable": false,
-      "is_summonable": true,
-      "is_experimental": false
+      "is_summonable": true
     },
     "components": {
-      "minecraft:collision_box": { "width": 0.0001, "height": 0.0001 },
-      "minecraft:physics": { "has_gravity": false, "has_collision": false },
-      "minecraft:health": { "value": 20, "max": 20 },
-      "minecraft:damage_sensor": { "triggers": [{ "cause": "all", "deals_damage": "no" }] },
-      "minecraft:knockback_resistance": { "value": 1 },
+      "minecraft:type_family": {
+        "family": [
+          "ponder_section_block",
+          "inanimate"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 0,
+        "height": 0
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "all",
+            "deals_damage": false
+          }
+        ]
+      },
       "minecraft:fire_immune": {},
-      "minecraft:pushable": { "is_pushable": false, "is_pushable_by_piston": false },
-      "minecraft:equip_item": { "can_wear_armor": false },
-      "minecraft:equipment": { "slot_drop_chance": [{ "slot": "slot.weapon.mainhand", "drop_chance": 0 }] },
-      "minecraft:type_family": { "family": ["ponder_section_block", "inanimate"] },
-      "minecraft:conditional_bandwidth_optimization": {}
+      "minecraft:persistent": {},
+      "minecraft:conditional_bandwidth_optimization": {
+        "default_values": {
+          "max_optimized_distance": 0,
+          "max_dropped_ticks": 0
+        }
+      },
+      "minecraft:equipment": {}
     }
   }
 }

@@ -1,8 +1,8 @@
-import { InputMode, system, world } from "@minecraft/server";
+import { CommandPermissionLevel, CustomCommandParamType, CustomCommandStatus, system, world } from "@minecraft/server";
 import { ActionFormData, FormCancelationReason, uiManager } from "@minecraft/server-ui";
 import { LIMITS, SESSION_TAG } from "../../enums/PonderConfig.js";
 import { registry, getScenesForItem } from "../registration/PonderSceneRegistry.js";
-import { localeFor, tr } from "../registration/PonderLocalization.js";
+import { localeFor } from "../registration/PonderLocalization.js";
 import { add, inside, orbit } from "../VecHelper.js";
 import { hasTextAt, stateAt, TimelineClock } from "../instruction/PonderSchedule.js";
 import { CAMERA_FOV } from "../element/OverlayLayout.js";
@@ -20,13 +20,6 @@ const sessions = new Map();
 const pendingEntries = new Map();
 const nativeByproducts = new Set(["minecraft:item", "minecraft:xp_orb", "minecraft:falling_block"]);
 let installed = false, booting = false;
-const message = (player, text) => { try { if (player.isValid) player.sendMessage(`§7[Ponder] §r${text}`); } catch {} };
-const inputMode = player => {
-  try {
-    const mode = player.inputInfo.lastInputMode;
-    return mode === InputMode.Touch ? "touch" : mode === InputMode.Gamepad ? "gamepad" : "keyboard";
-  } catch { return "keyboard"; }
-};
 function restoreSafely(player) {
   try { restorePlayer(player); }
   catch (error) { console.error(`[Ponder] Player state retained for recovery (${player.id}): ${error}`); }
@@ -64,7 +57,6 @@ async function loadPage(session, { naturalStart = false } = {}) {
   if (page.kind !== "scene") return; // Keep a paused view behind the index.
   const scene = registry.getScene(page.sceneId);
   if (session.scene?.id !== scene.id || !session.renderer) {
-    message(session.player, tr("loading", session.locale));
     session.player.camera.clear();
     session.cameraSignature = undefined;
     session.renderer?.dispose(); session.renderer = undefined;
@@ -123,9 +115,7 @@ function closePlayer(playerId, reason) {
 function fail(session, error) {
   if (session.closed) return;
   console.error(`[Ponder] Session ${session.player.id}: ${error?.stack ?? error}`);
-  const key = ["noSpace", "busy", "recovering", "unavailable"].includes(error?.message) ? error.message : "error";
   void closeSession(session, "error");
-  message(session.player, tr(key, session.locale));
 }
 async function perform(session, action) {
   assertLive(session);
@@ -195,18 +185,13 @@ async function showForm(session) {
   }
   void closeSession(session, "form-busy");
 }
-async function start(player, itemId) {
-  if (!player.isValid) return;
-  const scenes = getScenesForItem(itemId);
-  if (!scenes.length || sessions.has(player.id)) return;
+async function start(player, initial) {
+  if (!player.isValid || sessions.has(player.id)) return;
   const locale = localeFor(player);
-  if (!allocator.ready) {
-    message(player, tr(allocator.recoveryError?.message === "unavailable" ? "unavailable" : "recovering", locale));
-    return;
-  }
+  if (!allocator.ready) return;
   const session = {
-    player, dimension: player.dimension, locale, inputMode: inputMode(player),
-    nav: new Navigation(scenePage(scenes[0].id, { kind: "item", id: itemId })),
+    player, dimension: player.dimension, locale,
+    nav: new Navigation(initial),
     gate: new SessionGate(), closed: false, comfy: false, formEpoch: 0, formPending: false,
     tickBusy: false, navigating: true, lease: undefined, scene: undefined, renderer: undefined, clock: undefined,
   };
@@ -231,9 +216,33 @@ export function handlePonderItemUse(event) {
   system.run(() => {
     if (pendingEntries.get(player.id) !== ticket) return;
     pendingEntries.delete(player.id);
-    void start(player, itemId).catch(error => console.error(`[Ponder] Entry: ${error}`));
+    const scenes = getScenesForItem(itemId);
+    if (scenes.length) void start(player, scenePage(scenes[0].id, { kind: "item", id: itemId }))
+      .catch(error => console.error(`[Ponder] Entry: ${error}`));
   });
   return true;
+}
+
+/**
+ * Java /ponder [item]: PonderUI.of(id) opens the scenes registered for that item. The tag and
+ * item indexes need a stage behind them here, so /ponder and /ponder index start at the first item.
+ */
+function handlePonderCommand(origin, target) {
+  const player = origin.sourceEntity;
+  if (player?.typeId !== "minecraft:player") return { status: CustomCommandStatus.Failure };
+  const itemId = !target || target === "index" || target === "ponder:index" || target === "ponder:tags"
+    ? registry.byItem.keys().next().value : target.includes(":") ? target : `minecraft:${target}`;
+  const scenes = getScenesForItem(itemId);
+  if (!scenes.length || sessions.has(player.id) || pendingEntries.has(player.id)) return { status: CustomCommandStatus.Failure };
+  const ticket = {};
+  pendingEntries.set(player.id, ticket);
+  system.run(() => {
+    if (pendingEntries.get(player.id) !== ticket) return;
+    pendingEntries.delete(player.id);
+    void start(player, scenePage(scenes[0].id, { kind: "item", id: itemId }))
+      .catch(error => console.error(`[Ponder] Command: ${error}`));
+  });
+  return { status: CustomCommandStatus.Success };
 }
 function tick() {
   for (const session of sessions.values()) {
@@ -246,6 +255,7 @@ function tick() {
     // While a writer is busy we accumulate time; its successor materializes the
     // newest authored state. Native simulation is never paused/replayed.
     session.clock.advance(hasTextAt(session.scene, session.clock.tick));
+    session.renderer.shadow.tick(session.clock.tick);
     if (session.tickBusy) continue;
     session.tickBusy = true;
     void session.gate.run(async () => {
@@ -260,6 +270,13 @@ function tick() {
 export function installPonder() {
   if (installed) return;
   installed = true;
+  system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
+    customCommandRegistry.registerCommand({
+      name: "ponder:ponder", description: "ponder.ui.pondering",
+      permissionLevel: CommandPermissionLevel.Any,
+      optionalParameters: [{ name: "item", type: CustomCommandParamType.String }],
+    }, handlePonderCommand);
+  });
   world.afterEvents.itemUse.subscribe(handlePonderItemUse);
   world.beforeEvents.playerInteractWithBlock.subscribe(event => {
     if (handlePonderItemUse(event)) event.cancel = true;
@@ -289,10 +306,7 @@ export function installPonder() {
           .filter(candidate => nativeByproducts.has(candidate.typeId)).length;
         if (count > LIMITS.nativeEntities) {
           safeRemove(entity);
-          if (!session.closed) {
-            message(session.player, tr("resourceLimit", session.locale));
-            void closeSession(session, "native-entity-limit");
-          }
+          if (!session.closed) void closeSession(session, "native-entity-limit");
         }
       } catch (error) { console.warn(`[Ponder] Byproduct ownership: ${error}`); }
       break;

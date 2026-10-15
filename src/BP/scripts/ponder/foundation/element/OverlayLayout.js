@@ -1,6 +1,6 @@
 import { add, clamp, dot, mul, orbit, sub } from "../VecHelper.js";
 import { themeColor, wrapText } from "./TextWindowElement.js";
-import { localize, tr } from "../registration/PonderLocalization.js";
+import { localize, sharedText } from "../registration/PonderLocalization.js";
 
 export const CAMERA_FOV = 48;
 export const overlaps2D = (a, b, gap = 0) =>
@@ -54,14 +54,14 @@ function valueBoxAt(annotation, tick) {
 }
 /** 操作提示窗口里的前缀文字（Java 的 sneak_and / ctrl_and）；没有前缀时为空。 */
 export function controlText(annotation, locale) {
-  return annotation.sneaking ? tr("sneakAnd", locale) : annotation.ctrl ? tr("ctrlAnd", locale) : "";
+  return annotation.sneaking ? sharedText("sneak_and", locale) : annotation.ctrl ? sharedText("ctrl_and", locale) : "";
 }
 /**
  * Labels live on a world-space camera plane, not in screen/GUI-scaled slots.
  * Score candidates relative to the target and projected structure. Use a 4:3
  * composition envelope; wider displays simply reveal more of the room.
  */
-export function layoutAnnotations(scene, state, locale, inputMode = "keyboard", tracked = new Map()) {
+export function layoutAnnotations(scene, state, locale, tracked = new Map()) {
   const view = projection(state.camera), scale = scene.textScale;
   const halfH = view.depth * Math.tan(CAMERA_FOV * Math.PI / 360);
   const halfW = halfH * 4 / 3;
@@ -84,8 +84,9 @@ export function layoutAnnotations(scene, state, locale, inputMode = "keyboard", 
     const anchor = view.project(target);
     const content = annotation.op === "controls" ? controlText(annotation, locale) : localize(annotation.text, locale);
     const text = wrapText(content, { width: annotation.maxWidth ?? 180, color: annotation.color });
-    // Java：图标 24、物品 24，窗口高 24；有任一项时按 24 计。
-    const iconUnits = annotation.op === "controls" ? 24 * (1 + Number(Boolean(annotation.itemId))) : 0;
+    // Java InputWindowElement：图标 24、物品 24，有任一项时窗口高 24。没有调用 leftClick 等就没有图标。
+    const hasIcon = annotation.op === "controls" && Boolean(annotation.action || annotation.iconPath);
+    const iconUnits = annotation.op === "controls" ? 24 * (Number(hasIcon) + Number(Boolean(annotation.itemId))) : 0;
     const width = ((content ? text.width : 0) + 12 + iconUnits) * scale;
     const height = Math.max(content ? text.height + 10 : 0, iconUnits ? 24 : 0) * scale;
     const gap = 7 * scale, candidates = [];
@@ -109,13 +110,11 @@ export function layoutAnnotations(scene, state, locale, inputMode = "keyboard", 
         const touchesStructure = overlaps2D(rect, structure, gap);
         const score = collisions * 10000 + Number(touchesStructure) * 100 +
           Math.hypot(x + width / 2 - anchor.x, y + height / 2 - anchor.y) + preference * .6;
-        candidates.push({ rect, score, side, collisions });
+        candidates.push({ rect, score, side });
       }
     });
-    const chosen = candidates.sort((a, b) => a.score - b.score)[0];
-    if (!chosen || chosen.collisions || width > area.w || height > area.h)
-      throw new Error(`Annotation ${annotation.id} does not fit; shorten it, reduce textScale or widen the camera`);
-    const rect = chosen.rect;
+    // Java never rejects a text window; when nothing is free it simply overlaps, so take the best candidate.
+    const chosen = candidates.sort((a, b) => a.score - b.score)[0], rect = chosen.rect;
     occupied.push(rect);
     const attachment = {
       x: clamp(anchor.x, rect.x, rect.x + rect.w),

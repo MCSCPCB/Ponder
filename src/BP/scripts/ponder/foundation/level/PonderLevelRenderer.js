@@ -1,4 +1,4 @@
-import { BlockPermutation, ItemStack } from "@minecraft/server";
+import { BlockPermutation, ItemStack, SignSide } from "@minecraft/server";
 import { LIGHT_BLOCK, LIMITS } from "../../enums/PonderConfig.js";
 import { add, inside, key, positions, sub, unkey } from "../VecHelper.js";
 import { assertLive, job, safeRemove } from "./StageJobs.js";
@@ -6,6 +6,30 @@ import { OverlayRenderer } from "../element/OverlayRenderer.js";
 import { markOwned } from "./StageOwnership.js";
 import { assertStageClear } from "./StageAllocator.js";
 import { SectionAnimator } from "./SectionAnimator.js";
+import { CrackAnimator } from "./CrackAnimator.js";
+import { BlockDestroyEffects } from "./BlockDestroyEffects.js";
+import { PlatformShadow } from "./PlatformShadow.js";
+
+/**
+ * Writes authored block entity data into the placed block: sign text and container slots.
+ * Anything the Script API cannot express (a spawner's mob, say) is left to the block itself.
+ */
+function applyBlockData(block, data) {
+  if (data.sign) {
+    const sign = block.getComponent("minecraft:sign");
+    if (sign) {
+      if (data.sign.front !== undefined) sign.setText(data.sign.front, SignSide.Front);
+      if (data.sign.back !== undefined) sign.setText(data.sign.back, SignSide.Back);
+    }
+  }
+  if (data.items) {
+    const container = block.getComponent("minecraft:inventory")?.container;
+    if (container) {
+      container.clearAll();
+      for (const { slot, itemId, amount = 1 } of data.items) container.setItem(slot, new ItemStack(itemId, amount));
+    }
+  }
+}
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const TICKS_PER_SECOND = 20;
@@ -20,6 +44,9 @@ export class PonderLevelRenderer {
     this.entities = new Map(); this.permutations = new Map(); this.lastTick = -1;
     this.air = scene.schematic.air;
     this.animator = new SectionAnimator(session);
+    this.cracks = new CrackAnimator(session);
+    this.destroyEffects = new BlockDestroyEffects(session);
+    this.shadow = new PlatformShadow(session, scene);
     this.overlays = new OverlayRenderer(session, scene);
   }
   permutation(descriptor) {
@@ -34,15 +61,19 @@ export class PonderLevelRenderer {
   async render(state, { reset = false, effects = false } = {}) {
     assertLive(this.session);
     assertStageClear(this.session.dimension, this.session.lease);
+    if (reset) this.shadow.reset();
     const previous = this.lastTick;
     // Batches beyond the entity budget are not animated; they appear as plain blocks.
     const animated = this.animatedBatches(state);
     const settled = this.settledBlocks(state, animated);
+    // The burst samples the block under its carrier, so it must spawn before the block is replaced.
+    if (effects && !reset && previous >= 0) this.destroyEffects.emit(state.breaks, previous, state.tick);
     // Real blocks only change when the set of settled cells does. The comparison
     // is cheap and never rewrites cells the world has since changed natively.
     await this.syncBlocks(settled, reset || previous < 0);
     assertLive(this.session);
     this.animator.sync(animated);
+    this.cracks.sync(state.cracks);
     this.syncEntities(state, reset, effects);
     const tracked = new Map();
     for (const [id, record] of this.entities) {
@@ -79,10 +110,10 @@ export class PonderLevelRenderer {
   animatedBatches(state) {
     const wanted = new Map();
     let budget = LIMITS.animatedBlocks;
-    const pending = (batch, vars, cells) => {
+    const pending = (batch, vars, cells, pivots) => {
       if (!cells.length || cells.length > budget) return;
       budget -= cells.length;
-      wanted.set(batch.id, { cells, vars, signature: JSON.stringify([vars, cells.length]) });
+      wanted.set(batch.id, { cells, vars, pivots, signature: JSON.stringify([vars, pivots, cells.length]) });
     };
     for (const batch of state.batches.values()) {
       if (!this.isAnimating(batch, state)) continue;
@@ -91,16 +122,20 @@ export class PonderLevelRenderer {
         return block && block.blockId !== "minecraft:air" ? { ...block, position: unkey(k) } : undefined;
       }).filter(Boolean);
       const e = batch.event, pose = state.sections.get(batch.section);
-      const vars = { dur: Math.max(e.fade, 1) / TICKS_PER_SECOND, dir: 1, dx: 0, dy: 0, dz: 0 };
+      const vars = { dur: Math.max(e.fade ?? 0, 1) / TICKS_PER_SECOND, dir: 1, dx: 0, dy: 0, dz: 0 };
       // Java starts a section half a block away on the side opposite its entry direction.
       if (e.from) Object.assign(vars, { dx: -e.from.x * .5, dy: -e.from.y * .5, dz: -e.from.z * .5 });
-      if (pose && batch.section !== "base") Object.assign(vars, this.poseVars(pose));
-      pending(batch, vars, cells);
+      let pivots;
+      if (pose && batch.section !== "base") {
+        Object.assign(vars, this.poseVars(pose));
+        pivots = { center: pose.center, anchor: pose.anchor };
+      }
+      pending(batch, vars, cells, pivots);
     }
     for (const out of state.leaving) {
       const cells = [...out.cells].filter(([, block]) => block && block.blockId !== "minecraft:air")
         .map(([k, block]) => ({ ...block, position: unkey(k) }));
-      pending({ id: out.id }, { dur: Math.max(out.fade, 1) / TICKS_PER_SECOND, dir: -1,
+      pending({ id: out.id }, { dur: Math.max(out.fade ?? 0, 1) / TICKS_PER_SECOND, dir: -1,
         dx: (out.vec?.x ?? 0) * .5, dy: (out.vec?.y ?? 0) * .5, dz: (out.vec?.z ?? 0) * .5 }, cells);
     }
     return wanted;
@@ -123,7 +158,7 @@ export class PonderLevelRenderer {
       const descriptor = next.get(k) ?? this.empty(k);
       const before = this.blocks.get(k) ?? this.empty(k);
       if (reset || !same(before, descriptor))
-        changes.push({ position: add(unkey(k), this.session.lease.origin), permutation: this.permutation(descriptor) });
+        changes.push({ position: add(unkey(k), this.session.lease.origin), permutation: this.permutation(descriptor), data: descriptor.data });
     }
     // Resolve every permutation before touching the world. Only authored
     // changes are written during playback: native redstone is never overwritten.
@@ -132,10 +167,11 @@ export class PonderLevelRenderer {
       for (let i = 0; i < changes.length; i++) {
         assertLive(session);
         if (i % 128 === 0) assertStageClear(session.dimension, session.lease);
-        const { position, permutation } = changes[i];
+        const { position, permutation, data } = changes[i];
         const block = session.dimension.getBlock(position);
         if (!block) throw new Error("Loaded stage block unavailable");
         block.setPermutation(permutation);
+        if (data) applyBlockData(block, data);
         if (i % 128 === 127) yield;
       }
     })());
@@ -158,13 +194,18 @@ export class PonderLevelRenderer {
           ? this.session.dimension.spawnItem(new ItemStack(descriptor.itemId, descriptor.amount ?? 1), position)
           : this.session.dimension.spawnEntity(descriptor.entityTypeId, position);
         markOwned(entity, this.session.lease);
+        // A birb must stay where the storyboard puts it, not wander off on its own AI.
+        if (descriptor.pose) entity.addEffect("slowness", 20000000, { amplifier: 255, showParticles: false });
         record = { entity, authored: undefined };
         this.entities.set(id, record);
       }
       if (!same(record.authored, descriptor)) {
         if (!record.authored || !same(record.authored.position, descriptor.position) ||
-          !same(record.authored.rotation, descriptor.rotation))
-          record.entity.teleport(position, descriptor.rotation ? { rotation: descriptor.rotation } : {});
+          !same(record.authored.rotation, descriptor.rotation) || !same(record.authored.facing, descriptor.facing)) {
+          const options = descriptor.facing ? { facingLocation: add(descriptor.facing, this.session.lease.origin) }
+            : descriptor.rotation ? { rotation: descriptor.rotation } : {};
+          record.entity.teleport(position, options);
+        }
         if (descriptor.nameTag !== undefined) record.entity.nameTag = descriptor.nameTag;
         // Seeking rebuilds the authored entity, not its past native effects.
         if (effects && (!reset || state.tick === 0)) {
@@ -200,6 +241,9 @@ export class PonderLevelRenderer {
   dispose() {
     this.overlays.dispose();
     this.animator.dispose();
+    this.cracks.dispose();
+    this.destroyEffects.dispose();
+    this.shadow.dispose();
     for (const r of this.entities.values()) safeRemove(r.entity);
     this.entities.clear();
   }

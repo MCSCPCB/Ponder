@@ -228,16 +228,79 @@
       "bones": {
         "root": {
           "position": [
-            "((v.lx ?? 0) + (1 - (v.fade ?? 1)) * (v.dx ?? 0)) * 16 * (v.cal_sx ?? 1)",
-            "((v.ly ?? 0) + 0.5 + (1 - (v.fade ?? 1)) * (v.dy ?? 0)) * 16 + (v.cal_y ?? -9)",
-            "((v.lz ?? 0) + (1 - (v.fade ?? 1)) * (v.dz ?? 0)) * 16 * (v.cal_sz ?? -1)"
+            "((v.lx ?? 0) + (1 - (v.fade ?? 1)) * (v.dx ?? 0)) * 16",
+            "((v.ly ?? 0) + (1 - (v.fade ?? 1)) * (v.dy ?? 0)) * 16",
+            "-((v.lz ?? 0) + (1 - (v.fade ?? 1)) * (v.dz ?? 0)) * 16"
           ]
         },
-        "slide": {
+        "center_in": {
+          "position": [
+            "(v.cx ?? 0) * 16",
+            "(v.cy ?? 0) * 16",
+            "-(v.cz ?? 0) * 16"
+          ]
+        },
+        "spin_x": {
           "rotation": [
-            "(v.ax ?? 0) * (v.cal_rx ?? 1)",
-            "(v.ay ?? 0) * (v.cal_ry ?? -1)",
-            "(v.az ?? 0) * (v.cal_rz ?? -1)"
+            "v.ax ?? 0",
+            0,
+            0
+          ]
+        },
+        "spin_y": {
+          "rotation": [
+            0,
+            "-(v.ay ?? 0)",
+            0
+          ]
+        },
+        "spin_z": {
+          "rotation": [
+            0,
+            0,
+            "-(v.az ?? 0)"
+          ]
+        },
+        "center_out": {
+          "position": [
+            "-(v.cx ?? 0) * 16",
+            "-(v.cy ?? 0) * 16",
+            "(v.cz ?? 0) * 16"
+          ]
+        },
+        "anchor_in": {
+          "position": [
+            "(v.tx ?? 0) * 16",
+            "(v.ty ?? 0) * 16",
+            "-(v.tz ?? 0) * 16"
+          ]
+        },
+        "steady_x": {
+          "rotation": [
+            "-(v.ax ?? 0) * (v.steady ?? 0)",
+            0,
+            0
+          ]
+        },
+        "steady_y": {
+          "rotation": [
+            0,
+            "(v.ay ?? 0) * (v.steady ?? 0)",
+            0
+          ]
+        },
+        "steady_z": {
+          "rotation": [
+            0,
+            0,
+            "(v.az ?? 0) * (v.steady ?? 0)"
+          ]
+        },
+        "anchor_out": {
+          "position": [
+            "-(v.tx ?? 0) * 16",
+            "-(v.ty ?? 0) * 16",
+            "(v.tz ?? 0) * 16"
           ]
         }
       }
@@ -248,6 +311,32 @@
       "bones": {
         "sync": {
           "scale": 1
+        }
+      }
+    },
+    "animation.ponder.section_item": {
+      "loop": true,
+      "bones": {
+        "model": {
+          "position": [
+            -10.865,
+            10.82,
+            10.865
+          ],
+          "scale": 2.6663,
+          "rotation": [
+            -20,
+            -45,
+            0
+          ]
+        }
+      }
+    },
+    "animation.ponder.section_grow": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "scale": "(v.s ?? 0) > 0 ? math.max(v.fade ?? 1, 0.001) : 0.001"
         }
       }
     }

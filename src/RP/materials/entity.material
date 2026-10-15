@@ -12,6 +12,16 @@
         "DisableDepthTest"
       ],
       "depthFunc": "Always"
+    },
+    "ponder_crack_multiply:alpha_block_color": {
+      "+states": [
+        "Blending",
+        "DisableDepthWrite",
+        "DisableAlphaWrite"
+      ],
+      "depthFunc": "LessEqual",
+      "blendSrc": "DestColor",
+      "blendDst": "Zero"
     }
   }
 }

@@ -10,12 +10,6 @@ export const ICON_PATHS = Object.freeze([
   "textures/ui/ponder/icon_use",
   "textures/ui/ponder/icon_attack",
   "textures/ui/ponder/icon_scroll",
-  "textures/ui/ponder/icon_slot",
-  "textures/ui/ponder/icon_touch",
-  "textures/items/stick",
-  "textures/blocks/furnace_front_off",
-  "textures/items/iron_ingot",
-  "textures/blocks/redstone_lamp_off",
 ]);
 
 /** 找不到的路径回退到第 0 项，而不是让整个标注失败。 */

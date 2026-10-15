@@ -2457,13 +2457,7 @@
             "texture.icon1",
             "texture.icon2",
             "texture.icon3",
-            "texture.icon4",
-            "texture.icon5",
-            "texture.icon6",
-            "texture.icon7",
-            "texture.icon8",
-            "texture.icon9",
-            "texture.icon10"
+            "texture.icon4"
           ]
         }
       }
@@ -2479,6 +2473,75 @@
         "texture.default"
       ],
       "ignore_lighting": true
+    },
+    "controller.render.ponder.crack": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "q.property('ponder:stage')==0?Texture.stage_0:q.property('ponder:stage')==1?Texture.stage_1:q.property('ponder:stage')==2?Texture.stage_2:q.property('ponder:stage')==3?Texture.stage_3:q.property('ponder:stage')==4?Texture.stage_4:q.property('ponder:stage')==5?Texture.stage_5:q.property('ponder:stage')==6?Texture.stage_6:q.property('ponder:stage')==7?Texture.stage_7:q.property('ponder:stage')==8?Texture.stage_8:Texture.stage_9"
+      ],
+      "ignore_lighting": true,
+      "part_visibility": [
+        {
+          "*": "q.property('ponder:stage') >= 0"
+        }
+      ]
+    },
+    "controller.render.ponder.hidden": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.default"
+      ],
+      "part_visibility": [
+        {
+          "*": false
+        }
+      ]
+    },
+    "controller.render.ponder.shadow": {
+      "geometry": "Geometry.shadow",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.gradient"
+      ],
+      "ignore_lighting": true,
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0.4
+      }
+    },
+    "controller.render.ponder.glow": {
+      "geometry": "Geometry.glow",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.gradient"
+      ],
+      "ignore_lighting": true,
+      "color": {
+        "r": 0.776,
+        "g": 1,
+        "b": 0.788,
+        "a": "q.property('ponder:flash_alpha') * 0.667"
+      }
     }
   }
 }

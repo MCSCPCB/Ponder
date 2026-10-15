@@ -1,0 +1,30 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "ponder:shadow",
+      "materials": {
+        "default": "ponder_depth"
+      },
+      "textures": {
+        "gradient": "textures/ui/ponder/gradient"
+      },
+      "geometry": {
+        "shadow": "geometry.ponder.shadow",
+        "glow": "geometry.ponder.glow"
+      },
+      "animations": {
+        "update": "animation.ponder.shadow"
+      },
+      "scripts": {
+        "animate": [
+          "update"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.ponder.shadow",
+        "controller.render.ponder.glow"
+      ]
+    }
+  }
+}

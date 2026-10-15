@@ -1,12 +1,13 @@
 import { LIMITS, PALETTE } from "../../enums/PonderConfig.js";
 import { FONT_METRICS } from "./FontMetrics.js";
 
-// 16px Unicode atlas cells correspond to 8 UI pixels. Resource-pack-specific
-// metrics can override this table without changing wrapping or the renderer.
+// Advances in UI pixels, measured from the vanilla Bedrock default8.png atlas
+// (rightmost inked column + 2; space is 4). Everything else in ASCII is 6.
+// Non-ASCII glyphs have no measured source: they use 8, the half-width of a 16px cell.
 const ASCII = {
-  " ": 4, "!": 2, '"': 4, "'": 2, "(": 4, ")": 4, "*": 4, ",": 2, ".": 2,
-  ":": 2, ";": 2, "<": 5, ">": 5, "@": 7, "I": 4, "[": 4, "]": 4,
-  "`": 3, "f": 5, "i": 2, "j": 3, "k": 5, "l": 3, "t": 4, "{": 5, "|": 2, "}": 5,
+  " ": 4, "!": 2, '"': 5, "'": 3, "(": 5, ")": 5, "*": 5, ",": 2, ".": 2,
+  ":": 2, ";": 2, "<": 5, ">": 5, "@": 7, "~": 7, "I": 4, "[": 4, "]": 4,
+  "`": 3, "f": 5, "i": 2, "l": 3, "k": 5, "t": 4, "{": 5, "|": 2, "}": 5,
 };
 const FORMAT = {
   "0": 0x000000, "1": 0x0000aa, "2": 0x00aa00, "3": 0x00aaaa,
