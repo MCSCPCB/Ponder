@@ -70,4 +70,6 @@ export const LIMITS = Object.freeze({
   allocationAttempts: 24, safetyBuffer: 3, playerClearance: 96,
   nativeEntities: 128,
   formBusyRetries: 3,
+  // 一次下落动画最多这么多个 world_section 实体（每个拿两格）；超过则整批直接放下，不播动画。
+  worldSectionEntities: 64,
 });

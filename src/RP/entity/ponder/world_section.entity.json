@@ -10,15 +10,17 @@
                 "default": "textures/special/ponder/blank"
             },
             "animations": {
-                "world_section": "animation.ponder.world_section"
+                "place": "animation.ponder.world_section.place",
+                "fall": "animation.ponder.world_section.fall"
             },
             "scripts": {
                 "animate": [
-                    "world_section"
-                ]
+                    "place"
+                ],
+                "should_update_bones_and_effects_offscreen": true
             },
             "geometry": {
-                "default": "geometry.armor_stand"
+                "default": "geometry.ponder.world_section"
             },
             "render_controllers": [
                 "controller.render.zombie"

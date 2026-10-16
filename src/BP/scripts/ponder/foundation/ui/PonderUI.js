@@ -1,4 +1,4 @@
-import { system, world } from "@minecraft/server";
+import { EasingType, system, world } from "@minecraft/server";
 import { FormCancelationReason, uiManager } from "@minecraft/server-ui";
 import { LIMITS, SESSION_TAG } from "../../enums/PonderConfig.js";
 import { getSceneForItem } from "../registration/PonderSceneRegistry.js";
@@ -36,13 +36,31 @@ async function boot() {
 function actionBar(player, message) {
   if (player.isValid) player.onScreenDisplay.setActionBar(message);
 }
-function applyCamera(session) {
-  const { camera } = session.scene, origin = session.lease.origin;
+// The structure's entrance when the form first opens: the old UI preview rose 16 px of its
+// 196 px window over 0.48 s (out_quart) after 0.02 s. With the camera that is the view
+// starting this share of its height higher and easing down; the wait becomes one tick.
+const INTRO_RISE = 16 / 196;
+const INTRO_SECONDS = 0.48;
+
+function applyCamera(session, intro = false) {
+  const { camera } = session.scene, origin = session.lease.origin, player = session.player;
   const pose = orbit(camera);
-  session.player.camera.setFov({ fov: camera.fov });
-  session.player.camera.setCamera("minecraft:free", {
-    location: add(pose.location, origin), facingLocation: add(camera.focus, origin),
-  });
+  const location = add(pose.location, origin), facingLocation = add(camera.focus, origin);
+  player.camera.setFov({ fov: camera.fov });
+  if (!intro) {
+    player.camera.setCamera("minecraft:free", { location, facingLocation });
+    return;
+  }
+  // Camera and aim move together, so only the position eases and the view angle stays put.
+  const rise = INTRO_RISE * 2 * camera.distance * Math.tan(camera.fov * Math.PI / 360);
+  const lift = { x: pose.up.x * rise, y: pose.up.y * rise, z: pose.up.z * rise };
+  player.camera.setCamera("minecraft:free", { location: add(location, lift), facingLocation: add(facingLocation, lift) });
+  system.runTimeout(() => {
+    if (session.closed || !player.isValid) return;
+    player.camera.setCamera("minecraft:free", {
+      location, facingLocation, easeOptions: { easeTime: INTRO_SECONDS, easeType: EasingType.OutQuart },
+    });
+  }, 1);
 }
 
 /** Restore the player NOW; wait for the writer only before reclaiming world data. */
@@ -171,7 +189,7 @@ async function start(player, scene) {
     if (session.closed) return;
     actionBar(player, "");
     capturePlayer(player);
-    applyCamera(session);
+    applyCamera(session, true);
     await runForms(session);
   } catch (error) {
     system.clearRun(loading);

@@ -16,5 +16,7 @@ export function orbit(camera) {
     y: Math.sin(pitch) * camera.distance,
     z: -Math.cos(yaw) * Math.cos(pitch) * camera.distance,
   };
-  return { location: add(camera.focus, offset), focus: camera.focus };
+  // Screen up: perpendicular to the line of sight, in its vertical plane.
+  const up = { x: -Math.sin(yaw) * Math.sin(pitch), y: Math.cos(pitch), z: Math.cos(yaw) * Math.sin(pitch) };
+  return { location: add(camera.focus, offset), focus: camera.focus, up };
 }

@@ -1,0 +1,83 @@
+{
+    "format_version": "1.16.0",
+    "minecraft:geometry": [
+        {
+            "description": {
+                "identifier": "geometry.ponder.world_section",
+                "texture_width": 16,
+                "texture_height": 16,
+                "visible_bounds_width": 128,
+                "visible_bounds_height": 128,
+                "visible_bounds_offset": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "bones": [
+                {
+                    "name": "root",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "fall",
+                    "parent": "root",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "model",
+                    "parent": "fall",
+                    "pivot": [
+                        0,
+                        -8,
+                        0
+                    ]
+                },
+                {
+                    "name": "rightitem",
+                    "parent": "model",
+                    "pivot": [
+                        0,
+                        -8,
+                        0
+                    ]
+                },
+                {
+                    "name": "left_local_offset",
+                    "parent": "fall",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "leftarm",
+                    "parent": "left_local_offset",
+                    "pivot": [
+                        0,
+                        -8,
+                        0
+                    ]
+                },
+                {
+                    "name": "leftitem",
+                    "parent": "leftarm",
+                    "pivot": [
+                        0,
+                        -8,
+                        0
+                    ]
+                }
+            ]
+        }
+    ]
+}

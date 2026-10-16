@@ -1,66 +1,67 @@
 {
     "format_version": "1.8.0",
     "animations": {
-        "animation.ponder.world_section": {
+        "animation.ponder.world_section.place": {
             "loop": true,
             "bones": {
-                "body": {
+                "root": {
                     "rotation": [
-                        "-this",
-                        "-this",
-                        "-this"
+                        "-q.body_x_rotation",
+                        "-q.body_y_rotation",
+                        0
+                    ],
+                    "scale": "q.property('ponder:shown')"
+                },
+                "model": {
+                    "position": [
+                        -10.865,
+                        10.82,
+                        10.865
+                    ],
+                    "scale": 2.6663,
+                    "rotation": [
+                        -20,
+                        -45,
+                        0
                     ]
                 },
-                "head": {
-                    "rotation": [
-                        "-this",
-                        "-this",
-                        "-this"
+                "left_local_offset": {
+                    "position": [
+                        "q.property('ponder:left_x') * 16",
+                        "q.property('ponder:left_y') * 16",
+                        "-q.property('ponder:left_z') * 16"
                     ]
                 },
                 "leftarm": {
-                    "rotation": [
-                        "-this",
-                        "-this",
-                        "-this"
-                    ]
-                },
-                "leftleg": {
-                    "rotation": [
-                        "-this",
-                        "-this",
-                        "-this"
-                    ]
-                },
-                "rightarm": {
-                    "rotation": [
-                        "-this",
-                        "-this",
-                        "-this"
-                    ],
                     "position": [
-                        -5.0,
-                        -4.0,
-                        -12
-                    ]
-                },
-                "rightleg": {
-                    "rotation": [
-                        "-this",
-                        "-this",
-                        "-this"
-                    ]
-                },
-                "rightitem": {
-                    "scale": "2.7",
-                    "rotation": [
-                        "-this-20",
-                        "-this-135",
-                        "-this"
+                        -10.865,
+                        10.82,
+                        10.865
                     ],
+                    "scale": 2.6663,
+                    "rotation": [
+                        -20,
+                        -45,
+                        0
+                    ]
+                },
+                "leftitem": {
+                    "position": [
+                        "q.property('ponder:left_item_offset')",
+                        0,
+                        0
+                    ]
+                }
+            }
+        },
+        "animation.ponder.world_section.fall": {
+            "loop": "hold_on_last_frame",
+            "animation_length": 0.4,
+            "bones": {
+                "fall": {
                     "position": [
                         0,
-                        0,
+                        "24 * math.pow(1 - math.min(q.anim_time / 0.4, 1), 3)",
                         0
                     ]
                 }

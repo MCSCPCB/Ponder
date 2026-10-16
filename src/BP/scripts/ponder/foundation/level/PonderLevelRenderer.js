@@ -1,5 +1,5 @@
-import { BlockPermutation } from "@minecraft/server";
-import { LIGHT_BLOCK, WORLD_SECTION_ENTITY } from "../../enums/PonderConfig.js";
+import { BlockPermutation, ItemTypes } from "@minecraft/server";
+import { LIGHT_BLOCK, LIMITS, WORLD_SECTION_ENTITY } from "../../enums/PonderConfig.js";
 import { add } from "../VecHelper.js";
 import { job, safeRemove, waitTicks } from "./StageJobs.js";
 import { markOwned } from "./StageOwnership.js";
@@ -7,13 +7,24 @@ import { assertStageClear, nativeVolume, slabs } from "./StageAllocator.js";
 
 const STAGE_ENTITY_TAG = "ponder_stage_entity";
 const TEMP_ANIMATION_TAG = "ponder_temp_animation";
+// The fall itself is played on the client by animation.ponder.world_section.fall
+// (1.5 blocks over 0.4 s, ease-out cubic); these ticks only wait for it to finish.
 const FALL_ANIMATION_TICKS = 8;
-const FALL_START_HEIGHT = 1.5;
+const FALL_ANIMATION = "animation.ponder.world_section.fall";
 
 const tagSegment = value => String(value ?? "").toLowerCase().replace(/[^a-z0-9_]/g, "_");
-const lerpNumber = (start, end, progress) => start + (end - start) * progress;
-const easeOutCubic = progress => 1 - (1 - progress) ** 3;
-const formatCommandNumber = value => Number(value.toFixed(4));
+
+/** Blocks that can be shown in hand: the block id must also be an item. */
+const canHold = blockId => ItemTypes.get(blockId) !== undefined;
+
+/** Sorted by position, so the two cells an entity holds are next to each other. */
+function pairBlocks(blocks) {
+  const sorted = [...blocks].sort((a, b) =>
+    a.position.y - b.position.y || a.position.x - b.position.x || a.position.z - b.position.z);
+  const pairs = [];
+  for (let i = 0; i < sorted.length; i += 2) pairs.push([sorted[i], sorted[i + 1]]);
+  return pairs;
+}
 
 function attempt(action, errorMessage) {
   try {
@@ -172,17 +183,21 @@ export class PonderLevelRenderer {
     }
   }
 
-  async spawnAnimatedBlockEntities(animatedBlocks, token, phase, live) {
+  /**
+   * Pairs the blocks (sorted by position) onto world_section entities: the mainhand holds the
+   * first cell, where the entity stands, and the offhand the second, offset by properties.
+   * Each entity starts hidden (`ponder:shown` = 0) until its items are equipped.
+   */
+  async spawnAnimatedBlockEntities(pairs, token, phase, live) {
     const batchTag = tagSegment(`ponder_temp_${this.lease.id}_${token}_${phase}`);
     const spawned = [];
-    for (const [index, animatedBlock] of animatedBlocks.entries()) {
+    for (const [index, [main, off]] of pairs.entries()) {
       this.check(live);
       const entityTag = `${batchTag}_${index}`;
-      const finalLocation = this.toStageLocation(animatedBlock.position);
-      const startLocation = { x: finalLocation.x + 0.5, y: finalLocation.y + FALL_START_HEIGHT, z: finalLocation.z + 0.5 };
+      const location = this.toStageEntityLocation(main.position);
       const entity = attempt(
-        () => this.dimension.spawnEntity(WORLD_SECTION_ENTITY, startLocation),
-        `Failed to spawn temp animation entity for block "${animatedBlock.blockId}" in scene "${this.scene.id}".`,
+        () => this.dimension.spawnEntity(WORLD_SECTION_ENTITY, location),
+        `Failed to spawn temp animation entity for block "${main.blockId}" in scene "${this.scene.id}".`,
       );
       if (!entity) continue;
       const tagged = attempt(() => {
@@ -190,40 +205,52 @@ export class PonderLevelRenderer {
         entity.addTag(TEMP_ANIMATION_TAG);
         entity.addTag(batchTag);
         entity.addTag(entityTag);
+        if (off) {
+          entity.setProperty("ponder:left_x", off.position.x - main.position.x);
+          entity.setProperty("ponder:left_y", off.position.y - main.position.y);
+          entity.setProperty("ponder:left_z", off.position.z - main.position.z);
+          entity.setProperty("ponder:left_item_offset", off.blockId.startsWith("minecraft:") ? 2 : 0);
+        }
         return true;
-      }, `Failed to tag temp animation entity for block "${animatedBlock.blockId}" in scene "${this.scene.id}".`);
+      }, `Failed to tag temp animation entity for block "${main.blockId}" in scene "${this.scene.id}".`);
       if (!tagged) {
         attempt(() => safeRemove(entity), `Failed to remove untagged temp animation entity in scene "${this.scene.id}".`);
         continue;
       }
-      spawned.push({ entityTag, itemId: animatedBlock.blockId, finalLocation, startLocation });
+      spawned.push({ entity, entityTag, main, off });
     }
     if (spawned.length > 0) {
       await waitTicks(1);
-      for (const entry of spawned) {
+      for (const { entityTag, main, off } of spawned) {
         this.check(live);
+        const target = `@e[type=${WORLD_SECTION_ENTITY},tag=${entityTag}]`;
         attempt(
-          () => this.dimension.runCommand(`replaceitem entity @e[type=${WORLD_SECTION_ENTITY},tag=${entry.entityTag}] slot.weapon.mainhand 0 ${entry.itemId}`),
-          `Failed to equip temp animation entity with item "${entry.itemId}" in scene "${this.scene.id}".`,
+          () => this.dimension.runCommand(`replaceitem entity ${target} slot.weapon.mainhand 0 ${main.blockId}`),
+          `Failed to equip temp animation entity with item "${main.blockId}" in scene "${this.scene.id}".`,
+        );
+        if (off) attempt(
+          () => this.dimension.runCommand(`replaceitem entity ${target} slot.weapon.offhand 0 ${off.blockId}`),
+          `Failed to equip temp animation entity with item "${off.blockId}" in scene "${this.scene.id}".`,
         );
       }
     }
     return { batchTag, spawned };
   }
 
-  async animateFalling(spawned, live) {
-    for (let tick = 0; tick < FALL_ANIMATION_TICKS; tick += 1) {
-      this.check(live);
-      const progress = easeOutCubic((tick + 1) / FALL_ANIMATION_TICKS);
-      for (const { entityTag, startLocation, finalLocation } of spawned) {
-        const y = lerpNumber(startLocation.y, finalLocation.y, progress);
-        attempt(
-          () => this.dimension.runCommand(`tp @e[type=${WORLD_SECTION_ENTITY},tag=${entityTag}] ${formatCommandNumber(finalLocation.x)} ${formatCommandNumber(y)} ${formatCommandNumber(finalLocation.z)}`),
-          `Failed to move temp animation entity "${entityTag}".`,
-        );
-      }
-      await waitTicks(1);
+  /**
+   * The entities never move: one playanimation for the whole batch drops them on the client,
+   * and they are shown in the same tick, so nothing appears at the end point first.
+   */
+  async animateFalling(batch, live) {
+    this.check(live);
+    attempt(
+      () => this.dimension.runCommand(`playanimation @e[type=${WORLD_SECTION_ENTITY},tag=${batch.batchTag}] ${FALL_ANIMATION}`),
+      `Failed to play the fall animation in scene "${this.scene.id}".`,
+    );
+    for (const { entity } of batch.spawned) {
+      attempt(() => entity.setProperty("ponder:shown", 1), `Failed to show temp animation entity in scene "${this.scene.id}".`);
     }
+    await waitTicks(FALL_ANIMATION_TICKS);
     this.check(live);
   }
 
@@ -237,12 +264,20 @@ export class PonderLevelRenderer {
     await this.buildStage(stageIndex - 1, live);
     const { removed, added } = this.stageDiff(stageIndex);
     await this.clearStructures(removed, live);
-    const animatedBlocks = added.flatMap(expandStructureBlocks);
-    if (animatedBlocks.length > 0) {
-      const batch = await this.spawnAnimatedBlockEntities(animatedBlocks, token, "fall", live);
-      try { await this.animateFalling(batch.spawned, live); }
-      finally { this.cleanupTempAnimationEntities(batch.batchTag); }
+    // Only blocks that also exist as items can be held; the rest are simply placed.
+    // A batch over the entity limit is placed as a whole, without the animation.
+    const held = added.flatMap(expandStructureBlocks).filter(block => canHold(block.blockId));
+    const pairs = pairBlocks(held);
+    if (pairs.length === 0 || pairs.length > LIMITS.worldSectionEntities) {
+      await this.renderStructures(added, live);
+      return;
     }
-    await this.renderStructures(added, live);
+    const batch = await this.spawnAnimatedBlockEntities(pairs, token, "fall", live);
+    try {
+      await this.animateFalling(batch, live);
+      await this.renderStructures(added, live);
+      // Removed a tick after the real blocks go in, so nothing blinks out in between.
+      await waitTicks(1);
+    } finally { this.cleanupTempAnimationEntities(batch.batchTag); }
   }
 }

@@ -1,13 +1,65 @@
 {
-    "format_version": "1.21.0",
+    "format_version": "1.20.30",
     "minecraft:entity": {
         "description": {
             "identifier": "ponder:world_section",
             "is_spawnable": false,
             "is_summonable": true,
-            "is_experimental": false
+            "properties": {
+                "ponder:shown": {
+                    "type": "float",
+                    "range": [
+                        0.0,
+                        1.0
+                    ],
+                    "client_sync": true,
+                    "default": "0"
+                },
+                "ponder:left_x": {
+                    "type": "float",
+                    "range": [
+                        -64.0,
+                        64.0
+                    ],
+                    "client_sync": true,
+                    "default": "0"
+                },
+                "ponder:left_y": {
+                    "type": "float",
+                    "range": [
+                        -64.0,
+                        64.0
+                    ],
+                    "client_sync": true,
+                    "default": "0"
+                },
+                "ponder:left_z": {
+                    "type": "float",
+                    "range": [
+                        -64.0,
+                        64.0
+                    ],
+                    "client_sync": true,
+                    "default": "0"
+                },
+                "ponder:left_item_offset": {
+                    "type": "float",
+                    "range": [
+                        -3.0,
+                        3.0
+                    ],
+                    "client_sync": true,
+                    "default": "0"
+                }
+            }
         },
         "components": {
+            "minecraft:type_family": {
+                "family": [
+                    "dummy",
+                    "inanimate"
+                ]
+            },
             "minecraft:damage_sensor": {
                 "triggers": [
                     {
@@ -17,15 +69,8 @@
                 ]
             },
             "minecraft:collision_box": {
-                "width": 0,
-                "height": 0
-            },
-            "minecraft:health": {
-                "value": 1,
-                "max": 0
-            },
-            "minecraft:knockback_resistance": {
-                "value": 1
+                "height": 0,
+                "width": 0
             },
             "minecraft:pushable": {
                 "is_pushable": false,
@@ -36,14 +81,11 @@
                 "has_collision": false,
                 "has_gravity": false
             },
-            "minecraft:fire_immune": {},
+            "minecraft:equipment": {},
             "minecraft:conditional_bandwidth_optimization": {
-                "default_values": {
-                    "max_optimized_distance": 0,
-                    "max_dropped_ticks": 0
-                }
+                "conditional_values": [],
+                "default_values": {}
             }
-        },
-        "events": {}
+        }
     }
 }
