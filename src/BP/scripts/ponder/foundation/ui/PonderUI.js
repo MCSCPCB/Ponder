@@ -38,10 +38,16 @@ function actionBar(player, message) {
   if (player.isValid) player.onScreenDisplay.setActionBar(message);
 }
 // The structure's entrance when the form first opens: the old UI preview rose 16 px of its
-// 196 px window over 0.48 s (out_quart) after 0.02 s. With the camera that is the view
-// starting this share of its height higher and easing down; the wait becomes one tick.
+// 196 px window over 0.48 s (out_quart). With the camera that is the view starting this
+// share of its height higher and easing down.
 const INTRO_RISE = 16 / 196;
 const INTRO_SECONDS = 0.48;
+// The client draws the far stage's chunks only some ticks after the camera jumps there; an
+// ease started at once was over before the blocks showed. The camera holds lifted this long.
+const INTRO_HOLD_TICKS = 10;
+// The text window stands on a plane 2 blocks in front of the final camera, so the lifted
+// camera would sweep it across the screen; it appears once the view is still.
+const INTRO_TICKS = INTRO_HOLD_TICKS + Math.ceil(INTRO_SECONDS * 20);
 
 function applyCamera(session, intro = false) {
   const { camera } = session.scene, origin = session.lease.origin, player = session.player;
@@ -61,7 +67,7 @@ function applyCamera(session, intro = false) {
     player.camera.setCamera("minecraft:free", {
       location, facingLocation, easeOptions: { easeTime: INTRO_SECONDS, easeType: EasingType.OutQuart },
     });
-  }, 1);
+  }, INTRO_HOLD_TICKS);
 }
 
 /** Restore the player NOW; wait for the writer only before reclaiming world data. */
@@ -203,7 +209,8 @@ async function start(player, scene) {
     actionBar(player, "");
     capturePlayer(player);
     applyCamera(session, true);
-    showText(session, 0);
+    // A stage change before then shows its own text, which this must not replace.
+    system.runTimeout(() => { if (!session.closed && !session.text) showText(session, 0); }, INTRO_TICKS);
     await runForms(session);
   } catch (error) {
     system.clearRun(loading);

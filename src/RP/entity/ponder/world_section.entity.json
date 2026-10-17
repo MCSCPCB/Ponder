@@ -10,10 +10,15 @@
                 "default": "textures/special/ponder/blank"
             },
             "animations": {
-                "place": "animation.ponder.world_section.place",
-                "fall": "animation.ponder.world_section.fall"
+                "place": "animation.ponder.world_section.place"
             },
             "scripts": {
+                "initialize": [
+                    "v.shown_at = -1;"
+                ],
+                "pre_animation": [
+                    "v.shown_at = (v.shown_at < 0 && q.property('ponder:shown') > 0) ? q.life_time : v.shown_at;"
+                ],
                 "animate": [
                     "place"
                 ],

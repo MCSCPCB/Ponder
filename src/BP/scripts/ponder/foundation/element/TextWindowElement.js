@@ -1,5 +1,5 @@
 import { system, TextPrimitive, world } from "@minecraft/server";
-import { LINE_ENTITY, WINDOW_ENTITY } from "../../enums/PonderConfig.js";
+import { GUI_SCREEN_H, LINE_ENTITY, WINDOW_ENTITY } from "../../enums/PonderConfig.js";
 import { add, distance, orbit } from "../VecHelper.js";
 import { markOwned } from "../level/StageOwnership.js";
 
@@ -10,9 +10,9 @@ import { markOwned } from "../level/StageOwnership.js";
  * in Java GUI pixels on a 16:9 screen whose height is the camera's vertical view.
  */
 
-// Java GUI screen this layout is computed on: 1920x1080 at Java's automatic GUI scale (4),
-// which is 480x270 GUI pixels. The script cannot read the player's real screen.
-const SCREEN_H = 270, SCREEN_W = SCREEN_H * 16 / 9;
+// Java GUI screen this layout is computed on, 16:9. The script cannot read the player's
+// real screen.
+const SCREEN_H = GUI_SCREEN_H, SCREEN_W = SCREEN_H * 16 / 9;
 // The plane sits this far in front of the camera; it only has to be nearer than the scene.
 const PLANE_DISTANCE = 2;
 // Each layer is nudged towards the camera so later ones draw over earlier ones.
@@ -23,34 +23,31 @@ const FADE_TICKS = 5;
 const TEXT_COLOR = { red: (0xee + 0xff) / 2 / 255, green: (0xee + 0xff) / 2 / 255, blue: (0xee + 0xdd) / 2 / 255, alpha: 1 };
 // Java font units: 9 per line and per CJK glyph cell.
 const LINE_HEIGHT = 9;
-// Drawn widths of TextPrimitive glyphs in those units, calibrated in game: full-width
-// punctuation is 3, a CJK glyph 8 (24 of them in a 216-wide box left about one unit each).
 const PUNCTUATION = "，。、；：！？（）《》「」『』“”‘’";
 const CLOSING = "，。、；：！？）》」』”’";
 // CJK and full-width characters: a line may break before any of them.
 const isWide = ch => ch.codePointAt(0) > 0x2e80;
+// Java's advances, which decide where Java breaks a line: a CJK cell 9, a space 4, else 6.
+const javaWidth = ch => (isWide(ch) ? 9 : ch === " " ? 4 : 6);
+// What a TextPrimitive actually draws, in the same units (calibrated in game): full-width
+// punctuation 3, a CJK glyph 8. The box hugs and the line is placed by these.
 const glyphWidth = ch => (PUNCTUATION.includes(ch) ? 3 : isWide(ch) ? 8 : ch === " " ? 4 : 6);
 // Width in blocks of a CJK glyph of a TextPrimitive at scale 1 (calibrated in game).
 const TEXT_PRIMITIVE_GLYPH = 0.25;
-// Size and wrap width follow the old UI bubble (max_size 164, font_scale_factor 0.9) as seen
-// on the user's phone, not Java's min(screen width - targetX, 180): the text is drawn at this
-// fraction of Java's size and wraps at this many screen pixels.
-const FONT_SCALE = 0.75;
-const WRAP_WIDTH = 164;
-const SCREEN_MARGIN = 4;
 // A single-line TextPrimitive is centred on its location horizontally but draws about this
 // many font units below it (seen in game: a line centred in its box sat on the box's bottom
 // edge), so each line stands this much higher.
 const TEXT_RAISE = 4.5;
 const textWidth = line => [...line].reduce((n, c) => n + glyphWidth(c), 0);
+const javaTextWidth = line => [...line].reduce((n, c) => n + javaWidth(c), 0);
 
-/** Splits like Java's splitter: on spaces for Latin text, anywhere for CJK. */
+/** Splits like Java's splitter, by Java's advances: on spaces for Latin text, anywhere for CJK. */
 function wrap(text, maxWidth) {
   const lines = [];
   for (const paragraph of text.split("\n")) {
     let line = "", width = 0, lastSpace = -1;
     for (const ch of paragraph) {
-      const w = glyphWidth(ch);
+      const w = javaWidth(ch);
       // Closing punctuation never starts a line; it stays at the end of the one before.
       if (width + w > maxWidth && line.length && !CLOSING.includes(ch)) {
         // A CJK glyph may start a line anywhere; a Latin word goes back to its space.
@@ -61,7 +58,7 @@ function wrap(text, maxWidth) {
           lines.push(line);
           line = "";
         }
-        width = textWidth(line);
+        width = javaTextWidth(line);
         lastSpace = -1;
         if (ch === " ") continue;
       }
@@ -122,13 +119,10 @@ function layoutWindow(stage, view, origin) {
   const yDiff = (SCREEN_H / 2 - sy - 10) / 100;
   let targetX = SCREEN_W * (6 / 8 + (5 / 8 - 6 / 8) * yDiff * yDiff);
   if (stage.placeNearTarget && target) targetX = Math.min(targetX, target.x + 50);
-  // Wrapped in font units; the box is in screen pixels.
-  const lines = wrap(stage.description, WRAP_WIDTH / FONT_SCALE);
-  const boxWidth = Math.max(...lines.map(textWidth)) * FONT_SCALE;
-  const boxHeight = lines.length * LINE_HEIGHT * FONT_SCALE;
-  // Java's own width limit keeps the box on screen; with the fixed wrap width the box is
-  // moved left instead, so its right edge stays SCREEN_MARGIN inside the 16:9 screen.
-  targetX = Math.min(targetX, SCREEN_W - SCREEN_MARGIN - boxWidth + 6);
+  // Java's `textWidth`: the widest a line may wrap to.
+  const lines = wrap(stage.description, Math.min(SCREEN_W - targetX, 180));
+  const boxWidth = Math.max(...lines.map(textWidth));
+  const boxHeight = lines.length * LINE_HEIGHT;
   return { target, y: sy, targetX, lines, boxWidth, boxHeight };
 }
 
@@ -217,8 +211,8 @@ export class TextWindowElement {
    */
   createLine(line, i, alpha) {
     const { view, layout, session } = this, { dimension, player } = session;
-    const x = layout.targetX - 10 + textWidth(line) * FONT_SCALE / 2;
-    const y = layout.y + 3 + (LINE_HEIGHT * i + LINE_HEIGHT / 2 - TEXT_RAISE) * FONT_SCALE;
+    const x = layout.targetX - 10 + textWidth(line) / 2;
+    const y = layout.y + 3 + LINE_HEIGHT * i + LINE_HEIGHT / 2 - TEXT_RAISE;
     const text = new TextPrimitive({ dimension, ...view.toWorld(x, y, 3) }, line);
     text.useRotation = true;
     // Confirmed in game: the camera's pitch, with the yaw mirrored.
@@ -226,8 +220,8 @@ export class TextWindowElement {
     text.depthTest = false;
     text.backfaceVisible = false;
     text.backgroundColorOverride = { red: 0, green: 0, blue: 0, alpha: 0 };
-    // A CJK glyph spans 9 font units, FONT_SCALE pixels each.
-    text.scale = view.pixel(3) * 9 * FONT_SCALE / TEXT_PRIMITIVE_GLYPH;
+    // A CJK glyph cell spans 9 screen pixels, Java's font at GUI scale.
+    text.scale = view.pixel(3) * 9 / TEXT_PRIMITIVE_GLYPH;
     text.visibleTo = [player];
     // The default range is the client's render distance around the player, who stays where
     // they were while the camera is at the far stage; cover that distance.

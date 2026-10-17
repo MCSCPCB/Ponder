@@ -21,22 +21,26 @@ export const STAGE_PRESETS = {
     uiTitleMarker: "§4§r§1§r",
     size: { x: 8, y: 8, z: 8 },
     focus: { x: 3, y: 3, z: 3 },
+    scale: 5 / 8,
   },
   demo_16x16x16: {
     uiTitleMarker: "§4§r§2§r",
     size: { x: 16, y: 16, z: 16 },
     focus: { x: 7, y: 4, z: 7 },
+    scale: 5 / 16,
   },
   demo_2x3x2: {
     uiTitleMarker: "§4§r§3§r",
     size: { x: 2, y: 3, z: 2 },
     focus: { x: 0, y: 1, z: 0 },
+    scale: 1,
   },
   /*注释
   demo_XxYxZ: {
     uiTitleMarker: "SIZE_MARKER",
     size: { x: X, y: Y, z: Z }, // 舞台宽、高、深
     focus: { x: FOCUS_X, y: FOCUS_Y, z: FOCUS_Z }, // 摄像机注视的方块，相对舞台
+    scale: 5 / MAX_XZ, // Java 的 scaleSceneView：每格 30×scale 像素。5/最长边 = 和原版 5×5 场景占屏一样；不超过 5 格的用 1（Java 默认）
   },
   */
 };
@@ -65,6 +69,9 @@ export const STAGE_MAX_COORD = 125508;
 // 主世界云层所在高度。云会画在方块外壳里面，舞台不能与它相交，优先放在云层上方。
 export const CLOUD_BAND = Object.freeze({ from: 192, to: 208 });
 export const CAMERA_FOV = 48;
+// Java 的 GUI 屏幕高度（1080p、自动界面缩放 4 时为 270 像素）。文字窗口按它排版，
+// 摄像机距离按它把 Java 的"每格 30×scale 像素"换算成世界距离。
+export const GUI_SCREEN_H = 270;
 export const LIMITS = Object.freeze({
   // 同时进行的思索数量上限。
   sessions: 4,

@@ -7,10 +7,12 @@ import { assertStageClear, nativeVolume, slabs } from "./StageAllocator.js";
 
 const STAGE_ENTITY_TAG = "ponder_stage_entity";
 const TEMP_ANIMATION_TAG = "ponder_temp_animation";
-// The fall itself is played on the client by animation.ponder.world_section.fall
-// (1.5 blocks over 0.4 s, ease-out cubic); these ticks only wait for it to finish.
-const FALL_ANIMATION_TICKS = 8;
-const FALL_ANIMATION = "animation.ponder.world_section.fall";
+// The fall itself is played on the client by animation.ponder.world_section.place (1.5
+// blocks over 0.4 s, ease-out cubic); these ticks wait for it: the 0.4 s, plus two for the
+// property to reach the client. The held blocks then rest at their end point, so waiting
+// longer than the fall costs nothing visible.
+const FALL_ANIMATION_TICKS = 10;
+const HANDOFF_TICKS = 4;
 
 const tagSegment = value => String(value ?? "").toLowerCase().replace(/[^a-z0-9_]/g, "_");
 
@@ -238,15 +240,12 @@ export class PonderLevelRenderer {
   }
 
   /**
-   * The entities never move: one playanimation for the whole batch drops them on the client,
-   * and they are shown in the same tick, so nothing appears at the end point first.
+   * The entities never move: showing one (`ponder:shown` = 1) starts its fall on the client,
+   * timed from the frame the client first sees it shown, so the fall cannot be missed or
+   * start before the entity is drawn, and it rests at the end point afterwards.
    */
   async animateFalling(batch, live) {
     this.check(live);
-    attempt(
-      () => this.dimension.runCommand(`playanimation @e[type=${WORLD_SECTION_ENTITY},tag=${batch.batchTag}] ${FALL_ANIMATION}`),
-      `Failed to play the fall animation in scene "${this.scene.id}".`,
-    );
     for (const { entity } of batch.spawned) {
       attempt(() => entity.setProperty("ponder:shown", 1), `Failed to show temp animation entity in scene "${this.scene.id}".`);
     }
@@ -276,8 +275,9 @@ export class PonderLevelRenderer {
     try {
       await this.animateFalling(batch, live);
       await this.renderStructures(added, live);
-      // Removed a tick after the real blocks go in, so nothing blinks out in between.
-      await waitTicks(1);
+      // The client redraws a chunk some ticks after its blocks change, so the held blocks stay
+      // until the real ones are surely drawn; removed after one tick they left a gap (a flash).
+      await waitTicks(HANDOFF_TICKS);
     } finally { this.cleanupTempAnimationEntities(batch.batchTag); }
   }
 }

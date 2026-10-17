@@ -12,6 +12,13 @@
                     ],
                     "scale": "q.property('ponder:shown')"
                 },
+                "fall": {
+                    "position": [
+                        0,
+                        "8 + 24 * math.pow(1 - math.clamp((q.life_time - v.shown_at) / 0.4, 0, 1), 3)",
+                        0
+                    ]
+                },
                 "model": {
                     "position": [
                         -10.865,
@@ -49,19 +56,6 @@
                     "position": [
                         "q.property('ponder:left_item_offset')",
                         0,
-                        0
-                    ]
-                }
-            }
-        },
-        "animation.ponder.world_section.fall": {
-            "loop": "hold_on_last_frame",
-            "animation_length": 0.4,
-            "bones": {
-                "fall": {
-                    "position": [
-                        0,
-                        "8 + 24 * math.pow(1 - math.min(q.anim_time / 0.4, 1), 3)",
                         0
                     ]
                 }
