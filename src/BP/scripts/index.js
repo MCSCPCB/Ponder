@@ -1,6 +1,8 @@
 import { world } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { handlePonderItemUse, installPonder } from "./ponder/foundation/ui/PonderUI.js";
+// 临时：/scriptevent ponder:overlay_test [h|clear]，测完删掉这一行和 ponder/debug/OverlayTest.js。
+import "./ponder/debug/OverlayTest.js";
 
 function showVanillaFormTest(player) {
   const form = new ActionFormData()

@@ -1,0 +1,146 @@
+{
+    "format_version": "1.8.0",
+    "animations": {
+        "animation.ponder.text_window.place": {
+            "loop": true,
+            "bones": {
+                "root": {
+                    "rotation": [
+                        "-q.body_x_rotation",
+                        "-q.body_y_rotation",
+                        0
+                    ]
+                },
+                "yaw": {
+                    "rotation": [
+                        0,
+                        "q.property('ponder:yaw')",
+                        0
+                    ]
+                },
+                "pitch": {
+                    "rotation": [
+                        "q.property('ponder:pitch')",
+                        0,
+                        0
+                    ]
+                },
+                "unit": {
+                    "scale": [
+                        "-q.property('ponder:pixel') * 16",
+                        "q.property('ponder:pixel') * 16",
+                        "q.property('ponder:pixel') * 16"
+                    ]
+                },
+                "tl": {
+                    "position": [
+                        "0",
+                        "0",
+                        0
+                    ],
+                    "scale": [
+                        "4",
+                        "4",
+                        1
+                    ]
+                },
+                "tc": {
+                    "position": [
+                        "4",
+                        "0",
+                        0
+                    ],
+                    "scale": [
+                        "math.max(q.property('ponder:width') - 8, 0)",
+                        "4",
+                        1
+                    ]
+                },
+                "tr": {
+                    "position": [
+                        "q.property('ponder:width') - 4",
+                        "0",
+                        0
+                    ],
+                    "scale": [
+                        "4",
+                        "4",
+                        1
+                    ]
+                },
+                "ml": {
+                    "position": [
+                        "0",
+                        "-4",
+                        0
+                    ],
+                    "scale": [
+                        "4",
+                        "math.max(q.property('ponder:height') - 8, 0)",
+                        1
+                    ]
+                },
+                "mc": {
+                    "position": [
+                        "4",
+                        "-4",
+                        0
+                    ],
+                    "scale": [
+                        "math.max(q.property('ponder:width') - 8, 0)",
+                        "math.max(q.property('ponder:height') - 8, 0)",
+                        1
+                    ]
+                },
+                "mr": {
+                    "position": [
+                        "q.property('ponder:width') - 4",
+                        "-4",
+                        0
+                    ],
+                    "scale": [
+                        "4",
+                        "math.max(q.property('ponder:height') - 8, 0)",
+                        1
+                    ]
+                },
+                "bl": {
+                    "position": [
+                        "0",
+                        "-(q.property('ponder:height') - 4)",
+                        0
+                    ],
+                    "scale": [
+                        "4",
+                        "4",
+                        1
+                    ]
+                },
+                "bc": {
+                    "position": [
+                        "4",
+                        "-(q.property('ponder:height') - 4)",
+                        0
+                    ],
+                    "scale": [
+                        "math.max(q.property('ponder:width') - 8, 0)",
+                        "4",
+                        1
+                    ]
+                },
+                "br": {
+                    "position": [
+                        "q.property('ponder:width') - 4",
+                        "-(q.property('ponder:height') - 4)",
+                        0
+                    ],
+                    "scale": [
+                        "4",
+                        "4",
+                        1
+                    ]
+                }
+            }
+        }
+    }
+}

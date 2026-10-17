@@ -111,7 +111,7 @@ export const assemblyDemoScene = {
   ],
   stages: [
     defineStage({
-      bubbleSlot: "top",
+      pointAt: { x: 4, y: 2, z: 4 },
       description:
         "Lay down the stone base and plank deck. This is the footprint the rest of the scene grows from.",
       add: ["stone_base", "deck"],
@@ -131,7 +131,7 @@ export const assemblyDemoScene = {
       ],
     }),
     defineStage({
-      bubbleSlot: "middle",
+      pointAt: { x: 4, y: 2.5, z: 4 },
       description:
         "Drop the processing core into the middle, then bolt on the side machines that make the build feel functional.",
       add: ["machine_core", "barrel", "furnace"],

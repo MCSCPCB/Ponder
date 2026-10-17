@@ -61,7 +61,7 @@
                 "fall": {
                     "position": [
                         0,
-                        "24 * math.pow(1 - math.min(q.anim_time / 0.4, 1), 3)",
+                        "8 + 24 * math.pow(1 - math.min(q.anim_time / 0.4, 1), 3)",
                         0
                     ]
                 }

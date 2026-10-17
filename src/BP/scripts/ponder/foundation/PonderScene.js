@@ -13,11 +13,18 @@ export const defineEntityStructure = (id, entityTypeId, position, options = {}) 
   ...options,
 });
 
-export const defineStage = ({ description, add = [], remove = [], bubbleSlot }) => ({
+/**
+ * One step of the scene. Like Java's showText: `pointAt` (stage-local, decimals allowed)
+ * places the text next to that point with a line to it; without it the text is
+ * `independent`, at `y` of Java's 0..200 scene window, with no line.
+ */
+export const defineStage = ({ description, add = [], remove = [], pointAt, placeNearTarget = false, y = 0 }) => ({
   description,
   add,
   remove,
-  ...(bubbleSlot !== undefined ? { bubbleSlot } : {}),
+  ...(pointAt !== undefined ? { pointAt } : {}),
+  placeNearTarget,
+  y,
 });
 
 /**

@@ -5,12 +5,6 @@ export const ANIMATE_PROGRESS_MARKER = "§6§r";
 export const REVERSE_PROGRESS_MARKER = "§7§r";
 export const ANIMATE_PREVIEW_MARKER = "§8§r";
 export const HEADER_TITLE_MARKER = "§a§r§0§r";
-export const SLOT_MARKERS = {
-  top: "§9§r§0§r",
-  middle: "§9§r§1§r",
-  bottom: "§9§r§2§r",
-};
-export const DEFAULT_BUBBLE_SLOT = "top";
 export const BUTTON_MARKERS = {
   hidden: "§3§r§0§r",
   prev: "§3§r§1§r",
@@ -55,6 +49,13 @@ export const LIGHT_BLOCK = "minecraft:light_block_15";
 export const BACKDROP_BLOCK = "ponder:backdrop";
 // 正在运动的那段世界（Java WorldSectionElement），用手持方块显示。
 export const WORLD_SECTION_ENTITY = "ponder:world_section";
+// 文字窗口：画在摄像机前平面上的气泡框（九宫格拉伸）和指引线，各一个实体。
+export const WINDOW_ENTITY = "ponder:text_window";
+export const LINE_ENTITY = "ponder:text_line";
+// 贴在外壳外表面的同色实体盒子。镜头切进舞台时实体比方块先显示，方块还没显示的几帧由它遮挡。
+export const SKYBOX_ENTITY = "ponder:skybox";
+// 上面这些工具实体：无敌、静音（RP/sounds.json），只由脚本移除。
+export const TOOL_ENTITIES = new Set([WORLD_SECTION_ENTITY, WINDOW_ENTITY, LINE_ENTITY, SKYBOX_ENTITY]);
 // 结构盒与摄像机外至少留这么多格光源：外壳不贴着结构（避免红石导通、活塞推壳等），也不贴着镜头。
 export const STAGE_MARGIN = 2;
 // 舞台网格的起点，致敬边境之地起始坐标 12,550,821 的尾数。

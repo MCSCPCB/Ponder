@@ -1,0 +1,29 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "ponder:skybox",
+            "materials": {
+                "default": "ponder_skybox"
+            },
+            "textures": {
+                "default": "textures/special/ponder/backdrop"
+            },
+            "geometry": {
+                "default": "geometry.ponder.skybox"
+            },
+            "animations": {
+                "place": "animation.ponder.skybox.place"
+            },
+            "scripts": {
+                "animate": [
+                    "place"
+                ],
+                "should_update_bones_and_effects_offscreen": true
+            },
+            "render_controllers": [
+                "controller.render.ponder.skybox"
+            ]
+        }
+    }
+}

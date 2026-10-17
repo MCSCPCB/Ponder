@@ -1,0 +1,51 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:entity": {
+        "description": {
+            "identifier": "ponder:text_window",
+            "is_spawnable": false,
+            "is_summonable": true,
+            "properties": {
+                "ponder:yaw": { "type": "float", "range": [-400.0, 400.0], "client_sync": true, "default": "0" },
+                "ponder:pitch": { "type": "float", "range": [-400.0, 400.0], "client_sync": true, "default": "0" },
+                "ponder:pixel": { "type": "float", "range": [0.0, 1.0], "client_sync": true, "default": "0" },
+                "ponder:width": { "type": "float", "range": [0.0, 1000.0], "client_sync": true, "default": "0" },
+                "ponder:height": { "type": "float", "range": [0.0, 1000.0], "client_sync": true, "default": "0" },
+                "ponder:alpha": { "type": "float", "range": [0.0, 1.0], "client_sync": true, "default": "0" }
+            }
+        },
+        "components": {
+            "minecraft:type_family": {
+                "family": [
+                    "dummy",
+                    "inanimate"
+                ]
+            },
+            "minecraft:collision_box": {
+                "width": 0,
+                "height": 0
+            },
+            "minecraft:damage_sensor": {
+                "triggers": [
+                    {
+                        "cause": "all",
+                        "deals_damage": false
+                    }
+                ]
+            },
+            "minecraft:pushable": {
+                "is_pushable": false,
+                "is_pushable_by_piston": false
+            },
+            "minecraft:persistent": {},
+            "minecraft:physics": {
+                "has_collision": false,
+                "has_gravity": false
+            },
+            "minecraft:conditional_bandwidth_optimization": {
+                "conditional_values": [],
+                "default_values": {}
+            }
+        }
+    }
+}

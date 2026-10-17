@@ -1,0 +1,50 @@
+{
+    "format_version": "1.8.0",
+    "animations": {
+        "animation.ponder.text_line.place": {
+            "loop": true,
+            "bones": {
+                "root": {
+                    "rotation": [
+                        "-q.body_x_rotation",
+                        "-q.body_y_rotation",
+                        0
+                    ]
+                },
+                "yaw": {
+                    "rotation": [
+                        0,
+                        "q.property('ponder:yaw')",
+                        0
+                    ]
+                },
+                "pitch": {
+                    "rotation": [
+                        "q.property('ponder:pitch')",
+                        0,
+                        0
+                    ]
+                },
+                "unit": {
+                    "scale": [
+                        "-q.property('ponder:pixel') * 16",
+                        "q.property('ponder:pixel') * 16",
+                        "q.property('ponder:pixel') * 16"
+                    ]
+                },
+                "line": {
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "scale": [
+                        "q.property('ponder:width') * q.property('ponder:grow')",
+                        2,
+                        1
+                    ]
+                }
+            }
+        }
+    }
+}

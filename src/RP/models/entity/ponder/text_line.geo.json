@@ -1,0 +1,101 @@
+{
+    "format_version": "1.16.0",
+    "minecraft:geometry": [
+        {
+            "description": {
+                "identifier": "geometry.ponder.text_line",
+                "texture_width": 72,
+                "texture_height": 2,
+                "visible_bounds_width": 16,
+                "visible_bounds_height": 16,
+                "visible_bounds_offset": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "bones": [
+                {
+                    "name": "root",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "yaw",
+                    "parent": "root",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "pitch",
+                    "parent": "yaw",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "unit",
+                    "parent": "pitch",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "line",
+                    "parent": "unit",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                0,
+                                -1,
+                                0
+                            ],
+                            "size": [
+                                1,
+                                1,
+                                0
+                            ],
+                            "uv": {
+                                "north": {
+                                    "uv": [
+                                        0,
+                                        0
+                                    ],
+                                    "uv_size": [
+                                        1,
+                                        2
+                                    ]
+                                },
+                                "south": {
+                                    "uv": [
+                                        0,
+                                        0
+                                    ],
+                                    "uv_size": [
+                                        1,
+                                        2
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

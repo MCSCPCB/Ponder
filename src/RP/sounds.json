@@ -70,6 +70,27 @@
           "hurt": "ponder.silent",
           "death": "ponder.silent"
         }
+      },
+      "ponder:text_window": {
+        "volume": 0,
+        "events": {
+          "hurt": "ponder.silent",
+          "death": "ponder.silent"
+        }
+      },
+      "ponder:skybox": {
+        "volume": 0,
+        "events": {
+          "hurt": "ponder.silent",
+          "death": "ponder.silent"
+        }
+      },
+      "ponder:text_line": {
+        "volume": 0,
+        "events": {
+          "hurt": "ponder.silent",
+          "death": "ponder.silent"
+        }
       }
     }
   }

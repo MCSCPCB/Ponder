@@ -1,0 +1,12 @@
+{
+  "materials": {
+    "version": "1.0.0",
+    "ponder_text_window:entity_emissive_alpha": {
+      "depthFunc": "Always"
+    },
+    "ponder_skybox:entity": {
+      "-defines": ["FANCY"],
+      "+states": ["DisableCulling"]
+    }
+  }
+}

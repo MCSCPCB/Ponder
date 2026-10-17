@@ -1,9 +1,10 @@
 import { BlockPermutation, BlockVolume, StructureSaveMode, world } from "@minecraft/server";
 import {
-  BACKDROP_BLOCK, CLOUD_BAND, JOURNAL_KEY, LIGHT_BLOCK, LIMITS, STAGE_BASE, STAGE_MAX_COORD,
+  BACKDROP_BLOCK, CLOUD_BAND, JOURNAL_KEY, LIGHT_BLOCK, LIMITS, SKYBOX_ENTITY, STAGE_BASE, STAGE_MAX_COORD,
 } from "../../enums/PonderConfig.js";
 import { add, distance, expand, overlaps } from "../VecHelper.js";
 import { assertLive, job, safeRemove } from "./StageJobs.js";
+import { markOwned } from "./StageOwnership.js";
 
 /** Slabs keep individual native volume operations below 4096 blocks. */
 export function* slabs(bounds, step = 16) {
@@ -21,6 +22,8 @@ const SNAPSHOT_PREFIX = "ponder:snap_";
 // Structures are saved at most 64 blocks tall, inside the native structure size limit.
 const SNAPSHOT_STEP = 64;
 const GRID = 8, SPACING = 192;
+// How far the skybox stands outside the shell's outer faces.
+const SKYBOX_GAP = 0.01;
 // World content has been replaced in these phases, so release must put the snapshot back.
 const BUILT = ["building", "ready", "cleaning"];
 
@@ -218,6 +221,11 @@ export class StageAllocator {
         }
       }
     })());
+    // Just outside the shell's outer faces, so once the blocks show they hide it.
+    const skybox = markOwned(dimension.spawnEntity(SKYBOX_ENTITY, {
+      x: (b.from.x + b.to.x + 1) / 2, y: b.from.y - SKYBOX_GAP, z: (b.from.z + b.to.z + 1) / 2,
+    }), lease);
+    for (const k of ["x", "y", "z"]) skybox.setProperty(`ponder:size_${k}`, b.to[k] - b.from[k] + 1 + 2 * SKYBOX_GAP);
   }
   async release(lease) {
     if (!lease) return;

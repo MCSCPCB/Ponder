@@ -1,6 +1,6 @@
 import { EasingType, system, world } from "@minecraft/server";
 import { FormCancelationReason, uiManager } from "@minecraft/server-ui";
-import { LIMITS, SESSION_TAG } from "../../enums/PonderConfig.js";
+import { LIMITS, SESSION_TAG, TOOL_ENTITIES } from "../../enums/PonderConfig.js";
 import { getSceneForItem } from "../registration/PonderSceneRegistry.js";
 import { raw, translate, ui } from "../registration/PonderLocalization.js";
 import { add, inside, orbit } from "../VecHelper.js";
@@ -11,6 +11,7 @@ import { PonderLevelRenderer } from "../level/PonderLevelRenderer.js";
 import { capturePlayer, restorePlayer } from "./PonderPlayerState.js";
 import { SessionGate } from "./SessionGate.js";
 import { createStageForm } from "./PonderForm.js";
+import { TextWindowElement } from "../element/TextWindowElement.js";
 
 /** @type {Map<string, any>} */
 const sessions = new Map();
@@ -69,6 +70,8 @@ export function closeSession(session, reason = "closed") {
   session.closed = true;
   session.formEpoch++;
   session.animationToken++;
+  // The TextPrimitive is not an entity, so releasing the stage would not remove it.
+  session.text?.remove();
   const drained = session.gate.close();
   if (session.formPending && session.player.isValid) uiManager.closeAllForms(session.player);
   restoreSafely(session.player);
@@ -94,6 +97,13 @@ function fail(session, error) {
   if (session.closed) return;
   console.error(`[Ponder] Session ${session.player.id}: ${error?.stack ?? error}`);
   void closeSession(session, "error");
+}
+
+/** Replaces the text window with the one for this stage. */
+function showText(session, stageIndex) {
+  session.text?.remove();
+  session.text = new TextWindowElement(session, session.scene.stages[stageIndex]);
+  session.text.show();
 }
 
 /** Queues a stage change. A newer change or a close stops the running one at its next write. */
@@ -154,7 +164,10 @@ async function runForms(session) {
     const stageChanged = nextStageIndex !== stageIndex;
     stageIndex = nextStageIndex;
     formState = createStageForm(scene, stageIndex, animateProgressMode, false);
-    if (stageChanged) beginTransition(session, stageIndex);
+    if (stageChanged) {
+      beginTransition(session, stageIndex);
+      showText(session, stageIndex);
+    }
   }
 }
 
@@ -190,6 +203,7 @@ async function start(player, scene) {
     actionBar(player, "");
     capturePlayer(player);
     applyCamera(session, true);
+    showText(session, 0);
     await runForms(session);
   } catch (error) {
     system.clearRun(loading);
@@ -216,6 +230,11 @@ function tick() {
   }
 }
 export function installPonder() {
+  // Tool entities are invulnerable: damage_sensor stops ordinary damage, this also stops /kill
+  // (selfDestruct). Only our own entity.remove() takes them away.
+  world.beforeEvents.entityHurt.subscribe(event => {
+    if (TOOL_ENTITIES.has(event.hurtEntity.typeId)) event.cancel = true;
+  });
   world.afterEvents.entityHurt.subscribe(event => {
     if (event.damage > 0) void closePlayer(event.hurtEntity.id, "hurt");
   });

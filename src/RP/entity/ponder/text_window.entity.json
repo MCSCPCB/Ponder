@@ -1,0 +1,29 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "ponder:text_window",
+            "materials": {
+                "default": "ponder_text_window"
+            },
+            "textures": {
+                "default": "textures/special/ponder/text_window"
+            },
+            "geometry": {
+                "default": "geometry.ponder.text_window"
+            },
+            "animations": {
+                "place": "animation.ponder.text_window.place"
+            },
+            "scripts": {
+                "animate": [
+                    "place"
+                ],
+                "should_update_bones_and_effects_offscreen": true
+            },
+            "render_controllers": [
+                "controller.render.ponder.text_window"
+            ]
+        }
+    }
+}
