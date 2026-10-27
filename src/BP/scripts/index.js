@@ -1,26 +1,22 @@
 import { world } from "@minecraft/server";
-import { ActionFormData } from "@minecraft/server-ui";
-import { handlePonderItemUse } from "./ponder/runtime.js";
+import { CustomForm } from "@minecraft/server-ui";
 
-function showVanillaFormTest(player) {
-  const form = new ActionFormData()
-    .title("Vanilla Form Test")
-    .body("This is a normal ActionFormData opened by using an iron ingot.")
-    .button("Button 1")
-    .button("Button 2");
+// Items with ponder scenes. The scenes themselves live in the resource pack
+// (hbui/ponder/content), which draws the whole Ponder screen in Ore UI.
+const PONDER_ITEMS = new Set(["minecraft:redstone_lamp"]);
 
-  void form.show(player);
-}
+// The resource pack finds this marker in the form, hides the form and draws Ponder over it.
+// ";" ends it, since Ore UI's text runs straight into whatever is drawn next.
+const marker = (itemId) => `ponder:${itemId};`;
+// Ponder's Close presses this button when it cannot press the form's own close button.
+const CLOSE_LABEL = "ponder:close;";
 
 world.afterEvents.itemUse.subscribe((event) => {
-  if (event.source?.typeId !== "minecraft:player") {
-    return;
-  }
+  const player = event.source;
+  const itemId = event.itemStack?.typeId;
+  if (player?.typeId !== "minecraft:player" || !PONDER_ITEMS.has(itemId)) return;
 
-  if (event.itemStack?.typeId === "minecraft:iron_ingot") {
-    showVanillaFormTest(event.source);
-    return;
-  }
-
-  handlePonderItemUse(event);
+  const form = new CustomForm(player, marker(itemId));
+  form.label(marker(itemId)).button(CLOSE_LABEL, () => form.close()).closeButton();
+  void form.show();
 });

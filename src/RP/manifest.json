@@ -2,7 +2,7 @@
   "format_version": 2,
   "header": {
     "name": "Ponder Demo Resources",
-    "description": "Minimal HUD overlay for a Ponder-style structure demo.",
+    "description": "Ponder drawn in Ore UI (hbui/ponder).",
     "min_engine_version": [1, 21, 0],
     "uuid": "73ea98eb-f333-4c8f-989c-e8936d1b4e35",
     "version": [1, 0, 0]
