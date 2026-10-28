@@ -6,6 +6,10 @@ world.afterEvents.worldLoad.subscribe(() => {
   system.sendScriptEvent("ponder:register", JSON.stringify({
     modId: "redstone_lamp",
     script: "ponder_addons/redstone_lamp/plugin.js",
-    items: ["minecraft:redstone_lamp"],
+    items: [
+      "minecraft:redstone_lamp", "minecraft:piston", "minecraft:sticky_piston", "minecraft:lever",
+      "minecraft:stone_button", "minecraft:wooden_button", "minecraft:repeater", "minecraft:comparator",
+      "minecraft:hopper",
+    ],
   }));
 });
