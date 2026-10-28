@@ -74,11 +74,13 @@
       });
       if (e.selectedBlock) scene.selection = { m, p: e.selectedBlock };
     });
+    P.particleItems(scene, pt).forEach(p => items.push(p));
     items.sort((a, b) => a.depth - b.depth);
     // About half a GUI pixel of overlap between neighbouring faces at 30 px per block.
     const blockPx = 30 * scene.scaleFactor, grow = 0.6 / blockPx, size = Math.max(16, Math.round(blockPx * P.view.cssPerGui));
     const breaking = scene.world.breaking;
     items.forEach(it => {
+      if (it.draw) { it.draw(d); return; }
       // renderBreakingTexture: destroy_stage_<progress> over the block's faces.
       const stage = breaking.get(P.blockKey(it.b.p[0], it.b.p[1], it.b.p[2]));
       it.b.faces.forEach(f => {

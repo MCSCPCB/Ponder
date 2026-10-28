@@ -77,6 +77,8 @@
   P.withAlpha = (c, a) => [c[0], c[1], c[2], a];
   P.mix = (a, b, w) => [0, 1, 2, 3].map(i => P.int(a[i] + (b[i] - a[i]) * w));
   P.css = c => `rgba(${c[0]},${c[1]},${c[2]},${(c[3] / 255).toFixed(3)})`;
+  // Color.asVectorF: an rgb int as 0..1 channels.
+  P.rgb = argb => [((argb >>> 16) & 255) / 255, ((argb >>> 8) & 255) / 255, (argb & 255) / 255];
   const couple = (a, b) => [P.color(a, true), P.color(b, true)];
   P.C = {
     TEXT: P.color(0xffeeeeee, true),

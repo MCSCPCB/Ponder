@@ -37,6 +37,7 @@
       this.blocks = new Map();
       this.backup = null;
       this.breaking = new Map(); // blockBreakingProgressions: position key -> destroy stage 0..8
+      this.particles = new P.PonderWorldParticles(this);
     }
     setBlock(x, y, z, block) {
       if (block == null || block === "minecraft:air") this.blocks.delete(key(x, y, z));
@@ -49,7 +50,16 @@
       selection.keys.forEach(k => { if (this.backup.has(k)) this.blocks.set(k, this.backup.get(k)); });
     }
     createBackup() { this.backup = new Map(this.blocks); }
-    restore() { this.blocks = new Map(this.backup); this.breaking.clear(); }
+    restore() { this.blocks = new Map(this.backup); this.breaking.clear(); this.particles.clearEffects(); }
+    addParticle(data, x, y, z, mx, my, mz) { this.particles.addParticle(data.make(this, x, y, z, mx, my, mz)); }
+    // Level.addBlockDestroyEffects: block-texture particles across the block's shape (a full cube here).
+    addBlockDestroyEffects(pos, block) {
+      if (!block) return;
+      for (let l = 0; l < 4; l++) for (let i1 = 0; i1 < 4; i1++) for (let j1 = 0; j1 < 4; j1++) {
+        const d4 = (l + 0.5) / 4, d5 = (i1 + 0.5) / 4, d6 = (j1 + 0.5) / 4;
+        this.addParticle(P.blockParticle(block), pos[0] + d4, pos[1] + d5, pos[2] + d6, d4 - 0.5, d5 - 0.5, d6 - 0.5);
+      }
+    }
     // setBlockBreakingProgress: 0 clears it, otherwise the stage is damage - 1.
     setBlockBreakingProgress(x, y, z, damage) {
       if (damage === 0) this.breaking.delete(key(x, y, z));

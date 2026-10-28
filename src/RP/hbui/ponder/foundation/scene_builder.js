@@ -82,6 +82,7 @@
       this.world = new WorldInstructions(this);
       this.overlay = new OverlayInstructions(this);
       this.special = new SpecialInstructions(this);
+      this.effects = new EffectInstructions(this);
     }
     addInstruction(i) { this.scene.schedule.push(typeof i === "function" ? new I.Simple(i) : i); }
     // PonderLocalization.getSpecific: <namespace>.ponder.<scene>.header, text_1, text_2...
@@ -187,6 +188,18 @@
   }
   const at = pos => S.box(pos[0], pos[1], pos[2], pos[0], pos[1], pos[2]);
   const redraw = scene => scene.forEach(P.WorldSectionElement, e => e.queueRedraw());
+
+  class EffectInstructions {
+    constructor(b) { this.b = b; }
+    emitParticles(location, emitter, amountPerCycle, cycles) { this.b.addInstruction(new I.EmitParticles(location, emitter, amountPerCycle, cycles)); }
+    simpleParticleEmitter(data, motion) { return (w, x, y, z) => w.addParticle(data, x, y, z, motion[0], motion[1], motion[2]); }
+    particleEmitterWithinBlockSpace(data, motion) { return (w, x, y, z) => w.addParticle(data, Math.floor(x) + Math.random(), Math.floor(y) + Math.random(), Math.floor(z) + Math.random(), motion[0], motion[1], motion[2]); }
+    indicateRedstone(pos) { this.createRedstoneParticles(pos, 0xff0000, 10); }
+    indicateSuccess(pos) { this.createRedstoneParticles(pos, 0x80ffaa, 10); }
+    createRedstoneParticles(pos, color, amount) {
+      this.emitParticles(util.vector.centerOf(pos[0], pos[1], pos[2]), this.particleEmitterWithinBlockSpace(P.dust(color, 1), [0, 0, 0]), amount, 2);
+    }
+  }
 
   class SpecialInstructions {
     constructor(b) { this.b = b; }

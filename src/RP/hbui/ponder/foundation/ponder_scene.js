@@ -56,6 +56,7 @@
       const t = this.chasingPoi;
       this.pointOfInterest = this.pointOfInterest.map((v, i) => P.lerp(0.25, v, t[i]));
       this.outliner.tick();
+      this.world.particles.tick();
       this.transform.tick();
       this.elements.slice().forEach(e => e.tick(this));
       if (this.currentTime < this.totalTime) this.currentTime++;
@@ -266,6 +267,16 @@
   AnimateElement.rotateSection = (link, rotation, ticks) =>
     new AnimateElement(link, rotation, ticks, (e, v) => e.setAnimatedRotation(v, ticks === 0), e => e.animatedRotation);
 
+  // EmitParticlesInstruction: `runsPerTick` particles per tick, with the fraction as a chance of one more.
+  class EmitParticles extends Ticking {
+    constructor(anchor, emitter, runsPerTick, ticks) { super(false, ticks); this.anchor = anchor; this.emitter = emitter; this.runsPerTick = runsPerTick; }
+    tick(scene) {
+      super.tick(scene);
+      let runs = P.int(this.runsPerTick);
+      if (Math.random() < this.runsPerTick - runs) runs++;
+      for (let i = 0; i < runs; i++) this.emitter(scene.world, this.anchor[0], this.anchor[1], this.anchor[2]);
+    }
+  }
   P.Instructions = { Instruction, Simple, Ticking, Delay, Keyframe, MarkAsFinished, RotateScene, FadeInOut, Text,
-    FadeIntoScene, DisplayWorldSection, HideAll, ReplaceBlocks, FadeOutOfScene, AnimateElement };
+    FadeIntoScene, DisplayWorldSection, HideAll, ReplaceBlocks, FadeOutOfScene, AnimateElement, EmitParticles };
 })();

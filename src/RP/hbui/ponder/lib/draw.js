@@ -141,12 +141,12 @@
       if (n.text !== str) { n.el.textContent = str; n.text = str; }
     }
     // A u,v region of a texture (texW x texH) drawn into x, y, w, h.
-    sprite(src, u, v, uw, vh, texW, texH, x, y, w, h, alpha) {
+    sprite(src, u, v, uw, vh, texW, texH, x, y, w, h, alpha, filter) {
       const sx = w / uw, sy = h / vh;
       const n = this.box(x, y, w, h, `overflow:hidden;opacity:${(alpha === undefined ? 1 : alpha).toFixed(3)}`, "image");
       if (!n.img) { n.img = document.createElement("img"); n.el.appendChild(n.img); }
       if (n.src !== src) { n.img.src = src; n.src = src; }
-      const css = `position:absolute;left:0;top:0;transform-origin:0 0;transform:translate(${P.px(-u * sx)},${P.px(-v * sy)});width:${P.px(texW * sx)};height:${P.px(texH * sy)};image-rendering:pixelated`;
+      const css = `position:absolute;left:0;top:0;transform-origin:0 0;transform:translate(${P.px(-u * sx)},${P.px(-v * sy)});width:${P.px(texW * sx)};height:${P.px(texH * sy)};image-rendering:pixelated${filter ? ";filter:" + filter : ""}`;
       if (n.imgCss !== css) { n.img.style.cssText = css; n.imgCss = css; }
     }
     // A texture whose corners (0,0), (1,0) and (0,1) land on the GUI points o, u, v, laid out
