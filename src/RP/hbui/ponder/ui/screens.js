@@ -44,12 +44,13 @@
     renderBackTrackCaption(d) {
       const b = this.backTrack;
       if (!b || !b.hovered) return;
-      const text = P.translate(P.screens.backStack[0] instanceof Screen ? "ui.think_back" : "ui.exit");
+      const text = P.translate(P.screens.backStack[0] instanceof Screen ? "ponder.ui.think_back" : "ponder.ui.exit");
       d.text(text, 41 - P.textWidth(text) / 2, this.height - 16, P.C.TEXT_DARKER, false);
       if (P.equal(this.arrowAnimation.getValue(), this.arrowAnimation.target)) { this.arrowAnimation.setValue(1); this.arrowAnimation.setValue(1); }
     }
+    // AbstractWidget.mouseClicked: a mouse press plays the button sound; shortcuts do not.
     mouseClicked(mx, my) {
-      for (const w of this.widgets) if (w.isVisible() && w.isMouseOver(mx, my)) { w.click(mx, my); return true; }
+      for (const w of this.widgets) if (w.isVisible() && w.isMouseOver(mx, my)) { P.playSound("random.click"); w.click(mx, my); return true; }
       return false;
     }
     keyPressed(key) {

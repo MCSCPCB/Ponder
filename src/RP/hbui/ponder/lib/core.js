@@ -107,6 +107,12 @@
   // AnimationTickHolder: client ticks, counted while Ponder is open.
   P.ticks = 0;
 
+  // Plays a sound the way vanilla's Ore UI does: soundCommandGroup.play(name, volume, pitch).
+  P.playSound = function (name, volume, pitch) {
+    const group = window.__commands__ && window.__commands__.soundCommandGroup;
+    if (group && group.play) return group.play.callable.call(group.play, name, volume == null ? 1 : volume, pitch == null ? 1 : pitch);
+  };
+
   // On-screen log for testing without a console. Removed with P.DEBUG = false.
   const lines = [];
   P.log = function () {

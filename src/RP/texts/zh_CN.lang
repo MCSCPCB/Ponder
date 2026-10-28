@@ -1,0 +1,32 @@
+ponder.ui.hold_to_ponder=按住 [%1$s] 开始思索
+ponder.ui.subject=情景主题
+ponder.ui.pondering=思索……
+ponder.ui.pondering_tag=思索……
+ponder.ui.identify_mode=显示方块名称已启用~LINEBREAK~按 [%1$s] 继续思索
+ponder.ui.associated=关联词条
+ponder.ui.close=思索结束
+ponder.ui.identify=显示方块名称
+ponder.ui.next=下一个情景
+ponder.ui.next_up=接下来：
+ponder.ui.previous=上一个情景
+ponder.ui.replay=重放
+ponder.ui.think_back=回想
+ponder.ui.slow_text=舒适阅读
+ponder.ui.exit=退出
+ponder.ui.welcome=欢迎来到思索界面
+ponder.ui.categories=%1$s中包含的条目
+ponder.ui.index_description=点击一个图标来查看相关的物品和方块
+ponder.ui.index_title=思索索引
+ponder.ponder.shared.sneak_and=潜行 +
+ponder.ponder.shared.ctrl_and=Ctrl +
+key.ponder.ponder=思索
+
+ponder.ponder.tag.redstone=红石
+ponder.ponder.tag.redstone.description=帮助你进行红石工程的元件
+
+ponder.ponder.redstone_lamp.header=红石灯
+ponder.ponder.redstone_lamp.text_1=红石灯默认不会自己发亮，只有收到红石信号才会立刻点亮。
+ponder.ponder.redstone_lamp.text_2=毗邻的开启电源或毗邻的充能方块都能直接点亮红石灯。
+ponder.ponder.redstone_lamp.text_3=指向红石灯的红石粉、中继器、比较器也能点亮它，包括红石灯上方的红石粉。
+ponder.ponder.redstone_lamp_delay.header=红石灯的熄灭延迟
+ponder.ponder.redstone_lamp_delay.text_1=红石灯失去信号后要过 4 游戏刻才会熄灭，而且它本身是红石导体，被充能时也能继续带动相邻元件。

@@ -90,7 +90,7 @@
     listen();
     P.bridge.start();
     requestAnimationFrame(frame);
-    P.log("ponder ready", P.language());
+    P.log("ponder ready");
   }
   if (document.body) start();
   else document.addEventListener("DOMContentLoaded", start);

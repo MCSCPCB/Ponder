@@ -6,9 +6,19 @@
   const scenesByItem = (P.scenesByItem = new Map());
   const tags = (P.tags = new Map());
 
-  // PonderTag: { id, title, description, icon (item id), mainItem, items: [] }.
+  // Java's ResourceLocation namespace of our scenes and tags; lang keys are <namespace>.ponder.*.
+  const NAMESPACE = "ponder";
+
+  // PonderTag: { id, title, description, icon (item id), mainItem, items: [] }. title and
+  // description are the English defaults, shown through <namespace>.ponder.tag.<id>[.description].
   P.registerTag = function (tag) {
-    tags.set(tag.id, Object.assign({ items: [], mainItem: null }, tag));
+    const key = NAMESPACE + ".ponder.tag." + tag.id, title = tag.title, description = tag.description;
+    const entry = Object.assign({ items: [], mainItem: null }, tag);
+    Object.defineProperties(entry, {
+      title: { get: () => P.localize(key, title) },
+      description: { get: () => P.localize(key + ".description", description) },
+    });
+    tags.set(tag.id, entry);
   };
   P.addToTag = function (tagId, items) { items.forEach(i => tags.get(tagId).items.push(i)); };
 
@@ -53,6 +63,7 @@
   class SceneBuilder {
     constructor(scene) {
       this.scene = scene;
+      this.textIndex = 0;
       const size = scene.world.size;
       // Selections that need the world's size.
       util.select.everywhere = () => S.box(0, 0, 0, size.x - 1, size.y - 1, size.z - 1);
@@ -64,7 +75,9 @@
       this.overlay = new OverlayInstructions(this);
     }
     addInstruction(i) { this.scene.schedule.push(typeof i === "function" ? new I.Simple(i) : i); }
-    title(id, title) { this.scene.id = id; this.scene.title = P.localized(title); }
+    // PonderLocalization.getSpecific: <namespace>.ponder.<scene>.header, text_1, text_2...
+    title(id, title) { this.scene.id = id; this.scene.title = P.localize(this.specificKey("header"), title); }
+    specificKey(k) { return NAMESPACE + ".ponder." + this.scene.id + "." + k; }
     configureBasePlate(xOffset, zOffset, size) { const s = this.scene; s.basePlateOffsetX = xOffset; s.basePlateOffsetZ = zOffset; s.basePlateSize = size; }
     scaleSceneView(factor) { this.scene.scaleFactor = factor; }
     removeShadow() { this.scene.hidePlatformShadow = true; }
@@ -105,7 +118,7 @@
       const element = new P.TextWindowElement();
       this.b.addInstruction(new I.Text(element, duration));
       const b = this.b, builder = {
-        text: t => { element.textGetter = () => P.localized(t); return builder; },
+        text: t => { const key = b.specificKey("text_" + ++b.textIndex); element.textGetter = () => P.localize(key, t); return builder; },
         pointAt: v => { element.vec = v; return builder; },
         independent: y => { element.y = y || 0; return builder; },
         colored: c => { element.palette = c; return builder; },

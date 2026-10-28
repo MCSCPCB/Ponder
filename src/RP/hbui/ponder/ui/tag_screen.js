@@ -27,10 +27,6 @@
     return l;
   }
 
-  // Item names for tooltips; content may register them, else the id is shown readably.
-  P.itemNames = {};
-  P.itemName = id => P.localized(P.itemNames[id]) || id.replace(/^.*:/, "").split("_").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
-
   class PonderTagScreen extends P.Screen {
     constructor(tag) { super(); this.tag = tag; this.hoveredItem = null; }
     itemsY() { return P.int(0.15 * this.height + 85); }
@@ -71,12 +67,12 @@
       const ox = W / 2 - 120, oy = H * 0.15 - 40, x = 59, y = 31, streakH = 35;
       P.streak(d, 0, ox + x - 4, oy + y - 12 + P.int(streakH / 2), streakH, 240);
       P.boxElement(d, ox + 21, oy + 21, 30, 30, P.C.BACKGROUND_FLAT, P.C.IDLE);
-      d.text(P.translate("ui.pondering_tag"), ox + x, oy + y - 6, P.C.TEXT_DARKER, false);
-      d.text(P.localized(this.tag.title), ox + x, oy + y + 8, P.C.TEXT, false);
+      d.text(P.translate("ponder.ui.pondering_tag"), ox + x, oy + y - 6, P.C.TEXT_DARKER, false);
+      d.text(this.tag.title, ox + x, oy + y + 8, P.C.TEXT, false);
       P.renderTag(d, this.tag, ox + 23, oy + 23, 1, 1.66);
       // Description
       const w = P.int(W * 0.45), dx = P.int((W - w) / 2), dy = this.itemsY() - 10 + Math.max(this.itemArea.h, 48);
-      const desc = P.localized(this.tag.description), lines = P.splitLines(desc, w);
+      const desc = this.tag.description, lines = P.splitLines(desc, w);
       P.boxElement(d, dx - 3, dy - 3, w + 6, lines.length * 9 + 6, P.C.BACKGROUND_FLAT, P.C.IDLE);
       lines.forEach((l, i) => d.text(l, dx, dy + 9 * i, P.C.TEXT, false));
       this.widgets.forEach(b => b.render(d, mx, my, pt));
@@ -86,7 +82,7 @@
     }
     renderItems(d) {
       if (!this.items.length) return;
-      const x = P.int(this.width * 0.5), y = this.itemsY(), a = this.itemArea, title = P.translate("ui.associated"), sw = P.textWidth(title);
+      const x = P.int(this.width * 0.5), y = this.itemsY(), a = this.itemArea, title = P.translate("ponder.ui.associated"), sw = P.textWidth(title);
       // The streaks are drawn last in Java but 200 behind the label (z), so first here.
       P.streak(d, 0, x, y, a.h + 10, P.int(a.w / 2) + 75);
       P.streak(d, 180, x, y, a.h + 10, P.int(a.w / 2) + 75);
