@@ -8,45 +8,41 @@
   const FONT_SIZE = 8, LINE_HEIGHT = 9;
   P.LINE_HEIGHT = LINE_HEIGHT;
 
-  // Font.width: measured once per character at the size text is drawn, since the game snaps
-  // glyph advances to whole screen pixels there.
-  const widths = new Map();
-  let probe = null, probeScale = 0;
+  // Font.width: each character's advance, from its own span at 10x so sub-pixel advances add up
+  // exactly. Gameface lays out once per frame and getBoundingClientRect returns that layout, so
+  // a span's text never changes and it is read once laid out; until then Java's advances stand in.
+  const widths = new Map(), spans = new Map();
+  let probe = null;
   function measure(ch) {
-    if (!probe) {
-      probe = document.createElement("span");
-      document.body.appendChild(probe);
+    let s = spans.get(ch);
+    if (!s) {
+      if (!probe) {
+        probe = document.createElement("div");
+        probe.style.cssText = `position:absolute;left:-10000px;top:0;width:10000px;visibility:hidden;font-family:${P.FONT};font-size:${FONT_SIZE * 10}px`;
+        document.body.appendChild(probe);
+      }
+      s = document.createElement("span");
+      s.style.cssText = "position:absolute;left:0;top:0;white-space:pre";
+      s.textContent = ch;
+      probe.appendChild(s);
+      spans.set(ch, s);
     }
-    if (probeScale !== P.view.cssPerGui) {
-      probeScale = P.view.cssPerGui;
-      probe.style.cssText = `position:absolute;left:-10000px;top:0;visibility:hidden;white-space:pre;font-family:${P.FONT};font-size:${P.px(FONT_SIZE)}`;
-      widths.clear();
-    }
-    probe.textContent = ch;
-    return probe.getBoundingClientRect().width / probeScale;
+    return s.getBoundingClientRect().width / 10;
   }
   P.fontReady = function () {
     return Math.abs(measure("A") - 6) < 0.5;
   };
   P.charWidth = function (ch) {
-    if (probeScale !== P.view.cssPerGui) measure("A");
     let w = widths.get(ch);
-    if (w === undefined) {
-      w = measure(ch);
-      // Before the font has loaded the fallback measures wrong; do not keep that.
-      if (P.fontReady()) widths.set(ch, w);
-    }
-    return w;
+    if (w !== undefined) return w;
+    w = measure(ch);
+    // Not laid out yet, or still in the fallback font before Minecraft Seven has loaded.
+    if (w > 0 && P.fontReady()) { widths.set(ch, w); return w; }
+    return ch === " " ? 4 : ch >= "⺀" ? 9 : 6;
   };
-  // A whole string is measured as drawn: the sum of its characters can come out short (CJK
-  // falls back to Noto Sans, whose spacing differs inside a run), leaving text past its box.
   P.textWidth = function (text) {
-    if (probeScale !== P.view.cssPerGui) measure("A");
-    let w = widths.get(text);
-    if (w === undefined) {
-      w = measure(text);
-      if (P.fontReady()) widths.set(text, w);
-    }
+    let w = 0;
+    for (const ch of text) w += P.charWidth(ch);
     return w;
   };
   // StringSplitter.splitLines: breaks at the last space that fits, or anywhere for text
