@@ -60,6 +60,7 @@
         if (this.onGround && this.yd < 0) this.yd *= -0.5;
       }
       this.age++;
+      if (this.age >= 6000) this.discard();
     }
   }
 
