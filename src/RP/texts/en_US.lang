@@ -22,15 +22,5 @@ ponder.ponder.shared.ctrl_and=Ctrl +
 key.ponder.ponder=Ponder
 key.categories.ponder=Ponder
 
-ponder.ponder.tag.redstone=Redstone
-ponder.ponder.tag.redstone.description=Components which help with redstone engineering
-
-ponder.ponder.redstone_lamp.header=Redstone Lamp
-ponder.ponder.redstone_lamp.text_1=Redstone Lamps stay dark on their own and light up as soon as they receive a redstone signal
-ponder.ponder.redstone_lamp.text_2=An active power source or a powered block next to the lamp lights it directly
-ponder.ponder.redstone_lamp.text_3=Redstone Dust, Repeaters and Comparators pointing into the lamp light it too, including dust on top of it
-ponder.ponder.redstone_lamp_delay.header=Redstone Lamp Timing
-ponder.ponder.redstone_lamp_delay.text_1=Once the signal is gone, the lamp takes 4 game ticks to turn off. It conducts redstone, so a powered lamp can drive adjacent components
-
 ponder.command.ponder=Open Ponder
 ponder.command.scene=A scene id, or "index"

@@ -6,7 +6,7 @@ import { CustomForm } from "@minecraft/server-ui";
 //     modId: "my_mod", script: "ponder_addons/my_mod/plugin.js", items: ["my_mod:widget"] }));
 // `script` is the plugin, a path under hbui/ in the author's resource pack; `items` are the items
 // that open Ponder. Our own scenes are built into the resource pack, so "ponder" has no script.
-const addons = new Map([["ponder", { script: null, items: ["minecraft:redstone_lamp"] }]]);
+const addons = new Map([["ponder", { script: null, items: ["minecraft:spyglass"] }]]);
 
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id !== "ponder:register") return;
