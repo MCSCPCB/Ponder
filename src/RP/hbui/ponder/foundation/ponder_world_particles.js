@@ -108,7 +108,9 @@
     sprite() { return { src: this.texture, u: this.uo * 4, v: this.vo * 4, size: 4, texSize: 16 }; }
   }
 
-  // ParticleOptions: what world.addParticle makes.
+  // ParticleOptions: what world.addParticle makes. A plugin's own particle subclasses P.Particle
+  // with sprite() (and getQuadSize(pt) if its size changes) and is wrapped the same way:
+  //   { make: (world, x, y, z, xSpeed, ySpeed, zSpeed) => new MyParticle(world, x, y, z, ...) }
   P.dust = (color, scale) => ({ make: (w, x, y, z, mx, my, mz) => new DustParticle(w, x, y, z, mx, my, mz, P.rgb(color), scale) });
   P.blockParticle = block => ({ make: (w, x, y, z, mx, my, mz) => new TerrainParticle(w, x, y, z, mx, my, mz, block) });
 
@@ -126,6 +128,9 @@
     clearEffects() { this.particles = []; }
   }
   P.PonderWorldParticles = PonderWorldParticles;
+  P.Particle = Particle;
+  P.DustParticle = DustParticle;
+  P.TerrainParticle = TerrainParticle;
 
   // Screen-facing squares in the depth order of the scene's blocks.
   P.particleItems = function (scene, pt) {

@@ -78,9 +78,22 @@
     return faces;
   }
 
+  // Models a plugin supplies for its own blocks:
+  //   P.registerBlockModel("my_mod:widget", block => ({ shape: "cube", opaque: true, faces, tint: null }))
+  // faces maps up/down/north/south/west/east to texture URLs (a pack's own files sit under
+  // /hbui/ponder_addons/<modId>/). The function runs once per distinct block and states.
+  const custom = new Map();
+  P.registerBlockModel = (id, model) => { custom.set(id, model); };
+
   const cache = new Map();
   P.blockId = block => (typeof block === "string" ? block : block.id);
   P.blockModel = function (block) {
+    const make = custom.get(P.blockId(block));
+    if (make) {
+      const key = JSON.stringify(block);
+      if (!cache.has(key)) cache.set(key, Object.assign({ id: P.blockId(block), tint: null }, make(block)));
+      return cache.get(key);
+    }
     const id = P.blockId(block), power = P.blockStates(block).redstone_signal || 0, key = id + "#" + power;
     let model = cache.get(key);
     if (model) return model;

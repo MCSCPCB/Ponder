@@ -101,7 +101,9 @@
   P.entityItems = function (scene, pt) {
     const base = scene.transform.matrix(pt), blockPx = 30 * scene.scaleFactor, out = [];
     scene.world.entityList().forEach(e => {
-      if (!(e instanceof P.ItemEntity) || !e.alive) return;
+      if (!e.alive) return;
+      // Any other entity draws itself: render(sceneMatrix, pt, blockPx) returns { depth, draw(d) } items.
+      if (!(e instanceof P.ItemEntity)) { if (e.render) e.render(base, pt, blockPx).forEach(it => out.push(it)); return; }
       const block = P.isBlockItem(e.item.id), scale = block ? 0.25 : 0.5, lift = (block ? 3 : 2) / 16;
       const pose = P.itemEntityPose(e, pt), n = P.renderedItemAmount(e.item.count);
       let m = M.translate(base, P.lerp(pt, e.xo, e.x), P.lerp(pt, e.yo, e.y) + pose.bob + 0.25 * scale, P.lerp(pt, e.zo, e.z));
@@ -141,6 +143,10 @@
     const o = M.apply(m, -0.5, 0.5, 0), u = M.apply(m, 0.5, 0.5, 0), v = M.apply(m, -0.5, -0.5, 0);
     d.texturedQuad(`geo-item://${id}?width=${size}&height=${size}`, o, u, v, null, size);
   }
+
+  // For entities that draw themselves: a block's cube or an item's icon about matrix m's origin.
+  P.drawBlockCube = drawCube;
+  P.drawItemSprite = drawFlat;
 
   // renderLast: the outline of the block identify mode points at (AABBOutline, colour 0xefefef).
   P.renderSelection = function (d, scene) {
