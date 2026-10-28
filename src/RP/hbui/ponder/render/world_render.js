@@ -75,6 +75,7 @@
       if (e.selectedBlock) scene.selection = { m, p: e.selectedBlock };
     });
     P.particleItems(scene, pt).forEach(p => items.push(p));
+    P.entityItems(scene, pt).forEach(p => items.push(p));
     items.sort((a, b) => a.depth - b.depth);
     // About half a GUI pixel of overlap between neighbouring faces at 30 px per block.
     const blockPx = 30 * scene.scaleFactor, grow = 0.6 / blockPx, size = Math.max(16, Math.round(blockPx * P.view.cssPerGui));
@@ -92,6 +93,54 @@
       });
     });
   };
+
+  // ItemEntityRenderer.render + renderMultipleFromCount (1.21.1). The ground display transforms
+  // are vanilla's: block.json translation (0, 3, 0) px, scale 0.25; item/generated.json
+  // translation (0, 2, 0) px, scale 0.5. A flat item is one sprite of 1/16 thickness; its copies
+  // step 0.09375 * scale along Z, a block's are spread by ±0.15 on all axes.
+  P.entityItems = function (scene, pt) {
+    const base = scene.transform.matrix(pt), blockPx = 30 * scene.scaleFactor, out = [];
+    scene.world.entityList().forEach(e => {
+      if (!(e instanceof P.ItemEntity) || !e.alive) return;
+      const block = P.isBlockItem(e.item.id), scale = block ? 0.25 : 0.5, lift = (block ? 3 : 2) / 16;
+      const pose = P.itemEntityPose(e, pt), n = P.renderedItemAmount(e.item.count);
+      let m = M.translate(base, P.lerp(pt, e.xo, e.x), P.lerp(pt, e.yo, e.y) + pose.bob + 0.25 * scale, P.lerp(pt, e.zo, e.z));
+      m = M.rotY(m, pose.spin);
+      if (!block) m = M.translate(m, 0, 0, -0.09375 * (n - 1) * 0.5 * scale);
+      const random = P.javaRandom(P.itemSeed(e.item.id));
+      for (let i = 0; i < n; i++) {
+        let t = m;
+        if (i > 0) {
+          if (block) t = M.translate(t, (random.nextFloat() * 2 - 1) * 0.15, (random.nextFloat() * 2 - 1) * 0.15, (random.nextFloat() * 2 - 1) * 0.15);
+          else t = M.translate(t, (random.nextFloat() * 2 - 1) * 0.15 * 0.5, (random.nextFloat() * 2 - 1) * 0.15 * 0.5, 0);
+        }
+        // The model's ground transform: translate, then scale about the model's centre.
+        t = M.scale(M.translate(t, 0, lift, 0), scale, scale, scale);
+        const centre = M.apply(t, 0, 0, 0);
+        const draw = block ? d => drawCube(d, t, e.item.id, blockPx * scale) : d => drawFlat(d, t, e.item.id, blockPx * scale);
+        out.push({ depth: centre[2], draw });
+        if (!block) m = M.translate(m, 0, 0, 0.09375 * scale);
+      }
+    });
+    return out;
+  };
+  // A block item: its block's six faces around the origin, shaded like the world's.
+  function drawCube(d, m, id, px) {
+    const model = P.blockModel(id), size = Math.max(16, Math.round(px * P.view.cssPerGui));
+    const c = M.translate(m, -0.5, -0.5, -0.5);
+    Object.keys(P.FACES).forEach(f => {
+      const face = P.FACES[f];
+      if (!facing(c, face.n)) return;
+      const q = corners(c, [0, 0, 0], face, 0);
+      d.texturedQuad(model.faces[f], q[0], q[1], q[2], filterOf(P.SHADE[f], model.tint), size);
+    });
+  }
+  // A flat item: its icon on a unit quad in the XY plane, seen from either side.
+  function drawFlat(d, m, id, px) {
+    const size = Math.max(16, Math.round(px * P.view.cssPerGui));
+    const o = M.apply(m, -0.5, 0.5, 0), u = M.apply(m, 0.5, 0.5, 0), v = M.apply(m, -0.5, -0.5, 0);
+    d.texturedQuad(`geo-item://${id}?width=${size}&height=${size}`, o, u, v, null, size);
+  }
 
   // renderLast: the outline of the block identify mode points at (AABBOutline, colour 0xefefef).
   P.renderSelection = function (d, scene) {

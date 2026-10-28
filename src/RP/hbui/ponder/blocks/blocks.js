@@ -61,6 +61,13 @@
     cache.set(key, model);
     return model;
   };
+  // Whether an item is drawn as its block (Java: a block/* parent model) rather than a flat
+  // icon (item/generated). Bedrock names block items tile.*; the non-cube ones stay flat.
+  const FLAT_BLOCK_ITEM = /torch|rail|door|pane|bars|lever|sapling|flower|ladder|vine|redstone_wire|button|carpet/;
+  P.isBlockItem = id => {
+    const name = id.replace(/^minecraft:/, "");
+    return P.hasTranslation(`tile.${name}.name`) && !FLAT_BLOCK_ITEM.test(name);
+  };
   // The item a block is picked as (getCloneItemFromBlockstate).
   P.blockItem = function (block) {
     const id = P.blockId(block);

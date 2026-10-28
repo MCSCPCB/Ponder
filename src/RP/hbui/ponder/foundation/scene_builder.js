@@ -204,6 +204,36 @@
     createRedstoneParticles(pos, color, amount) {
       this.emitParticles(util.vector.centerOf(pos[0], pos[1], pos[2]), this.particleEmitterWithinBlockSpace(P.dust(color, 1), [0, 0, 0]), amount, 2);
     }
+    // Entities. createEntity spawns one from a factory that gets the world.
+    createEntity(factory) {
+      const link = {};
+      this.b.addInstruction(scene => {
+        const entity = factory(scene.world);
+        const handle = new P.EntityElement(entity);
+        scene.addElement(handle);
+        scene.linkElement(handle, link);
+        scene.world.addFreshEntity(entity);
+      });
+      return link;
+    }
+    createItemEntity(location, motion, item) {
+      return this.createEntity(world => {
+        const entity = new P.ItemEntity(world, location[0], location[1], location[2], item);
+        entity.setDeltaMovement(motion);
+        return entity;
+      });
+    }
+    modifyEntity(link, callback) {
+      this.b.addInstruction(scene => { const e = scene.resolve(link); if (e) e.ifPresent(callback); });
+    }
+    modifyEntities(type, callback) {
+      this.b.addInstruction(scene => scene.world.entityList().forEach(e => { if (e instanceof type && e.alive) callback(e); }));
+    }
+    modifyEntitiesInside(type, area, callback) {
+      this.b.addInstruction(scene => scene.world.entityList().forEach(e => {
+        if (e instanceof type && e.alive && area.has(Math.floor(e.x), Math.floor(e.y), Math.floor(e.z))) callback(e);
+      }));
+    }
   }
 
   class SpecialInstructions {

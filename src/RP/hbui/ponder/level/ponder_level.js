@@ -38,6 +38,8 @@
       this.backup = null;
       this.breaking = new Map(); // blockBreakingProgressions: position key -> destroy stage 0..8
       this.particles = new P.PonderWorldParticles(this);
+      this.entities = [];
+      this.nextEntityId = 0;
     }
     setBlock(x, y, z, block) {
       if (block == null || block === "minecraft:air") this.blocks.delete(key(x, y, z));
@@ -50,7 +52,18 @@
       selection.keys.forEach(k => { if (this.backup.has(k)) this.blocks.set(k, this.backup.get(k)); });
     }
     createBackup() { this.backup = new Map(this.blocks); }
-    restore() { this.blocks = new Map(this.backup); this.breaking.clear(); this.particles.clearEffects(); }
+    restore() { this.blocks = new Map(this.backup); this.breaking.clear(); this.particles.clearEffects(); this.entities = []; }
+    // PonderLevel.tick: particles, then every entity; one below y -0.5 is discarded.
+    tick() {
+      this.particles.tick();
+      this.entities.forEach(e => {
+        e.tick();
+        if (e.y <= -0.5) e.discard();
+      });
+      this.entities = this.entities.filter(e => e.alive);
+    }
+    addFreshEntity(entity) { entity.id = this.nextEntityId++; this.entities.push(entity); return entity; }
+    entityList() { return this.entities; }
     addParticle(data, x, y, z, mx, my, mz) { this.particles.addParticle(data.make(this, x, y, z, mx, my, mz)); }
     // Level.addBlockDestroyEffects: block-texture particles across the block's shape (a full cube here).
     addBlockDestroyEffects(pos, block) {

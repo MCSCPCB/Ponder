@@ -75,6 +75,7 @@
     }
     return d;
   }
+  P.collide = clip;
   // DustParticleBase: sprites generic_7..generic_0 (row 0 of particles.png, 8 px each) by age.
   class DustParticle extends Particle {
     constructor(world, x, y, z, xSpeed, ySpeed, zSpeed, color, scale) {
