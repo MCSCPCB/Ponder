@@ -3,7 +3,7 @@ import { CustomForm } from "@minecraft/server-ui";
 
 // Items with ponder scenes. The scenes themselves live in the resource pack
 // (hbui/ponder/content), which draws the whole Ponder screen in Ore UI.
-const PONDER_ITEMS = new Set(["minecraft:redstone_lamp", "minecraft:spyglass"]);
+const PONDER_ITEMS = new Set(["minecraft:redstone_lamp"]);
 
 // The resource pack finds this marker in the form, hides the form and draws Ponder over it.
 // ";" ends it, since Ore UI's text runs straight into whatever is drawn next.
