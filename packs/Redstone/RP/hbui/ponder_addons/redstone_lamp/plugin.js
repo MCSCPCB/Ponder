@@ -133,7 +133,7 @@
     fill(world) {
       for (let x = 0; x < 5; x++) for (let z = 0; z < 5; z++)
         world.setBlock(x, 0, z, (x + z) % 2 === 0 ? "minecraft:snow" : "minecraft:light_gray_terracotta");
-      world.setBlock(1, 1, 1, P.block("minecraft:lever", { facing_direction: 4, open_bit: false }));
+      world.setBlock(1, 1, 1, P.block("minecraft:lever", { lever_direction: "up_north_south", open_bit: false }));
       world.setBlock(2, 1, 1, LAMP);
       world.setBlock(1, 1, 3, P.block("minecraft:stone_button", { facing_direction: 4, button_pressed_bit: false }));
       world.setBlock(2, 1, 3, LAMP);

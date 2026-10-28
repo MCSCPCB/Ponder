@@ -1,0 +1,33 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Gathering Ponder Behavior",
+    "description": "Registers the gathering Ponder scenes with Ponder.",
+    "min_engine_version": [1, 21, 0],
+    "uuid": "b2af2b5a-9e33-48b2-899f-25c88540a5e3",
+    "version": [1, 0, 0]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "39e46262-8c4d-42c6-8f72-11e3adaf3132",
+      "entry": "scripts/index.js",
+      "version": [1, 0, 0]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "75ac27d0-cc46-493b-8c61-bf4d4eeeff7f",
+      "version": [1, 0, 0]
+    },
+    {
+      "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
+      "version": [1, 0, 0]
+    },
+    {
+      "module_name": "@minecraft/server",
+      "version": "alpha"
+    }
+  ]
+}
