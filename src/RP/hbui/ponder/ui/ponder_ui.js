@@ -12,7 +12,7 @@
       this.item = item;
       this.scenes = P.compileScenes(item);
       this.tags = [];
-      P.tags.forEach(t => { if (t.items.indexOf(item) >= 0 || t.mainItem === item) this.tags.push(t); });
+      P.listedTagsByNamespace().forEach(list => list.forEach(t => { if (t.items.indexOf(item) >= 0 || t.mainItem === item) this.tags.push(t); }));
       this.index = 0;
       this.lazyIndex = P.linear().startWithValue(0);
       this.fadeIn = P.linear().startWithValue(0).chase(1, 0.1, P.Chaser.EXP);

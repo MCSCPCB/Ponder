@@ -26,7 +26,7 @@
   }
 
   P.bridge.onOpen = function (item) {
-    if (!P.scenesByItem.has(item)) { P.log("no scenes for", item); return false; }
+    if (!P.indexedItems().includes(item)) { P.log("no scenes for", item); return false; }
     P.updateView();
     P.screens.reset();
     root.style.display = "";
@@ -88,6 +88,7 @@
   function start() {
     mount();
     listen();
+    P.registerAll();
     P.loadStructures(P.structurePaths());
     P.bridge.start();
     requestAnimationFrame(frame);

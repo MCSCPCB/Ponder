@@ -1,9 +1,9 @@
 // StructureTemplate: the schematic a scene is built on, loaded like PonderScene's
-// loadSchematic from hbui/ponder/structures/<path>.mcstructure. Blocks become
+// loadSchematic from hbui/ponder_addons/<modId>/structures/<path>.mcstructure. Blocks become
 // { size: {x, y, z}, blocks: [{ pos, block: { id, states } }] }.
 (function () {
   const P = window.Ponder;
-  const BASE = "/hbui/ponder/structures/";
+  const BASE = "/hbui/";
   const templates = new Map();
 
   // block_indices[0] is the block layer, indexed z fastest, then y, then x; -1 is nothing.

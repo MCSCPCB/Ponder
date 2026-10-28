@@ -63,7 +63,7 @@
     P.breadcrumbArrow(d, W / 2 - 90, H - 51, 70, 20, 5, c1, c3);
     P.breadcrumbArrow(d, W / 2 + 90, H - 51, -70, 20, -5, c1, c3);
     // Tags
-    const highlightAll = scene.tags.indexOf("highlight_all") >= 0;
+    const highlightAll = scene.tags.indexOf("ponder:_all") >= 0;
     this.tagButtons.forEach((button, i) => {
       const tag = this.tags[i], chase = this.tagFades[i];
       chase.updateChaseTarget(button.isMouseOver(mx, my) ? 1 : 0);

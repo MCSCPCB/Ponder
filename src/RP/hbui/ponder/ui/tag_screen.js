@@ -39,7 +39,7 @@
       const cx = P.int(this.width * 0.5), cy = this.itemsY();
       const button = (id, x, y) => {
         const b = new P.PonderButton(x, y).showingItem(id);
-        if (P.scenesByItem.has(id)) b.withCallback(() => {
+        if (P.indexedItems().includes(id)) b.withCallback(() => {
           this.centerScalingOn(this.mouse[0], this.mouse[1]);
           P.screens.transitionTo(new P.PonderUI(id, tag));
         });

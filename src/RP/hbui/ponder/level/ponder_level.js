@@ -52,7 +52,11 @@
       selection.keys.forEach(k => { if (this.backup.has(k)) this.blocks.set(k, this.backup.get(k)); });
     }
     createBackup() { this.backup = new Map(this.blocks); }
-    restore() { this.blocks = new Map(this.backup); this.breaking.clear(); this.particles.clearEffects(); this.entities = []; }
+    restore() {
+      this.blocks = new Map(this.backup); this.breaking.clear(); this.particles.clearEffects(); this.entities = [];
+      // PonderLevel.restore: every plugin's onPonderLevelRestore runs after the world is rebuilt.
+      P.plugins.forEach(p => { if (p.onPonderLevelRestore) p.onPonderLevelRestore(this); });
+    }
     // PonderLevel.tick: particles, then every entity; one below y -0.5 is discarded.
     tick() {
       this.particles.tick();

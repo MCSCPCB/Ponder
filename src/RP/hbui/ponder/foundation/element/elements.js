@@ -105,7 +105,7 @@
       const dir = this.direction;
       const xFade = (dir === "RIGHT" ? -1 : dir === "LEFT" ? 1 : 0) * 10 * (1 - fade);
       const yFade = (dir === "DOWN" ? -1 : dir === "UP" ? 1 : 0) * 10 * (1 - fade);
-      const text = this.key ? P.translate("ponder.ponder.shared." + this.key) : "";
+      const text = this.key ? P.sharedText("ponder", this.key) : "";
       if (fade < 1 / 16) return;
       const s2s = scene.transform.sceneToScreen(this.sceneSpace, pt);
       let width = 0, height = 0, keyWidth = 0;
