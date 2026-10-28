@@ -181,6 +181,19 @@
       o.color = this.color;
     }
   }
+  // HighlightValueBoxInstruction: a white box chasing out of the point `vec` to `expands` around it.
+  class HighlightValueBox extends I.Ticking {
+    constructor(vec, expands, ticks) { super(false, ticks); this.vec = vec; this.expands = expands; }
+    tick(scene) {
+      super.tick(scene);
+      const v = this.vec, e = this.expands, point = [v, v];
+      const expanded = [[v[0] - e[0], v[1] - e[1], v[2] - e[2]], [v[0] + e[0], v[1] + e[1], v[2] + e[2]]];
+      const o = scene.outliner.chaseAABB(this.vec, this.remainingTicks + 1 >= this.totalTicks ? point : expanded);
+      o.lineWidth = 1 / 15;
+      o.color = P.Palette.WHITE;
+    }
+  }
+  I.HighlightValueBox = HighlightValueBox;
   I.OutlineSelection = OutlineSelection;
   I.ChaseAABB = ChaseAABB;
   I.Line = Line;

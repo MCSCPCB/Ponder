@@ -65,6 +65,11 @@
       of: (x, y, z) => [x, y, z],
       centerOf: (x, y, z) => [x + 0.5, y + 0.5, z + 0.5],
       topOf: (x, y, z) => [x + 0.5, y + 1, z + 0.5],
+      // centerOf(pos) + the face normal * (.5 + margin)
+      blockSurface: (pos, face, margin) => {
+        const n = P.normalOf(face), s = 0.5 + (margin || 0);
+        return [pos[0] + 0.5 + n[0] * s, pos[1] + 0.5 + n[1] * s, pos[2] + 0.5 + n[2] * s];
+      },
     },
   });
 
@@ -221,6 +226,23 @@
       return this.textBuilder(new P.TextWindowElement(), e => new I.TextWithOutline(e, duration, selection)).pointAt(selection.center());
     }
     showText(duration) { return this.textBuilder(new P.TextWindowElement(), e => new I.Text(e, duration)); }
+    // Value box highlights. `side` is a Direction name ("UP", "NORTH", ...).
+    showCenteredScrollInput(pos, side, duration) { this.showScrollInput(util.vector.blockSurface(pos, side), side, duration); }
+    showScrollInput(location, side, duration) {
+      const axis = P.normalOf(side).findIndex(v => v !== 0), s = 1 / 16, q = 1 / 4;
+      this.b.addInstruction(new I.HighlightValueBox(location, [0, 1, 2].map(i => (i === axis ? s : q)), duration));
+    }
+    showRepeaterScrollInput(pos, duration) {
+      const s = 1 / 16, q = 1 / 6, v = util.vector.blockSurface(pos, "DOWN");
+      this.b.addInstruction(new I.HighlightValueBox([v[0], v[1] + 3 / 16, v[2]], [q, s, q], duration));
+    }
+    // showFilterSlotInput(location, duration) or showFilterSlotInput(location, side, duration)
+    showFilterSlotInput(location, side, duration) {
+      if (typeof side === "number") { this.b.addInstruction(new I.HighlightValueBox(location, [0.1, 0.1, 0.1], side)); return; }
+      const n = P.normalOf(side);
+      location = location.map((v, i) => v - n[i] * 3 / 128);
+      this.b.addInstruction(new I.HighlightValueBox(location, n.map(v => (1 - Math.abs(v)) * 11 / 128), duration));
+    }
     // InputWindowElement: the builder fills in the key, mouse icon and item before the scene runs.
     showControls(sceneSpace, direction, duration) {
       const element = new P.InputWindowElement(sceneSpace, direction);

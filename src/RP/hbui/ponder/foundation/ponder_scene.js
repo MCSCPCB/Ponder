@@ -157,6 +157,7 @@
   // Direction.getNormal scaled by .5, for elements sliding in or out of the scene.
   const NORMALS = { DOWN: [0, -1, 0], UP: [0, 1, 0], NORTH: [0, 0, -1], SOUTH: [0, 0, 1], WEST: [-1, 0, 0], EAST: [1, 0, 0] };
   P.fadeVecOf = dir => (dir && NORMALS[dir] ? NORMALS[dir].map(v => v * 0.5) : null);
+  P.normalOf = dir => NORMALS[dir];
 
   class FadeIntoScene extends Ticking {
     constructor(ticks, fadeInFrom, element) { super(false, ticks); this.fadeInFrom = fadeInFrom; this.element = element; }
