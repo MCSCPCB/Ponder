@@ -76,7 +76,7 @@
   // getSeedForItemStack seeds the copies' offsets with Item.getId, a Java registry number
   // Bedrock has no counterpart for; a hash of the id keeps them fixed per item the same way.
   P.itemSeed = id => { let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return h; };
-  P.javaRandom = seed => {
+  P.seededRandom = seed => {
     let s = seed >>> 0;
     return { nextFloat() { s = (s + 0x6d2b79f5) >>> 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; } };
   };

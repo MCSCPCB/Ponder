@@ -107,7 +107,7 @@
       let m = M.translate(base, P.lerp(pt, e.xo, e.x), P.lerp(pt, e.yo, e.y) + pose.bob + 0.25 * scale, P.lerp(pt, e.zo, e.z));
       m = M.rotY(m, pose.spin);
       if (!block) m = M.translate(m, 0, 0, -0.09375 * (n - 1) * 0.5 * scale);
-      const random = P.javaRandom(P.itemSeed(e.item.id));
+      const random = P.seededRandom(P.itemSeed(e.item.id));
       for (let i = 0; i < n; i++) {
         let t = m;
         if (i > 0) {
