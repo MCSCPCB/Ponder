@@ -1,5 +1,6 @@
 // What a block looks like: per-face vanilla textures, shape, opacity and tint. A block in the
-// world is an id ("minecraft:stone") or { id, power } for redstone wire.
+// world is an id ("minecraft:stone"), { id, power } for redstone wire, or { id, props } from a
+// structure (Java Properties or Bedrock states; wire power is props.power / redstone_signal).
 (function () {
   const P = window.Ponder;
 
@@ -41,7 +42,7 @@
   const cache = new Map();
   P.blockId = block => (typeof block === "string" ? block : block.id);
   P.blockModel = function (block) {
-    const id = P.blockId(block), power = typeof block === "string" ? 0 : block.power || 0, key = id + "#" + power;
+    const id = P.blockId(block), power = typeof block === "string" ? 0 : +(block.power || block.props && (block.props.power || block.props.redstone_signal)) || 0, key = id + "#" + power;
     let model = cache.get(key);
     if (model) return model;
     const name = id.replace(/^minecraft:/, ""), entry = TABLE[name] || name;

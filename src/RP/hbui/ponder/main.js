@@ -88,6 +88,7 @@
   function start() {
     mount();
     listen();
+    P.loadStructures(P.structurePaths());
     P.bridge.start();
     requestAnimationFrame(frame);
     P.log("ponder ready");

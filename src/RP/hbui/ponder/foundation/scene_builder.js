@@ -22,8 +22,8 @@
   };
   P.addToTag = function (tagId, items) { items.forEach(i => tags.get(tagId).items.push(i)); };
 
-  // One scene of an item: `schematic` is { size: {x, y, z}, fill(world) } (Java's .nbt),
-  // `storyboard` builds the instructions. Scenes of an item keep their registration order.
+  // One scene of an item: `schematic` is a path under hbui/ponder/structures/ (.nbt or
+  // .mcstructure) or { size: {x, y, z}, fill(world) }; `storyboard` builds the instructions. Scenes of an item keep their registration order.
   P.registerScene = function (entry) {
     entry.items.forEach(item => {
       if (!scenesByItem.has(item)) scenesByItem.set(item, []);
@@ -31,11 +31,19 @@
     });
   };
 
+  // Every structure path the registered scenes use.
+  P.structurePaths = function () {
+    const paths = new Set();
+    scenesByItem.forEach(list => list.forEach(e => { if (typeof e.schematic === "string") paths.add(e.schematic); }));
+    return Array.from(paths);
+  };
+
   // PonderSceneRegistry.compile
   P.compileScenes = function (item) {
     return (scenesByItem.get(item) || []).map(entry => {
-      const world = new P.PonderWorld(entry.schematic.size);
-      entry.schematic.fill(world);
+      const template = typeof entry.schematic === "string" ? P.structureTemplate(entry.schematic) : null;
+      const world = new P.PonderWorld(template ? template.size : entry.schematic.size);
+      if (template) P.placeStructure(world, template); else entry.schematic.fill(world);
       world.createBackup();
       const scene = new P.PonderScene(world, entry.id, entry.tags || []);
       entry.storyboard(new SceneBuilder(scene), util);
