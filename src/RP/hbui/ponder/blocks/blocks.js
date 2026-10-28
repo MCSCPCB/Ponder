@@ -9,8 +9,9 @@
   P.blockStates = block => (typeof block === "string" ? {} : block.states);
   P.withStates = (block, changes) => P.block(P.blockId(block), Object.assign({}, P.blockStates(block), changes));
 
-  // Files under textures/blocks/ for ids blocks.json does not resolve (its flattened ids such as
-  // oak_log live in versioned packs, and grass is tinted). Ids in neither use their own name.
+  // Files under textures/blocks/ for ids blocks.json does not resolve: its flattened ids such as
+  // oak_log live in versioned packs, grass is tinted, and in game pack://blocks.json does not
+  // load at all (1.26.51), so the common blocks have to be here. Others use their own name.
   const TABLE = {
     grass_block: { up: "grass_carried", down: "dirt", side: "grass_side_carried" },
     oak_log: { up: "log_oak_top", down: "log_oak_top", side: "log_oak" },
@@ -19,7 +20,12 @@
     oak_planks: "planks_oak", spruce_planks: "planks_spruce", birch_planks: "planks_birch",
     stone_bricks: "stonebrick", bricks: "brick", terracotta: "hardened_clay",
     granite: "stone_granite", diorite: "stone_diorite", andesite: "stone_andesite",
-    snow_block: "snow",
+    sandstone: { up: "sandstone_top", down: "sandstone_bottom", side: "sandstone_normal" },
+    quartz_block: { up: "quartz_block_top", down: "quartz_block_bottom", side: "quartz_block_side" },
+    furnace: { up: "furnace_top", down: "furnace_top", north: "furnace_front_off", side: "furnace_side" },
+    farmland: { up: "farmland_dry", side: "dirt", down: "dirt" },
+    redstone_lamp: "redstone_lamp_off", lit_redstone_lamp: "redstone_lamp_on",
+    redstone_wire: "redstone_dust_cross",
   };
   const COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"];
   COLORS.forEach(c => {
@@ -115,7 +121,7 @@
   const FLAT_BLOCK_ITEM = /torch|rail|door|pane|bars|lever|sapling|flower|ladder|vine|redstone_wire|button|carpet/;
   P.isBlockItem = id => {
     const name = id.replace(/^minecraft:/, "");
-    return P.hasTranslation(`tile.${name}.name`) && !FLAT_BLOCK_ITEM.test(name);
+    return P.hasTranslation(P.nameKeys(id)[0]) && !FLAT_BLOCK_ITEM.test(name);
   };
   // The item a block is picked as (getCloneItemFromBlockstate).
   P.blockItem = function (block) {

@@ -8,22 +8,28 @@
   const FONT_SIZE = 8, LINE_HEIGHT = 9;
   P.LINE_HEIGHT = LINE_HEIGHT;
 
-  // Font.width: measured once per character at 10x, so sub-pixel advances add up exactly.
+  // Font.width: measured once per character at the size text is drawn, since the game snaps
+  // glyph advances to whole screen pixels there.
   const widths = new Map();
-  let probe = null;
+  let probe = null, probeScale = 0;
   function measure(ch) {
     if (!probe) {
       probe = document.createElement("span");
-      probe.style.cssText = `position:absolute;left:-10000px;top:0;visibility:hidden;white-space:pre;font-family:${P.FONT};font-size:${FONT_SIZE * 10}px`;
       document.body.appendChild(probe);
     }
+    if (probeScale !== P.view.cssPerGui) {
+      probeScale = P.view.cssPerGui;
+      probe.style.cssText = `position:absolute;left:-10000px;top:0;visibility:hidden;white-space:pre;font-family:${P.FONT};font-size:${P.px(FONT_SIZE)}`;
+      widths.clear();
+    }
     probe.textContent = ch;
-    return probe.getBoundingClientRect().width / 10;
+    return probe.getBoundingClientRect().width / probeScale;
   }
   P.fontReady = function () {
     return Math.abs(measure("A") - 6) < 0.5;
   };
   P.charWidth = function (ch) {
+    if (probeScale !== P.view.cssPerGui) measure("A");
     let w = widths.get(ch);
     if (w === undefined) {
       w = measure(ch);
@@ -32,9 +38,15 @@
     }
     return w;
   };
+  // A whole string is measured as drawn: the sum of its characters can come out short (CJK
+  // falls back to Noto Sans, whose spacing differs inside a run), leaving text past its box.
   P.textWidth = function (text) {
-    let w = 0;
-    for (const ch of text) w += P.charWidth(ch);
+    if (probeScale !== P.view.cssPerGui) measure("A");
+    let w = widths.get(text);
+    if (w === undefined) {
+      w = measure(text);
+      if (P.fontReady()) widths.set(text, w);
+    }
     return w;
   };
   // StringSplitter.splitLines: breaks at the last space that fits, or anywhere for text
@@ -191,8 +203,11 @@
     // GuiGameElement.of(item) at scale `s` (16 * s GUI pixels), as Ore UI draws item icons.
     item(id, x, y, s, alpha) {
       const size = Math.round(16 * s * P.view.cssPerGui);
-      this.sprite(`geo-item://${id}?width=${size}&height=${size}`, 0, 0, 1, 1, 1, 1, x, y, 16 * s, 16 * s, alpha);
+      this.sprite(P.itemIcon(id, size), 0, 0, 1, 1, 1, 1, x, y, 16 * s, 16 * s, alpha);
     }
   }
+  // Ore UI's item icon URL. The id is the URL's host, so a colon would read as a port: vanilla
+  // ids go without "minecraft:", others have it escaped as the editor bundle does (%3A).
+  P.itemIcon = (id, size) => `geo-item://${id.replace(/^minecraft:/, "").replace(/:/g, "%3A")}?width=${size}&height=${size}`;
   P.DrawList = DrawList;
 })();

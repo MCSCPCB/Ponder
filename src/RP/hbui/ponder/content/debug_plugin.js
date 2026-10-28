@@ -4,12 +4,12 @@
   const P = window.Ponder;
 
   // debug/scene_1.nbt: a 6x6 snow block and white concrete checker plate, and stained glass axes
-  // from (1, 1, 1): red along X, lime along Y, blue along Z.
+  // from (1, 1, 1): red along X, lime along Y, blue along Z. Java's snow_block is Bedrock's snow.
   const scene1 = {
     size: { x: 6, y: 5, z: 6 },
     fill(world) {
       for (let x = 0; x < 6; x++) for (let z = 0; z < 6; z++)
-        world.setBlock(x, 0, z, (x + z) % 2 === 0 ? "minecraft:snow_block" : "minecraft:white_concrete");
+        world.setBlock(x, 0, z, (x + z) % 2 === 0 ? "minecraft:snow" : "minecraft:white_concrete");
       world.setBlock(1, 1, 1, "minecraft:white_stained_glass");
       for (let i = 2; i <= 4; i++) {
         world.setBlock(i, 1, 1, "minecraft:red_stained_glass");

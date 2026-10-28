@@ -141,7 +141,7 @@
   function drawFlat(d, m, id, px) {
     const size = Math.max(16, Math.round(px * P.view.cssPerGui));
     const o = M.apply(m, -0.5, 0.5, 0), u = M.apply(m, 0.5, 0.5, 0), v = M.apply(m, -0.5, -0.5, 0);
-    d.texturedQuad(`geo-item://${id}?width=${size}&height=${size}`, o, u, v, null, size);
+    d.texturedQuad(P.itemIcon(id, size), o, u, v, null, size);
   }
 
   // For entities that draw themselves: a block's cube or an item's icon about matrix m's origin.
