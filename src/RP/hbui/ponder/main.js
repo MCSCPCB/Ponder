@@ -25,15 +25,35 @@
     }
   }
 
-  P.bridge.onOpen = function (item) {
-    if (!P.indexedItems().includes(item)) { P.log("no scenes for", item); return false; }
-    P.updateView();
-    P.screens.reset();
-    root.style.display = "";
-    open = true;
-    P.screens.open(new P.PonderUI(item));
-    P.log("open", item, `gui ${P.view.width}x${P.view.height} scale ${P.view.scale} font ${P.fontReady() ? "ok" : "not loaded"}`);
-    return true;
+  // Loads the other authors' plugins (their script calls P.addPlugin) before scenes are registered.
+  // Each script runs once per page; a plugin already added is not loaded again.
+  const loaded = new Set();
+  function loadAddons(addons) {
+    return Promise.all(addons.filter(a => !loaded.has(a.script)).map(a => new Promise(resolve => {
+      loaded.add(a.script);
+      const el = document.createElement("script");
+      el.src = "/hbui/" + a.script;
+      el.onload = () => { P.log("addon", a.modId); resolve(); };
+      el.onerror = () => { P.log("addon failed", a.modId, a.script); resolve(); };
+      document.head.appendChild(el);
+    })));
+  }
+
+  P.bridge.onOpen = function (item, addons) {
+    return loadAddons(addons).then(() => {
+      P.registerAll();
+      return P.loadStructures(P.structurePaths());
+    }).then(() => {
+      if (P.bridge.item !== item) return false; // the form closed while loading
+      if (!P.indexedItems().includes(item)) { P.log("no scenes for", item); return false; }
+      P.updateView();
+      P.screens.reset();
+      root.style.display = "";
+      open = true;
+      P.screens.open(new P.PonderUI(item));
+      P.log("open", item, `gui ${P.view.width}x${P.view.height} scale ${P.view.scale} font ${P.fontReady() ? "ok" : "not loaded"}`);
+      return true;
+    });
   };
   P.bridge.onClose = function () {
     open = false;
@@ -88,8 +108,6 @@
   function start() {
     mount();
     listen();
-    P.registerAll();
-    P.loadStructures(P.structurePaths());
     P.bridge.start();
     requestAnimationFrame(frame);
     P.log("ponder ready");

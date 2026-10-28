@@ -5,6 +5,7 @@
 (function () {
   const P = window.Ponder;
   const MARKER = /ponder:([a-z0-9_.-]+:[a-z0-9_./-]+);/;
+  const ADDONS = /ponder\.addons:(\[[^;]*\]);/;
   const CLOSE_LABEL = "ponder:close;"; // the behavior pack's own close button
   const GROUP = "vanillaCoreDataStoreSetCommandGroup";
   const bridge = (P.bridge = { screenId: "", definition: "", item: null, onOpen: null, onClose: null });
@@ -50,21 +51,23 @@
     });
   }
 
-  // The marker, from the form definition or else from the text Ore UI rendered.
-  function findItem() {
-    let m = MARKER.exec(bridge.definition);
+  // A marker, from the form definition or else from the text Ore UI rendered.
+  function find(pattern) {
+    let m = pattern.exec(bridge.definition);
     if (m) return m[1];
     const root = document.getElementById("root");
     if (!root) return null;
-    m = MARKER.exec(root.textContent || "");
+    m = pattern.exec(root.textContent || "");
     if (m) return m[1];
     const texts = root.getElementsByTagName("fast-text");
     for (let i = 0; i < texts.length; i++) {
-      m = MARKER.exec(texts[i].getAttribute("text") || texts[i].text || "");
+      m = pattern.exec(texts[i].getAttribute("text") || texts[i].text || "");
       if (m) return m[1];
     }
     return null;
   }
+  // The other authors' plugins the behavior pack knows of: [{ modId, script }].
+  const findAddons = () => JSON.parse(find(ADDONS) || "[]");
 
   function setVanillaHidden(hidden) {
     const root = document.getElementById("root");
@@ -74,13 +77,19 @@
   // Set when our close did not take: Ponder steps aside until the form goes away.
   let gaveUp = false;
   function poll() {
-    const item = findItem();
+    const item = find(MARKER);
     if (item === bridge.item) return;
     if (bridge.item && !gaveUp && bridge.onClose) bridge.onClose();
     bridge.item = item;
-    // onOpen returns false when there is nothing to show; the vanilla form then stays.
-    gaveUp = !!item && !bridge.onOpen(item);
-    setVanillaHidden(!!item && !gaveUp);
+    gaveUp = false;
+    setVanillaHidden(!!item);
+    if (!item) return;
+    // onOpen resolves to false when there is nothing to show; the vanilla form then comes back.
+    Promise.resolve(bridge.onOpen(item, findAddons())).then(shown => {
+      if (shown || bridge.item !== item) return;
+      gaveUp = true;
+      setVanillaHidden(false);
+    });
   }
 
   // Presses the vanilla button showing `label`: the innermost element with that text gets the
