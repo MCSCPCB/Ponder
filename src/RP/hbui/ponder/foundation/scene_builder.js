@@ -221,6 +221,12 @@
       return this.textBuilder(new P.TextWindowElement(), e => new I.TextWithOutline(e, duration, selection)).pointAt(selection.center());
     }
     showText(duration) { return this.textBuilder(new P.TextWindowElement(), e => new I.Text(e, duration)); }
+    // InputWindowElement: the builder fills in the key, mouse icon and item before the scene runs.
+    showControls(sceneSpace, direction, duration) {
+      const element = new P.InputWindowElement(sceneSpace, direction);
+      this.b.addInstruction(new I.ShowInput(element, duration));
+      return element.builder();
+    }
     textBuilder(element, instruction) {
       this.b.addInstruction(instruction(element));
       const b = this.b, builder = {

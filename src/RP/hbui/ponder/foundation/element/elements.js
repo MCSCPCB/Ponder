@@ -86,7 +86,39 @@
       lines.forEach((l, i) => d.text(l, P.int(targetX - 10), pY + 3 + 9 * i, c, false));
     }
   }
-  Object.assign(P, { PonderElement, AnimatedSceneElement, AnimatedOverlayElement, WorldSectionElement, TextWindowElement });
+  // InputWindowElement: a speech box pointing at `sceneSpace` with a key label, a mouse icon and an item.
+  class InputWindowElement extends AnimatedOverlayElement {
+    constructor(sceneSpace, direction) { super(); this.sceneSpace = sceneSpace; this.direction = direction; this.key = null; this.icon = null; this.item = null; }
+    builder() {
+      const e = this, b = {
+        withItem(item) { e.item = item; return b; },
+        leftClick() { e.icon = P.Icons.LMB; return b; },
+        scroll() { e.icon = P.Icons.SCROLL; return b; },
+        rightClick() { e.icon = P.Icons.RMB; return b; },
+        showing(icon) { e.icon = icon; return b; },
+        whileSneaking() { e.key = "sneak_and"; return b; },
+        whileCTRL() { e.key = "ctrl_and"; return b; },
+      };
+      return b;
+    }
+    render(scene, screen, d, pt, fade) {
+      const dir = this.direction;
+      const xFade = (dir === "RIGHT" ? -1 : dir === "LEFT" ? 1 : 0) * 10 * (1 - fade);
+      const yFade = (dir === "DOWN" ? -1 : dir === "UP" ? 1 : 0) * 10 * (1 - fade);
+      const text = this.key ? P.translate("ponder.ponder.shared." + this.key) : "";
+      if (fade < 1 / 16) return;
+      const s2s = scene.transform.sceneToScreen(this.sceneSpace, pt);
+      let width = 0, height = 0, keyWidth = 0;
+      if (this.icon) { width += 24; height = 24; }
+      if (this.key) { keyWidth = P.textWidth(text); width += keyWidth; }
+      if (this.item) { width += 24; height = 24; }
+      const [bx, by] = P.speechBox(d, s2s[0] + xFade, s2s[1] + yFade, width, height, false, dir);
+      if (this.key) d.text(text, bx + 2, by + P.int((height - 9) / 2 + 2), P.scaleAlpha(P.Palette.WHITE, fade), false);
+      if (this.icon) d.sprite(P.WIDGETS, this.icon[0] * 16, this.icon[1] * 16, 16, 16, 256, 256, bx + keyWidth, by, 24, 24);
+      if (this.item) d.item(this.item, bx + keyWidth + (this.icon ? 24 : 0), by, 1.5);
+    }
+  }
+  Object.assign(P, { PonderElement, AnimatedSceneElement, AnimatedOverlayElement, WorldSectionElement, TextWindowElement, InputWindowElement });
 
   // A local rectangle (x0..x1, y0..y1 at z = 0) under matrix `m`, as a CSS affine transform
   // of a 100 x 100 box: the screen positions of its corners decide the matrix.

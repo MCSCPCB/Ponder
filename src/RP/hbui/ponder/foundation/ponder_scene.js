@@ -150,6 +150,10 @@
     hide() { this.element.visible = false; }
     applyFade(scene, fade) { this.element.setFade(fade); }
   }
+  // ShowInputInstruction: the input window fades in and out like a text window.
+  class ShowInput extends Text {
+    constructor(element, duration) { super(element, duration); }
+  }
   // Direction.getNormal scaled by .5, for elements sliding in or out of the scene.
   const NORMALS = { DOWN: [0, -1, 0], UP: [0, 1, 0], NORTH: [0, 0, -1], SOUTH: [0, 0, 1], WEST: [-1, 0, 0], EAST: [1, 0, 0] };
   P.fadeVecOf = dir => (dir && NORMALS[dir] ? NORMALS[dir].map(v => v * 0.5) : null);
@@ -278,5 +282,5 @@
     }
   }
   P.Instructions = { Instruction, Simple, Ticking, Delay, Keyframe, MarkAsFinished, RotateScene, FadeInOut, Text,
-    FadeIntoScene, DisplayWorldSection, HideAll, ReplaceBlocks, FadeOutOfScene, AnimateElement, EmitParticles };
+    FadeIntoScene, DisplayWorldSection, HideAll, ReplaceBlocks, FadeOutOfScene, AnimateElement, EmitParticles, ShowInput };
 })();

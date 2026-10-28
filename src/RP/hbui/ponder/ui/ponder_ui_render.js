@@ -103,7 +103,7 @@
   };
   UI.renderOverlay = function (d, i, pt) {
     if (this.identifyMode) return;
-    this.scenes[i].forEachVisible(P.TextWindowElement, e => e.render(this.scenes[i], this, d, pt, e.getFade(pt)));
+    this.scenes[i].forEachVisible(P.AnimatedOverlayElement, e => e.render(this.scenes[i], this, d, pt, e.getFade(pt)));
   };
 
   UI.renderSceneInformation = function (d, fade, indexDiff, scene) {
