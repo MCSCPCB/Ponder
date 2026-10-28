@@ -28,11 +28,11 @@
     },
     {
       "module_name": "@minecraft/server",
-      "version": "beta"
+      "version": "alpha"
     },
     {
       "module_name": "@minecraft/server-ui",
-      "version": "beta"
+      "version": "alpha"
     }
   ]
 }

@@ -27,7 +27,7 @@
     },
     {
       "module_name": "@minecraft/server",
-      "version": "beta"
+      "version": "alpha"
     }
   ]
 }
