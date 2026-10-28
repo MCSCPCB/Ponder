@@ -10,10 +10,12 @@
   const GROUP = "vanillaCoreDataStoreSetCommandGroup";
   const bridge = (P.bridge = { screenId: "", definition: "", item: null, onOpen: null, onClose: null });
 
-  // Vanilla ids are uint32 hashes as strings; ours count down from the top of that range.
+  // Vanilla ids are uint32 hashes, passed as strings up to 1.26.51 and as numbers from 1.26.60;
+  // tools/adapter sets QUERY_ID for the target version. Ours count down from the top of the range.
+  const QUERY_ID = "ponder:query-id/string";
   let nextId = 0xffffffff;
   function subscribe(name, args, callback) {
-    const engine = window.engine, id = String(nextId--);
+    const engine = window.engine, n = nextId--, id = QUERY_ID.endsWith("/number") ? n : String(n);
     const handler = value => callback(value);
     engine.on(`query:subscribed/${id}`, handler);
     engine.on(`query:updated/${id}`, handler);
@@ -38,7 +40,8 @@
   let dropDefinition = null;
   function watchScreen() {
     subscribe("vanillaCoreDataDrivenUIScreenIdQuery", [], value => {
-      const screenId = value && value.screenId != null ? String(value.screenId) : "";
+      // Passed on as it came, the way vanilla does: the definition query checks its type.
+      const screenId = value && value.screenId != null ? value.screenId : "";
       if (screenId === bridge.screenId) return;
       P.log("screen", screenId || "(none)");
       bridge.screenId = screenId;

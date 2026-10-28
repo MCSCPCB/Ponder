@@ -34,7 +34,19 @@ const NAMES = [
   { use: "sounds", names: ["soundCommandGroup"] },
   { use: "item icons", names: ["geo-item://"], unquoted: true },
   { use: "pack files", names: ["pack://"], unquoted: true },
+  // Not a name: how a query subscription's id goes to the engine. Vanilla's query driver hashes
+  // the query and its arguments to a uint32 and passes either that number or its string; bridge.js
+  // reads the marker to know which. 1.26.60 passes the number and rejects a string.
+  { use: "query subscription id", names: ["ponder:query-id/string", "ponder:query-id/number"], detect: queryIdKind },
 ];
+
+// In the driver: `l=o.toString();return null!==(r=a(l,()=>({value:t(e,n,o)})))…`, where o is the
+// hash and l its string; the third argument of t is what reaches query:subscribe.
+function queryIdKind(bundle) {
+  const m = /(\w)=(\w)\.toString\(\);return null!==\(\w=\w\(\1,\(\)=>\(\{value:\w\(\w,\w,(\w)\)\}\)\)\)/.exec(bundle);
+  if (!m) return null;
+  return m[3] === m[2] ? "ponder:query-id/number" : m[3] === m[1] ? "ponder:query-id/string" : null;
+}
 
 const fail = message => { console.error("error: " + message); process.exit(1); };
 
@@ -66,6 +78,12 @@ function gameplay(gui) {
 function renames(bundle) {
   const out = [];
   NAMES.forEach(entry => {
+    if (entry.detect) {
+      const target = entry.detect(bundle);
+      if (!target) fail("could not tell the " + entry.use + " from the target bundle; this version's Ore UI changed and the adapter needs updating");
+      entry.names.forEach(name => { if (name !== target) out.push({ from: name, to: target }); });
+      return;
+    }
     const present = entry.names.filter(name => bundle.includes(name));
     if (!present.length) fail("the target bundle has none of [" + entry.names.join(", ") + "] (" + entry.use + "); this version's Ore UI changed and the adapter needs a new name in NAMES");
     const target = present[present.length - 1];
