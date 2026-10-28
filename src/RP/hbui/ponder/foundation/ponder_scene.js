@@ -78,6 +78,9 @@
     addToSceneTime(t) { if (!this.stoppedCounting) this.totalTime += t; }
     stopCounting() { this.stoppedCounting = true; }
     markKeyframe(offset) { if (!this.stoppedCounting) this.keyframeTimes.push(this.totalTime + offset); }
+    setPointOfInterest(poi) { this.chasingPoi = poi; }
+    resolve(link) { return this.linked.get(link) || null; }
+    linkElement(e, link) { this.linked.set(link, e); }
     addElement(e) { if (this.elements.indexOf(e) < 0) this.elements.push(e); }
     forEach(type, fn) { this.elements.forEach(e => { if (e instanceof type) fn(e); }); }
     forEachVisible(type, fn) { this.elements.forEach(e => { if (e instanceof type && e.visible) fn(e); }); }
@@ -201,20 +204,68 @@
       });
     }
   }
-  // ReplaceBlocksInstruction: sets blocks of the selection that are inside the world.
+  // ReplaceBlocksInstruction: `stateToUse` maps each block of the selection inside the world
+  // to its new one; air is replaced only if `replaceAir`.
   class ReplaceBlocks extends Instruction {
-    constructor(selection, block, replaceAir) { super(); this.selection = selection; this.block = block; this.replaceAir = replaceAir; }
+    constructor(selection, stateToUse, replaceAir, spawnParticles) {
+      super(); this.selection = selection; this.stateToUse = stateToUse; this.replaceAir = replaceAir; this.spawnParticles = spawnParticles;
+    }
     tick(scene) {
       const w = scene.world;
       this.selection.keys.forEach(k => {
         const p = k.split(",").map(Number);
-        if (p[0] < 0 || p[1] < 0 || p[2] < 0 || p[0] >= w.size.x || p[1] >= w.size.y || p[2] >= w.size.z) return;
-        if (!this.replaceAir && !w.getBlock(p[0], p[1], p[2])) return;
-        w.setBlock(p[0], p[1], p[2], this.block);
+        if (!w.inside(p[0], p[1], p[2])) return;
+        const prev = w.getBlock(p[0], p[1], p[2]);
+        if (!this.replaceAir && !prev) return;
+        if (this.spawnParticles && prev) w.addBlockDestroyEffects(p, prev);
+        w.setBlock(p[0], p[1], p[2], this.stateToUse(prev));
       });
       scene.forEach(P.WorldSectionElement, e => e.queueRedraw());
     }
   }
+  class FadeOutOfScene extends Ticking {
+    constructor(ticks, fadeOutTo, link) { super(false, ticks); this.fadeOutTo = fadeOutTo ? OPPOSITE[fadeOutTo] : null; this.link = link; }
+    firstTick(scene) {
+      this.element = scene.resolve(this.link);
+      if (!this.element) return;
+      this.element.visible = true;
+      this.element.setFade(1);
+      this.element.fadeVec = P.fadeVecOf(this.fadeOutTo) || [0, 0, 0];
+    }
+    tick(scene) {
+      super.tick(scene);
+      if (!this.element) return;
+      const f = this.remainingTicks / this.totalTicks;
+      this.element.setFade(1 - (1 - f) * (1 - f));
+      if (this.remainingTicks === 0) { this.element.visible = false; this.element.setFade(0); }
+    }
+  }
+  const OPPOSITE = { DOWN: "UP", UP: "DOWN", NORTH: "SOUTH", SOUTH: "NORTH", WEST: "EAST", EAST: "WEST" };
+  // AnimateElementInstruction: adds totalDelta over `ticks` through getter/setter, landing on
+  // exactly the target on the last tick.
+  class AnimateElement extends Ticking {
+    constructor(link, totalDelta, ticks, setter, getter) {
+      super(false, ticks);
+      this.link = link; this.totalDelta = totalDelta; this.setter = setter; this.getter = getter;
+      this.deltaPerTick = totalDelta.map(v => v / ticks);
+    }
+    firstTick(scene) {
+      this.element = scene.resolve(this.link);
+      if (this.element) this.target = this.getter(this.element).map((v, i) => v + this.totalDelta[i]);
+    }
+    tick(scene) {
+      super.tick(scene);
+      if (!this.element) return;
+      if (this.remainingTicks === 0) { this.setter(this.element, this.target); this.setter(this.element, this.target); return; }
+      this.setter(this.element, this.getter(this.element).map((v, i) => v + this.deltaPerTick[i]));
+    }
+  }
+  // AnimateWorldSectionInstruction
+  AnimateElement.moveSection = (link, offset, ticks) =>
+    new AnimateElement(link, offset, ticks, (e, v) => e.setAnimatedOffset(v, ticks === 0), e => e.animatedOffset);
+  AnimateElement.rotateSection = (link, rotation, ticks) =>
+    new AnimateElement(link, rotation, ticks, (e, v) => e.setAnimatedRotation(v, ticks === 0), e => e.animatedRotation);
+
   P.Instructions = { Instruction, Simple, Ticking, Delay, Keyframe, MarkAsFinished, RotateScene, FadeInOut, Text,
-    FadeIntoScene, DisplayWorldSection, HideAll, ReplaceBlocks };
+    FadeIntoScene, DisplayWorldSection, HideAll, ReplaceBlocks, FadeOutOfScene, AnimateElement };
 })();

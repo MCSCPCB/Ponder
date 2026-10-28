@@ -36,14 +36,25 @@
       this.size = size; // { x, y, z } from the schematic
       this.blocks = new Map();
       this.backup = null;
+      this.breaking = new Map(); // blockBreakingProgressions: position key -> destroy stage 0..8
     }
     setBlock(x, y, z, block) {
       if (block == null || block === "minecraft:air") this.blocks.delete(key(x, y, z));
       else this.blocks.set(key(x, y, z), block);
     }
     getBlock(x, y, z) { return this.blocks.get(key(x, y, z)) || null; }
+    inside(x, y, z) { return x >= 0 && y >= 0 && z >= 0 && x < this.size.x && y < this.size.y && z < this.size.z; }
+    // PonderLevel.restoreBlocks: only positions the schematic held go back.
+    restoreBlocks(selection) {
+      selection.keys.forEach(k => { if (this.backup.has(k)) this.blocks.set(k, this.backup.get(k)); });
+    }
     createBackup() { this.backup = new Map(this.blocks); }
-    restore() { this.blocks = new Map(this.backup); }
+    restore() { this.blocks = new Map(this.backup); this.breaking.clear(); }
+    // setBlockBreakingProgress: 0 clears it, otherwise the stage is damage - 1.
+    setBlockBreakingProgress(x, y, z, damage) {
+      if (damage === 0) this.breaking.delete(key(x, y, z));
+      else this.breaking.set(key(x, y, z), damage - 1);
+    }
     // BoundingBox spans of the schematic.
     xSpan() { return this.size.x; }
   }

@@ -27,6 +27,7 @@
 
   class Outline {
     constructor() { this.color = P.Palette.WHITE; this.lineWidth = 1 / 32; this.alpha = 1; }
+    tick() {}
   }
   class BlockClusterOutline extends Outline {
     constructor(selection) { super(); this.cluster = cluster(Array.from(selection.keys).map(k => k.split(",").map(Number))); }
@@ -34,6 +35,17 @@
   // AABBOutline of a box given as [min, max] in scene space.
   class AABBOutline extends Outline {
     constructor(box) { super(); this.box = box; }
+    boxAt() { return this.box; }
+  }
+  // ChasingAABBOutline: moves halfway to its target box every tick.
+  const lerpBox = (t, a, b) => [a[0].map((v, i) => P.lerp(t, v, b[0][i])), a[1].map((v, i) => P.lerp(t, v, b[1][i]))];
+  class ChasingAABBOutline extends AABBOutline {
+    constructor(box) { super(box); this.prevBox = box; this.targetBox = box; }
+    tick() { this.prevBox = this.box; this.box = lerpBox(0.5, this.box, this.targetBox); }
+    boxAt(pt) { return lerpBox(pt, this.prevBox, this.box); }
+  }
+  class LineOutline extends Outline {
+    constructor() { super(); this.start = this.end = [0, 0, 0]; }
   }
 
   class Outliner {
@@ -48,7 +60,25 @@
       this.outlines.set(slot, entry);
       return entry.outline;
     }
-    tick() { this.outlines.forEach((e, k) => { e.tick(); if (!e.isAlive()) this.outlines.delete(k); }); }
+    chaseAABB(slot, box) {
+      const old = this.outlines.get(slot);
+      if (!old || !(old.outline instanceof AABBOutline)) this.outlines.set(slot, new OutlineEntry(new ChasingAABBOutline(box)));
+      const entry = this.outlines.get(slot);
+      entry.ticksTillRemoval = 1;
+      entry.outline.targetBox = box;
+      return entry.outline;
+    }
+    showLine(slot, start, end) {
+      if (!this.outlines.has(slot)) this.outlines.set(slot, new OutlineEntry(new LineOutline()));
+      const entry = this.outlines.get(slot);
+      entry.ticksTillRemoval = 1;
+      entry.outline.start = start;
+      entry.outline.end = end;
+      return entry.outline;
+    }
+    tick() {
+      this.outlines.forEach((e, k) => { e.tick(); if (!e.isAlive()) this.outlines.delete(k); });
+    }
     // renderOutlines, in the scene's GUI space (the camera is at the origin there).
     render(d, matrix, pt, blockPx) {
       this.outlines.forEach(entry => {
@@ -60,13 +90,14 @@
         const color = P.withAlpha(outline.color, P.int(outline.color[3] * outline.alpha));
         const width = Math.max(outline.lineWidth * blockPx, 1 / P.view.cssPerGui);
         if (outline instanceof BlockClusterOutline) renderCluster(d, matrix, outline.cluster, color, width);
-        else renderBox(d, matrix, outline.box, color, width);
+        else if (outline instanceof LineOutline) d.line(M.apply(matrix, ...outline.start), M.apply(matrix, ...outline.end), width, color);
+        else renderBox(d, matrix, outline.boxAt(pt), color, width);
       });
     }
   }
   class OutlineEntry {
     constructor(outline) { this.outline = outline; this.ticksTillRemoval = 1; }
-    tick() { this.ticksTillRemoval--; }
+    tick() { this.ticksTillRemoval--; this.outline.tick(); }
     isAlive() { return this.ticksTillRemoval >= -FADE_TICKS; }
     isFading() { return this.ticksTillRemoval < 0; }
   }
@@ -130,6 +161,28 @@
     show(scene) { super.show(scene); scene.addElement(this.outline); this.outline.setFade(1); this.outline.visible = true; }
     hide(scene) { super.hide(scene); this.outline.setFade(0); this.outline.visible = false; }
   }
+  // ChaseAABBInstruction
+  class ChaseAABB extends I.Ticking {
+    constructor(color, slot, box, ticks) { super(false, ticks); this.color = color; this.slot = slot; this.box = box; }
+    tick(scene) {
+      super.tick(scene);
+      const o = scene.outliner.chaseAABB(this.slot, this.box);
+      o.lineWidth = 1 / 16;
+      o.color = this.color;
+    }
+  }
+  // LineInstruction
+  class Line extends I.Ticking {
+    constructor(color, start, end, ticks, big) { super(false, ticks); this.color = color; this.start = start; this.end = end; this.big = big; }
+    tick(scene) {
+      super.tick(scene);
+      const o = scene.outliner.showLine(this.start, this.start, this.end);
+      o.lineWidth = this.big ? 1 / 8 : 1 / 16;
+      o.color = this.color;
+    }
+  }
   I.OutlineSelection = OutlineSelection;
+  I.ChaseAABB = ChaseAABB;
+  I.Line = Line;
   I.TextWithOutline = TextWithOutline;
 })();

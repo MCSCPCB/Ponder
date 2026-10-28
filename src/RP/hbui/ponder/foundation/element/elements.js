@@ -22,6 +22,8 @@
     constructor(selection) {
       super();
       this.section = selection ? selection.copy() : null;
+      this.centerOfRotation = selection ? selection.center() : [0, 0, 0];
+      this.stabilizationAnchor = null;
       this.version = 0;
       this.resetAnimatedTransform();
     }
@@ -35,6 +37,22 @@
     erase(selection) { this.section = this.section.substract(selection); this.queueRedraw(); }
     mergeOnto(other) { this.visible = false; if (other.isEmpty()) other.set(this.section); else other.add(this.section); }
     setAnimatedOffset(v, force) { this.animatedOffset = v; if (force) this.prevAnimatedOffset = v; }
+    setAnimatedRotation(v, force) { this.animatedRotation = v; if (force) this.prevAnimatedRotation = v; }
+    // transformMS: offset, then rotation X, Y, Z about the centre, undone about the anchor.
+    transform(m, pt) {
+      const M = P.Mat, a = this.prevAnimatedOffset, b = this.animatedOffset;
+      m = M.translate(m, P.lerp(pt, a[0], b[0]), P.lerp(pt, a[1], b[1]), P.lerp(pt, a[2], b[2]));
+      const r0 = this.prevAnimatedRotation, r1 = this.animatedRotation;
+      if (r0.every(v => v === 0) && r1.every(v => v === 0)) return m;
+      const rx = P.lerp(pt, r0[0], r1[0]), ry = P.lerp(pt, r0[1], r1[1]), rz = P.lerp(pt, r0[2], r1[2]);
+      const around = (m, c, sign) => {
+        m = M.translate(m, c[0], c[1], c[2]);
+        m = sign > 0 ? M.rotZ(M.rotY(M.rotX(m, rx), ry), rz) : M.rotZ(M.rotY(M.rotX(m, -rx), -ry), -rz);
+        return M.translate(m, -c[0], -c[1], -c[2]);
+      };
+      m = around(m, this.centerOfRotation, 1);
+      return this.stabilizationAnchor ? around(m, this.stabilizationAnchor, -1) : m;
+    }
     queueRedraw() { this.version++; }
   }
 

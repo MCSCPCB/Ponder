@@ -81,6 +81,7 @@
       util.select.column = (x, z) => S.box(x, 0, z, x, size.y - 1, z);
       this.world = new WorldInstructions(this);
       this.overlay = new OverlayInstructions(this);
+      this.special = new SpecialInstructions(this);
     }
     addInstruction(i) { this.scene.schedule.push(typeof i === "function" ? new I.Simple(i) : i); }
     // PonderLocalization.getSpecific: <namespace>.ponder.<scene>.header, text_1, text_2...
@@ -108,21 +109,101 @@
     showSection(selection, fadeInDirection) {
       this.b.addInstruction(new I.DisplayWorldSection(15, fadeInDirection, selection, s => s.baseWorldSection));
     }
-    showIndependentSection(selection, fadeInDirection) {
-      const i = new I.DisplayWorldSection(15, fadeInDirection, selection, null);
+    showSectionAndMerge(selection, fadeInDirection, link) {
+      this.b.addInstruction(new I.DisplayWorldSection(15, fadeInDirection, selection, s => s.resolve(link)));
+    }
+    glueBlockOnto(pos, fadeInDirection, link) { this.showSectionAndMerge(at(pos), fadeInDirection, link); }
+    showIndependentSection(selection, fadeInDirection) { return this.independent(15, fadeInDirection, selection); }
+    showIndependentSectionImmediately(selection) { return this.independent(0, "DOWN", selection); }
+    independent(ticks, fadeInDirection, selection) {
+      const i = new I.DisplayWorldSection(ticks, fadeInDirection, selection, null);
       i.link = {};
       this.b.addInstruction(i);
       return i.link;
     }
-    setBlock(pos, block) { this.setBlocks(S.box(pos[0], pos[1], pos[2], pos[0], pos[1], pos[2]), block); }
-    setBlocks(selection, block) { this.b.addInstruction(new I.ReplaceBlocks(selection, block, true)); }
-    modifyBlocks(selection, block) { this.b.addInstruction(new I.ReplaceBlocks(selection, block, false)); }
+    hideSection(selection, fadeOutDirection) {
+      const link = {};
+      this.b.addInstruction(scene => {
+        const e = new P.WorldSectionElement(selection);
+        scene.baseWorldSection.erase(selection);
+        scene.linkElement(e, link);
+        scene.addElement(e);
+        e.queueRedraw();
+      });
+      this.hideIndependentSection(link, fadeOutDirection);
+    }
+    hideIndependentSection(link, fadeOutDirection) { this.b.addInstruction(new I.FadeOutOfScene(15, fadeOutDirection, link)); }
+    restoreBlocks(selection) { this.b.addInstruction(scene => { scene.world.restoreBlocks(selection); redraw(scene); }); }
+    makeSectionIndependent(selection) {
+      const link = {};
+      this.b.addInstruction(scene => {
+        const e = new P.WorldSectionElement(selection);
+        scene.baseWorldSection.erase(selection);
+        scene.linkElement(e, link);
+        scene.addElement(e);
+        e.queueRedraw();
+        e.resetAnimatedTransform();
+        e.visible = true;
+        e.forceApplyFade(1);
+      });
+      return link;
+    }
+    rotateSection(link, xRotation, yRotation, zRotation, duration) {
+      this.b.addInstruction(I.AnimateElement.rotateSection(link, [xRotation, yRotation, zRotation], duration));
+    }
+    configureCenterOfRotation(link, anchor) { this.b.addInstruction(scene => { const e = scene.resolve(link); if (e) e.centerOfRotation = anchor; }); }
+    configureStabilization(link, anchor) { this.b.addInstruction(scene => { const e = scene.resolve(link); if (e) e.stabilizationAnchor = anchor; }); }
+    moveSection(link, offset, duration) { this.b.addInstruction(I.AnimateElement.moveSection(link, offset, duration)); }
+    incrementBlockBreakingProgress(pos) {
+      this.b.addInstruction(scene => {
+        const w = scene.world, k = P.blockKey(pos[0], pos[1], pos[2]);
+        const progress = (w.breaking.has(k) ? w.breaking.get(k) : -1) + 1;
+        if (progress === 9) {
+          w.addBlockDestroyEffects(pos, w.getBlock(pos[0], pos[1], pos[2]));
+          w.setBlock(pos[0], pos[1], pos[2], null);
+          w.setBlockBreakingProgress(pos[0], pos[1], pos[2], 0);
+          redraw(scene);
+        } else w.setBlockBreakingProgress(pos[0], pos[1], pos[2], progress + 1);
+      });
+    }
+    // Blocks are Bedrock ids or { id, states } (P.block); state functions map one to the next.
+    setBlocks(selection, block, spawnParticles) { this.b.addInstruction(new I.ReplaceBlocks(selection, () => block, true, spawnParticles)); }
+    destroyBlock(pos) { this.setBlock(pos, null, true); }
+    setBlock(pos, block, spawnParticles) { this.setBlocks(at(pos), block, spawnParticles); }
+    replaceBlocks(selection, block, spawnParticles) { this.modifyBlocks(selection, () => block, spawnParticles); }
+    modifyBlock(pos, stateFunc, spawnParticles) { this.modifyBlocks(at(pos), stateFunc, spawnParticles); }
+    // Boolean and 0/1 states flip; any other state steps through `values`.
+    cycleBlockProperty(pos, state, values) {
+      this.modifyBlocks(at(pos), b => {
+        const states = P.blockStates(b);
+        if (!(state in states)) return b;
+        const v = states[state];
+        const next = values ? values[(values.indexOf(v) + 1) % values.length] : typeof v === "number" ? 1 - v : !v;
+        return P.withStates(b, { [state]: next });
+      }, false);
+    }
+    modifyBlocks(selection, stateFunc, spawnParticles) { this.b.addInstruction(new I.ReplaceBlocks(selection, stateFunc, false, spawnParticles)); }
+    toggleRedstonePower(selection) { this.modifyBlocks(selection, P.toggleRedstonePower, false); }
+  }
+  const at = pos => S.box(pos[0], pos[1], pos[2], pos[0], pos[1], pos[2]);
+  const redraw = scene => scene.forEach(P.WorldSectionElement, e => e.queueRedraw());
+
+  class SpecialInstructions {
+    constructor(b) { this.b = b; }
+    // MovePoiInstruction; a block position means its centre.
+    movePointOfInterest(location) { this.b.addInstruction(scene => scene.setPointOfInterest(location)); }
+    movePointOfInterestTo(pos) { this.movePointOfInterest(util.vector.centerOf(pos[0], pos[1], pos[2])); }
+    hideElement(link, direction) { this.b.addInstruction(new I.FadeOutOfScene(15, direction, link)); }
   }
 
   // TextElementBuilder
   class OverlayInstructions {
     constructor(b) { this.b = b; }
     showOutline(color, slot, selection, duration) { this.b.addInstruction(new I.OutlineSelection(color, slot, selection, duration)); }
+    // Boxes are [[minX, minY, minZ], [maxX, maxY, maxZ]] in scene space.
+    chaseBoundingBoxOutline(color, slot, box, duration) { this.b.addInstruction(new I.ChaseAABB(color, slot, box, duration)); }
+    showLine(color, start, end, duration) { this.b.addInstruction(new I.Line(color, start, end, duration, false)); }
+    showBigLine(color, start, end, duration) { this.b.addInstruction(new I.Line(color, start, end, duration, true)); }
     showOutlineWithText(selection, duration) {
       return this.textBuilder(new P.TextWindowElement(), e => new I.TextWithOutline(e, duration, selection)).pointAt(selection.center());
     }

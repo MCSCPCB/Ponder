@@ -11,13 +11,12 @@
   const curve = l => { const f = l / 15, b = f / (4 - 3 * f), g = 1 - Math.pow(1 - b, 4); return 0.04 + 0.96 * P.lerp(0.5, b, g); };
   const lightFromFade = fade => (fade === 1 ? 1 : curve(P.int(P.lerp(fade, 5, 15))) / curve(15));
 
-  // The section's transform: the scene's, then the fade-in offset and its animated offset.
+  // The section's transform: the scene's, then the fade-in offset and its animated transform.
   function sectionMatrix(scene, e, pt) {
     let m = scene.transform.matrix(pt);
     const fade = e.fade.getValue(pt);
     if (e.fadeVec) m = M.translate(m, e.fadeVec[0] * (fade - 1), e.fadeVec[1] * (fade - 1), e.fadeVec[2] * (fade - 1));
-    const a = e.prevAnimatedOffset, b = e.animatedOffset;
-    return M.translate(m, P.lerp(pt, a[0], b[0]), P.lerp(pt, a[1], b[1]), P.lerp(pt, a[2], b[2]));
+    return e.transform(m, pt);
   }
 
   // The faces of the section's blocks that are not against a full block of the section.
@@ -78,12 +77,18 @@
     items.sort((a, b) => a.depth - b.depth);
     // About half a GUI pixel of overlap between neighbouring faces at 30 px per block.
     const blockPx = 30 * scene.scaleFactor, grow = 0.6 / blockPx, size = Math.max(16, Math.round(blockPx * P.view.cssPerGui));
-    items.forEach(it => it.b.faces.forEach(f => {
-      const face = f[1];
-      if (!facing(it.m, face.n)) return;
-      const c = corners(it.m, it.b.p, face, it.b.model.opaque ? grow : 0);
-      d.texturedQuad(it.b.model.faces[f[0]], c[0], c[1], c[2], filterOf(P.SHADE[f[0]] * it.light, it.b.model.tint), size);
-    }));
+    const breaking = scene.world.breaking;
+    items.forEach(it => {
+      // renderBreakingTexture: destroy_stage_<progress> over the block's faces.
+      const stage = breaking.get(P.blockKey(it.b.p[0], it.b.p[1], it.b.p[2]));
+      it.b.faces.forEach(f => {
+        const face = f[1];
+        if (!facing(it.m, face.n)) return;
+        const c = corners(it.m, it.b.p, face, it.b.model.opaque ? grow : 0);
+        d.texturedQuad(it.b.model.faces[f[0]], c[0], c[1], c[2], filterOf(P.SHADE[f[0]] * it.light, it.b.model.tint), size);
+        if (stage != null) d.texturedQuad(`pack://textures/environment/destroy_stage_${stage}.png?filtering=point`, c[0], c[1], c[2], null, size);
+      });
+    });
   };
 
   // renderLast: the outline of the block identify mode points at (AABBOutline, colour 0xefefef).
@@ -109,7 +114,8 @@
     scene.forEachVisible(P.WorldSectionElement, e => {
       e.selectedBlock = null;
       if (e.isEmpty()) return;
-      const off = e.animatedOffset, a = from.map((v, i) => v - off[i]), b = to.map((v, i) => v - off[i]);
+      // reverseTransformVec
+      const inv = M.invert(e.transform(M.id(), 1)), a = M.apply(inv, from[0], from[1], from[2]), b = M.apply(inv, to[0], to[1], to[2]);
       const hit = traverse(a, b, (x, y, z) => e.section.has(x, y, z) && scene.world.getBlock(x, y, z));
       if (!hit) return;
       const dist = Math.hypot(hit.at[0] - a[0], hit.at[1] - a[1], hit.at[2] - a[2]);
