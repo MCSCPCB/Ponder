@@ -1,0 +1,33 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Redstone Lamp Ponder Behavior",
+    "description": "Registers the redstone lamp Ponder scenes with Ponder.",
+    "min_engine_version": [1, 21, 0],
+    "uuid": "8907150a-03f9-4fe3-b1eb-eddd08ad195e",
+    "version": [1, 0, 0]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "108aa064-23ef-4d13-8f04-d6df2163223e",
+      "entry": "scripts/index.js",
+      "version": [1, 0, 0]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "8efd9501-f059-4cf6-9e67-b1b74bc045ee",
+      "version": [1, 0, 0]
+    },
+    {
+      "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
+      "version": [1, 0, 0]
+    },
+    {
+      "module_name": "@minecraft/server",
+      "version": "beta"
+    }
+  ]
+}

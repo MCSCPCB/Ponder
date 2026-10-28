@@ -1,0 +1,9 @@
+redstone_lamp.ponder.tag.redstone=Redstone
+redstone_lamp.ponder.tag.redstone.description=Components which help with redstone engineering
+
+redstone_lamp.ponder.redstone_lamp.header=Redstone Lamp
+redstone_lamp.ponder.redstone_lamp.text_1=Redstone Lamps stay dark on their own and light up as soon as they receive a redstone signal
+redstone_lamp.ponder.redstone_lamp.text_2=An active power source or a powered block next to the lamp lights it directly
+redstone_lamp.ponder.redstone_lamp.text_3=Redstone Dust, Repeaters and Comparators pointing into the lamp light it too, including dust on top of it
+redstone_lamp.ponder.redstone_lamp_delay.header=Redstone Lamp Timing
+redstone_lamp.ponder.redstone_lamp_delay.text_1=Once the signal is gone, the lamp takes 4 game ticks to turn off. It conducts redstone, so a powered lamp can drive adjacent components
