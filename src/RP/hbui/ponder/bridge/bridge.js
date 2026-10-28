@@ -8,7 +8,7 @@
   const ADDONS = /ponder\.addons:(\[[^;]*\]);/;
   const CLOSE_LABEL = "ponder:close;"; // the behavior pack's own close button
   const GROUP = "vanillaCoreDataStoreSetCommandGroup";
-  const bridge = (P.bridge = { screenId: "", definition: "", item: null, onOpen: null, onClose: null });
+  const bridge = (P.bridge = { screenId: "", definition: "", data: {}, item: null, onOpen: null, onClose: null });
 
   // Vanilla ids are uint32 hashes, passed as strings up to 1.26.51 and as numbers from 1.26.60;
   // tools/adapter sets QUERY_ID for the target version. Ours count down from the top of the range.
@@ -37,6 +37,24 @@
     }
     return out;
   }
+  // The definition only binds the form's text to a data store path ("$.minecraft.custom_form_data_
+  // {instanceId}"); the text itself is read from there, as vanilla's getString binding does. The
+  // behavior pack puts the markers in the title and the first two labels.
+  const FIELDS = ["title", "layout[0].text", "layout[1].text"];
+  let dropData = [], dataPath = "";
+  function watchData() {
+    const m = /^\$\.([^.\s]+)\.([^.\s]+)$/m.exec(bridge.definition);
+    const path = m ? m[0] : "";
+    if (path === dataPath) return;
+    dataPath = path;
+    dropData.forEach(drop => drop());
+    bridge.data = {};
+    dropData = m ? FIELDS.map(field => subscribe("vanillaCoreDataStoreStringQuery", [m[1], m[2], field, false], value => {
+      bridge.data[field] = value && value.value != null ? String(value.value) : "";
+      if (P.DEBUG) P.log("data", field, bridge.data[field].slice(0, 80));
+    })) : [];
+  }
+
   let dropDefinition = null;
   function watchScreen() {
     subscribe("vanillaCoreDataDrivenUIScreenIdQuery", [], value => {
@@ -50,13 +68,17 @@
       dropDefinition = screenId ? subscribe("vanilla.CoreDataDrivenUIDefinitionQuery", [1, screenId], def => {
         bridge.definition = strings(def, []).join("\n");
         if (P.DEBUG) P.log("definition", bridge.definition.slice(0, 300).replace(/\n/g, " | "));
+        watchData();
       }) : null;
+      watchData();
     });
   }
 
-  // A marker, from the form definition or else from the text Ore UI rendered.
+  // A marker, from the form's data, its definition, or else the text Ore UI rendered.
   function find(pattern) {
-    let m = pattern.exec(bridge.definition);
+    let m = pattern.exec(FIELDS.map(field => bridge.data[field] || "").join("\n"));
+    if (m) return m[1];
+    m = pattern.exec(bridge.definition);
     if (m) return m[1];
     const root = document.getElementById("root");
     if (!root) return null;

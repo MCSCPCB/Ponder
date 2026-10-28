@@ -27,6 +27,7 @@ const TOOLS = path.resolve(__dirname, "..");
 const NAMES = [
   { use: "DDUI screen id query", names: ["vanillaCoreDataDrivenUIScreenIdQuery", "vanilla.ddui.screenId"] },
   { use: "DDUI definition query", names: ["vanilla.CoreDataDrivenUIDefinitionQuery"] },
+  { use: "DDUI data store string query", names: ["vanillaCoreDataStoreStringQuery", "vanilla.ddui.string"] },
   { use: "DDUI data store commands", names: ["vanillaCoreDataStoreSetCommandGroup", "vanillaDduiDataStoreSetCommandGroup"] },
   { use: "form button press", names: ["dataStoreButtonPress"] },
   { use: "form close button press", names: ["dataStoreCloseButtonPress"] },
