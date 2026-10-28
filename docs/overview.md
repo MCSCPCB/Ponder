@@ -1,0 +1,50 @@
+# Ponder 基岩版概述
+
+Ponder 是 Java 版 [Create](https://github.com/Creators-of-Create/Create) 的思索界面在基岩版上的复刻。玩家对一件物品打开思索，就能看一段方块结构的动画演示，旁边配有讲解文字。
+
+## 它能做什么
+
+- 为任意物品注册一个或多个场景。场景是一段脚本，控制方块的出现、移动、替换，以及文字、描边、粒子和掉落物。
+- 用标签把相关物品归类。标签显示在标签索引和场景的“关联词条”里。
+- 多个包可以同时往 Ponder 里加内容。一件物品可以同时拥有几个包的场景，一个包也可以把物品加进别的包的标签。
+
+## 工作方式
+
+Ponder 本身是一对行为包和资源包。界面画在资源包的 Ore UI（`hbui/gameplay.html`）里，以 1.26.51 为准编写。
+
+你的内容也是一对行为包和资源包：
+
+- **行为包**在世界加载后发一条 `ponder:register` 脚本事件，告诉 Ponder 你的插件脚本在哪、哪些物品能打开思索。
+- **资源包**里放插件脚本 `plugin.js`、翻译文件，以及可选的结构文件和贴图。
+
+玩家打开思索时，Ponder 载入所有报到过的插件脚本，再显示界面。插件脚本的写法对应 Java 版的 `PonderPlugin`，场景脚本对应 `SceneBuilder`。如果你写过 Java 版的思索，大部分代码可以照搬。
+
+## 玩家怎么打开
+
+- 使用一件注册过场景的物品。
+- `/ponder:ponder` 打开标签索引，`/ponder:ponder index` 打开物品索引，`/ponder:ponder <物品 id>` 直接打开该物品的场景。
+
+## 示例
+
+仓库里有三份可以直接启用的示例：
+
+| 位置 | 内容 |
+| --- | --- |
+| `src` | Ponder 本体，自带一个望远镜场景（Java 版的调试场景 1） |
+| `packs/Redstone` | 红石灯、活塞、拉杆与按钮、中继器、比较器、漏斗。演示大部分场景指令 |
+| `packs/Gathering` | 挖矿、骨粉、TNT。演示自定义粒子、实体和方块模型，以及往 `packs/Redstone` 的标签和场景里加内容 |
+
+## 与 Java 版的差异
+
+- **方块外形**。只有红石粉画成薄片，楼梯、台阶、火把、拉杆、按钮、活塞等都画成完整方块。自定义方块同样只有 `"cube"` 和 `"wire"` 两种外形。
+- **方块 id**。用基岩版的 id 和方块状态，例如 Java 的 `snow_block` 在基岩版是 `minecraft:snow`。
+- **实体**。内置的只有掉落物，其他实体要自己写渲染，见[自定义方块、粒子与实体](reference/custom-content.md)。
+- **结构文件**。只读基岩版的小端 `.mcstructure`，不读 Java 版的 `.nbt`。
+- **字体**。沿用原版 Ore UI 的字体，汉字是 Noto Sans，字母和数字是 Minecraft 像素字体。
+
+## 下一步
+
+- [入门教程：做第一个思索包](getting-started.md)
+- [接口参考：插件注册](reference/registration.md)
+- [接口参考：场景指令](reference/scene.md)
+- [接口参考：自定义方块、粒子与实体](reference/custom-content.md)
