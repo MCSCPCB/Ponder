@@ -24,6 +24,7 @@
       this.stoppedCounting = false;
       this.transform = new P.SceneTransform(this);
       this.baseWorldSection = new P.WorldSectionElement();
+      this.outliner = new P.Outliner();
       this.pointOfInterest = this.chasingPoi = [0, 4, 0];
     }
     reset() {
@@ -54,6 +55,7 @@
     tick() {
       const t = this.chasingPoi;
       this.pointOfInterest = this.pointOfInterest.map((v, i) => P.lerp(0.25, v, t[i]));
+      this.outliner.tick();
       this.transform.tick();
       this.elements.slice().forEach(e => e.tick(this));
       if (this.currentTime < this.totalTime) this.currentTime++;

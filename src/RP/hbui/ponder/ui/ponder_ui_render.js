@@ -27,6 +27,7 @@
     scene.transform.updateScreenParams(this.width, this.height, slide);
     P.renderWorldSections(d, scene, pt);
     P.renderSelection(d, scene);
+    scene.outliner.render(d, scene.transform.matrix(pt), pt, 30 * scene.scaleFactor);
     P.renderPlateEffects(d, scene, pt, this.finishingFlash.getValue(pt));
   };
 

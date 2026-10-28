@@ -122,9 +122,13 @@
   // TextElementBuilder
   class OverlayInstructions {
     constructor(b) { this.b = b; }
-    showText(duration) {
-      const element = new P.TextWindowElement();
-      this.b.addInstruction(new I.Text(element, duration));
+    showOutline(color, slot, selection, duration) { this.b.addInstruction(new I.OutlineSelection(color, slot, selection, duration)); }
+    showOutlineWithText(selection, duration) {
+      return this.textBuilder(new P.TextWindowElement(), e => new I.TextWithOutline(e, duration, selection)).pointAt(selection.center());
+    }
+    showText(duration) { return this.textBuilder(new P.TextWindowElement(), e => new I.Text(e, duration)); }
+    textBuilder(element, instruction) {
+      this.b.addInstruction(instruction(element));
       const b = this.b, builder = {
         text: t => { const key = b.specificKey("text_" + ++b.textIndex); element.textGetter = () => P.localize(key, t); return builder; },
         pointAt: v => { element.vec = v; return builder; },

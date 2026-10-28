@@ -19,6 +19,13 @@
     add(other) { const s = this.copy(); other.keys.forEach(k => s.keys.add(k)); return s; }
     substract(other) { const s = this.copy(); other.keys.forEach(k => s.keys.delete(k)); return s; }
     has(x, y, z) { return this.keys.has(key(x, y, z)); }
+    // Compound.getCenter: the mean of the blocks' corners, plus half a block.
+    center() {
+      const c = [0, 0, 0];
+      if (!this.keys.size) return c;
+      this.keys.forEach(k => k.split(",").forEach((v, i) => { c[i] += +v; }));
+      return c.map(v => v / this.keys.size + 0.5);
+    }
   }
   P.Selection = Selection;
   P.blockKey = key;

@@ -19,7 +19,7 @@
     furnace: { up: "furnace_top", down: "furnace_top", north: "furnace_front_off", side: "furnace_side" },
     farmland: { up: "farmland_dry", side: "dirt", down: "dirt" },
     redstone_lamp: "redstone_lamp_off", lit_redstone_lamp: "redstone_lamp_on",
-    redstone_wire: "redstone_dust_cross",
+    redstone_wire: "redstone_dust_cross", snow_block: "snow",
   };
   const COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"];
   COLORS.forEach(c => {

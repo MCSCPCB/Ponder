@@ -1,5 +1,7 @@
 widgets.png and logo.png are copied unchanged from Ponder
 (https://github.com/Creators-of-Create/Ponder, assets/ponder/textures/gui/).
+../structures/debug/scene_1.nbt is copied unchanged from the same project
+(assets/ponder/ponder/debug/scene_1.nbt).
 
 MIT License
 
