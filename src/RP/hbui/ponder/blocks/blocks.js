@@ -9,8 +9,8 @@
   P.blockStates = block => (typeof block === "string" ? {} : block.states);
   P.withStates = (block, changes) => P.block(P.blockId(block), Object.assign({}, P.blockStates(block), changes));
 
-  // Bedrock texture names (textures/blocks/<name>.png) by block id. Ids not listed use a
-  // texture of their own name.
+  // Files under textures/blocks/ for ids blocks.json does not resolve (its flattened ids such as
+  // oak_log live in versioned packs, and grass is tinted). Ids in neither use their own name.
   const TABLE = {
     grass_block: { up: "grass_carried", down: "dirt", side: "grass_side_carried" },
     oak_log: { up: "log_oak_top", down: "log_oak_top", side: "log_oak" },
@@ -19,12 +19,7 @@
     oak_planks: "planks_oak", spruce_planks: "planks_spruce", birch_planks: "planks_birch",
     stone_bricks: "stonebrick", bricks: "brick", terracotta: "hardened_clay",
     granite: "stone_granite", diorite: "stone_diorite", andesite: "stone_andesite",
-    sandstone: { up: "sandstone_top", down: "sandstone_bottom", side: "sandstone_normal" },
-    quartz_block: { up: "quartz_block_top", down: "quartz_block_bottom", side: "quartz_block_side" },
-    furnace: { up: "furnace_top", down: "furnace_top", north: "furnace_front_off", side: "furnace_side" },
-    farmland: { up: "farmland_dry", side: "dirt", down: "dirt" },
-    redstone_lamp: "redstone_lamp_off", lit_redstone_lamp: "redstone_lamp_on",
-    redstone_wire: "redstone_dust_cross", snow_block: "snow",
+    snow_block: "snow",
   };
   const COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"];
   COLORS.forEach(c => {
@@ -44,15 +39,56 @@
     return [f * 0.6 + (f > 0 ? 0.4 : 0.3), P.clamp(f * f * 0.7 - 0.5, 0, 1), P.clamp(f * f * 0.6 - 0.7, 0, 1)];
   };
 
+  // The game's own lookup: blocks.json gives each block a texture name per face (carried_textures,
+  // the inventory look, first), terrain_texture.json gives each name its file. A name with
+  // variants uses the first; one with an overlay_color falls back to TABLE (its tint is masked).
+  let blocksJson = {}, terrain = {};
+  // Vanilla's JSON carries // and /* */ comments, which the game's reader allows.
+  const stripComments = text => text.replace(/("(?:\\.|[^"\\])*")|\/\/[^\n]*|\/\*[\s\S]*?\*\//g, (m, str) => str || "");
+  const readJson = url => new Promise(resolve => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+    xhr.onload = () => resolve(JSON.parse(stripComments(xhr.responseText)));
+    xhr.onerror = () => { P.log("read failed", url); resolve({}); };
+    xhr.send();
+  });
+  let texturesLoaded = null;
+  P.loadBlockTextures = () => texturesLoaded || (texturesLoaded = Promise.all([
+    readJson("pack://blocks.json"), readJson("pack://textures/terrain_texture.json"),
+  ]).then(([b, t]) => { blocksJson = b; terrain = t.texture_data || {}; }));
+  // textures/blocks/<file> for a terrain texture name, or null.
+  function terrainFile(name) {
+    let t = terrain[name] && terrain[name].textures;
+    if (Array.isArray(t)) t = t[0];
+    if (t && typeof t === "object") t = t.overlay_color ? null : t.path;
+    return t ? t.replace(/^textures\/blocks\//, "") : null;
+  }
+  // Face -> file from blocks.json, or null when it does not know the block.
+  function jsonFaces(name) {
+    const entry = blocksJson[name];
+    const names = entry && (entry.carried_textures || entry.textures);
+    if (!names) return null;
+    const faces = {};
+    for (const f of ["up", "down", "north", "south", "west", "east"]) {
+      const n = typeof names === "string" ? names : names[f] || names.side;
+      const file = n && terrainFile(n);
+      if (!file) return null;
+      faces[f] = file;
+    }
+    return faces;
+  }
+
   const cache = new Map();
   P.blockId = block => (typeof block === "string" ? block : block.id);
   P.blockModel = function (block) {
     const id = P.blockId(block), power = P.blockStates(block).redstone_signal || 0, key = id + "#" + power;
     let model = cache.get(key);
     if (model) return model;
-    const name = id.replace(/^minecraft:/, ""), entry = TABLE[name] || name;
+    const name = id.replace(/^minecraft:/, ""), files = jsonFaces(name);
+    if (!files && !TABLE[name]) P.log("texture: blocks.json has no", name);
+    const entry = TABLE[name] || name;
     const texture = face => {
-      const t = typeof entry === "string" ? entry : entry[face] || entry.side || entry.up;
+      const t = files ? files[face] : typeof entry === "string" ? entry : entry[face] || entry.side || entry.up;
       return `pack://textures/blocks/${t}.png?filtering=point`;
     };
     model = { id, shape: name === "redstone_wire" ? "wire" : "cube", opaque: !TRANSPARENT.test(name), faces: {},

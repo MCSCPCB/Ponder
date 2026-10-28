@@ -40,7 +40,7 @@
   }
 
   P.bridge.onOpen = function (item, addons) {
-    return loadAddons(addons).then(() => {
+    return Promise.all([loadAddons(addons), P.loadBlockTextures()]).then(() => {
       P.registerAll();
       return P.loadStructures(P.structurePaths());
     }).then(() => {
