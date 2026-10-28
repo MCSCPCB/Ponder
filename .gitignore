@@ -2,3 +2,6 @@
 /_stash
 /.github
 /node_modules
+/tools/version
+/tools/input
+/tools/output
