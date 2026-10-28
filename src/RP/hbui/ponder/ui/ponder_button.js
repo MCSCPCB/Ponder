@@ -17,6 +17,7 @@
       this.icon = null; this.item = null; this.tag = null;
       this.shortcut = null; this.callback = null;
       this.background = P.C.BACKGROUND_TRANSPARENT;
+      this.active = true;
     }
     showing(icon) { this.icon = icon; return this; }
     showingItem(id) { this.item = id; return this; }
@@ -25,14 +26,19 @@
     withCallback(fn) { this.callback = fn; return this; }
     enableFade(modY) { this.fade.startWithValue(0); this.fadeModY = modY; return this; }
     withBorderColors(couple) { this.colors = { idle: couple, hover: couple, click: couple }; this.gradientColor = this.gradientTarget = couple; this.animateColors = false; return this; }
+    // AbstractSimiWidget.setActive: an inactive button takes no clicks and shows COLOR_DISABLED.
+    setActive(active) { this.active = active; return this; }
+    updateGradientFromState() { this.gradientTarget = this.colorForState(); return this; }
+    animateGradientFromState() { this.startGradientAnimation(this.colorForState(), 0.6); return this; }
     flashOn() { this.flash.updateChaseTarget(1); }
     dim() { this.flash.updateChaseTarget(0); }
     isVisible() { return !(this.fade.getValue() < 0.1); }
     isMouseOver(mx, my) {
+      if (!this.active) return false;
       const p = 2 + this.padding;
       return this.x - p <= mx && this.y - p <= my && mx < this.x + p + this.width && my < this.y + p + this.height;
     }
-    colorForState() { return this.hovered ? this.colors.hover : this.colors.idle; }
+    colorForState() { return !this.active ? P.C.BUTTON_DISABLED : this.hovered ? this.colors.hover : this.colors.idle; }
     startGradientAnimation(target, speed) {
       if (!this.animateColors) return;
       this.colorAnimation.startWithValue(1).chase(0, speed, P.Chaser.EXP);
@@ -41,10 +47,10 @@
       this.gradientTarget = target;
     }
     tick() { this.fade.tickChaser(); this.flash.tickChaser(); this.colorAnimation.tickChaser(); }
-    click() {
+    click(mx, my) {
       this.gradientColor = this.colors.click;
       this.startGradientAnimation(this.colorForState(), 0.15);
-      if (this.callback) this.callback();
+      if (this.callback) this.callback(mx, my);
     }
     render(d, mx, my, pt) {
       const fadeValue = this.fade.getValue(pt);

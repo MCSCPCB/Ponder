@@ -66,6 +66,25 @@
     return out;
   };
   P.wordWrapHeight = (text, maxWidth) => P.splitLines(text, maxWidth).length * LINE_HEIGHT;
+  // FontHelper.cutTextComponent: words (with their trailing spaces; CJK one character each, as
+  // BreakIterator splits them) fill lines up to maxWidth. "_" switches between the palette's two
+  // colours and is not drawn; it is dropped here, so callers pass single-colour palettes only.
+  const WORDS = /[　-鿿＀-￯]\s*|[^\s　-鿿＀-￯]*\s+|[^\s　-鿿＀-￯]+/g;
+  P.cutText = function (text, maxWidth) {
+    const lines = [];
+    let line = "", width = 0;
+    for (const word of String(text).match(WORDS) || []) {
+      const w = P.textWidth(word.replace(/_/g, ""));
+      if (width + w > maxWidth) {
+        if (width > 0) { lines.push(line); line = ""; width = 0; }
+        else { lines.push(word); continue; }
+      }
+      line += word;
+      width += w;
+    }
+    if (width > 0) lines.push(line);
+    return lines.map(l => l.replace(/_/g, ""));
+  };
 
   class DrawList {
     constructor(container) {

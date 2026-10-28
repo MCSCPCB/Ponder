@@ -1,9 +1,10 @@
 // Plugin registration, after Java's PonderIndex and the helpers in
 // api/registration (PonderPlugin, PonderSceneRegistrationHelper, PonderTagRegistrationHelper,
 // MultiSceneBuilder, MultiTagBuilder, StoryBoardEntry, TagBuilder, SharedTextRegistrationHelper,
-// IndexExclusionHelper). A plugin is { modId, registerScenes(helper), registerTags(helper),
-// registerSharedText(helper), onPonderLevelRestore(level), indexExclusions(helper) }; every method
-// is optional except modId. Plugins are sorted "create" first, then by modId, as Java does.
+// IndexExclusionHelper). A plugin is { modId, name, registerScenes(helper), registerTags(helper),
+// registerSharedText(helper), onPonderLevelRestore(level), indexExclusions(helper) }; everything
+// is optional except modId. `name` is the mod name the tag index shows (Java asks the mod loader;
+// Bedrock has none), modId otherwise. Plugins are sorted "create" first, then by modId, as Java does.
 (function () {
   const P = window.Ponder;
   const plugins = (P.plugins = []);

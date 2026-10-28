@@ -1,4 +1,4 @@
-import { system, world } from "@minecraft/server";
+import { system, world, CommandPermissionLevel, CustomCommandParamType, CustomCommandStatus } from "@minecraft/server";
 import { CustomForm } from "@minecraft/server-ui";
 
 // Ponder packs by other authors report in with a script event once the world has loaded:
@@ -36,4 +36,22 @@ world.afterEvents.itemUse.subscribe((event) => {
   const itemId = event.itemStack?.typeId;
   if (player?.typeId !== "minecraft:player" || !hasPonder(itemId)) return;
   openPonder(player, itemId);
+});
+
+// Java's /ponder: no argument opens the tag index, "index" the item index, an item id its scenes.
+system.beforeEvents.startup.subscribe((event) => {
+  const registry = event.customCommandRegistry;
+  registry.registerCommand({
+    name: "ponder:ponder",
+    description: "ponder.command.ponder",
+    permissionLevel: CommandPermissionLevel.Any,
+    cheatsRequired: false,
+    optionalParameters: [{ name: "ponder.command.scene", type: CustomCommandParamType.String }],
+  }, (origin, scene) => {
+    const player = origin.sourceEntity;
+    if (!player) return { status: CustomCommandStatus.Failure };
+    const id = scene === "index" ? "ponder:index" : scene || "ponder:tags";
+    system.run(() => openPonder(player, id));
+    return { status: CustomCommandStatus.Success };
+  });
 });

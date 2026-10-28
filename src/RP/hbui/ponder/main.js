@@ -45,12 +45,16 @@
       return P.loadStructures(P.structurePaths());
     }).then(() => {
       if (P.bridge.item !== item) return false; // the form closed while loading
-      if (!P.indexedItems().includes(item)) { P.log("no scenes for", item); return false; }
+      let screen = null;
+      if (item === "ponder:index") screen = new P.PonderIndexScreen();
+      else if (item === "ponder:tags") screen = new P.PonderTagIndexScreen();
+      else if (P.indexedItems().includes(item)) screen = new P.PonderUI(item);
+      else { P.log("no scenes for", item); return false; }
       P.updateView();
       P.screens.reset();
       root.style.display = "";
       open = true;
-      P.screens.open(new P.PonderUI(item));
+      P.screens.open(screen);
       P.log("open", item, `gui ${P.view.width}x${P.view.height} scale ${P.view.scale} font ${P.fontReady() ? "ok" : "not loaded"}`);
       return true;
     });

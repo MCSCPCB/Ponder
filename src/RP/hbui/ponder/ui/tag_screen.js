@@ -3,7 +3,7 @@
   const P = window.Ponder;
 
   // LayoutHelper.centeredHorizontal
-  function centeredHorizontal(count, rows, w, h, spacing) {
+  const centeredHorizontal = (P.centeredHorizontal = function (count, rows, w, h, spacing) {
     const per = Math.floor(count / rows), rowCounts = [];
     let diff = count - per * rows;
     for (let i = 0; i < rows; i++) rowCounts.push(per + (diff-- > 0 ? 1 : 0));
@@ -25,7 +25,7 @@
       l.x += w + spacing;
     };
     return l;
-  }
+  });
 
   class PonderTagScreen extends P.Screen {
     constructor(tag) { super(); this.tag = tag; this.hoveredItem = null; }
@@ -39,8 +39,8 @@
       const cx = P.int(this.width * 0.5), cy = this.itemsY();
       const button = (id, x, y) => {
         const b = new P.PonderButton(x, y).showingItem(id);
-        if (P.indexedItems().includes(id)) b.withCallback(() => {
-          this.centerScalingOn(this.mouse[0], this.mouse[1]);
+        if (P.indexedItems().includes(id)) b.withCallback((mx, my) => {
+          this.centerScalingOn(mx, my);
           P.screens.transitionTo(new P.PonderUI(id, tag));
         });
         else b.withBorderColors(/^minecraft:/.test(id) ? P.C.MISSING_VANILLA : P.C.MISSING_MODDED);

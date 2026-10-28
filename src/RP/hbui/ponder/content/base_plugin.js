@@ -72,6 +72,7 @@
 
   P.addPlugin({
     modId: "ponder",
+    name: "Ponder",
     registerScenes(helper) {
       helper.forComponents(LAMP)
         .addStoryBoard(schematic, lamp, "ponder:redstone")
