@@ -3,9 +3,12 @@
 //   1. Put the packs in tools/input/ as .zip, .mcpack or .mcaddon: Ponder itself (src/BP and
 //      src/RP) and the add-ons with Ponder scenes, each add-on whole (behavior and resource pack).
 //   2. Into tools/version/<version>/ put the game's gui folder, so that
-//      tools/version/<version>/gui/dist/hbui/gameplay.html exists, and Mojang's
-//      bedrock-samples-v<release>-min.zip (github.com/Mojang/bedrock-samples/releases, the newest
-//      full release no newer than <version>), which has vanilla's resource pack.
+//      tools/version/<version>/gui/dist/hbui/gameplay.html exists; Mojang's
+//      bedrock-samples-v<release>-full.zip (github.com/Mojang/bedrock-samples/releases, the newest
+//      full release no newer than <version>), which has vanilla's resource pack with its
+//      textures; and in scaffold/ the shape tables of Scaffold (github.com/EvilSlimeLabs/Scaffold:
+//      block_definition, block_geometry, block_rotation, state_rotations and dust_connections
+//      .json from scaffold/lookups/) with its LICENSE.
 //   3. node tools/adapter/adapt.js <version>
 //   4. Take the results from tools/output/<version>/.
 //
@@ -19,7 +22,9 @@
 // - swaps vanilla's hashed bundle names at the top of hbui/gameplay.html for the target's;
 // - renames the vanilla queries and commands Ponder calls to what the target bundle calls them
 //   (NAMES below), and stops if the bundle has none of the known names;
-// - writes hbui/ponder/blocks/vanilla_blocks.json, every vanilla block's textures;
+// - writes hbui/ponder/blocks/vanilla_blocks.json: vanilla's textures (size, animation), each
+//   block's textures and, from Scaffold's tables, the shapes of the blocks that are not a plain
+//   cube, with Scaffold's licence beside it;
 // - sets header.min_engine_version to the target version.
 // An add-on: for each hbui/ponder_addons/<folder>/ in its resource pack, writes ponder_blocks.json
 // there, what Ponder needs to draw the add-on's own blocks. Its scripts and min_engine_version
@@ -125,8 +130,9 @@ function readDir(dir) {
 }
 
 // Sizes come from the central directory: zips written with data descriptors leave them 0 in the
-// local headers. Folders, and macOS's __MACOSX copies, are skipped.
-function readZip(file) {
+// local headers. Folders, and macOS's __MACOSX copies, are skipped; so is every entry `keep`, when
+// given, says no to.
+function readZip(file, keep) {
   const data = fs.readFileSync(file);
   const files = new Map();
   let end = data.length - 22;
@@ -144,7 +150,7 @@ function readZip(file) {
     const local = data.readUInt32LE(entry + 42);
     const name = data.toString("utf8", entry + 46, entry + 46 + nameLength).replace(/\\/g, "/");
     entry += 46 + nameLength + extraLength + commentLength;
-    if (!name || name.endsWith("/") || name.startsWith("__MACOSX/")) continue;
+    if (!name || name.endsWith("/") || name.startsWith("__MACOSX/") || (keep && !keep(name))) continue;
     const start = local + 30 + data.readUInt16LE(local + 26) + data.readUInt16LE(local + 28);
     const bytes = data.subarray(start, start + compressed);
     if (method === 0) files.set(name, Buffer.from(bytes));
@@ -278,19 +284,55 @@ function adaptPack(pack, target, engine, versions, main) {
 
 // ---- vanilla's blocks, from bedrock-samples ----
 
-// The resource pack in the version folder's bedrock-samples-v<release>-min.zip: one pack, every
-// version layer already merged.
+// The resource pack in the version folder's bedrock-samples-v<release>-full.zip (one pack, every
+// version layer already merged; of its images only their sizes are kept), and Scaffold's tables
+// in its scaffold/.
+const SCAFFOLD = ["block_definition", "block_geometry", "block_rotation", "state_rotations", "dust_connections"];
+const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga))$/;
 function vanillaPack(folder) {
-  const zips = fs.readdirSync(folder).filter(name => /^bedrock-samples-v[\d.]+-min\.zip$/.test(name)).sort();
-  if (!zips.length) fail("no bedrock-samples-v<release>-min.zip in " + path.relative(TOOLS, folder) + " (download it from github.com/Mojang/bedrock-samples/releases)");
-  const file = path.join(folder, zips[zips.length - 1]), files = new Map();
-  readZip(file).forEach((bytes, name) => { if (name.startsWith("resource_pack/")) files.set(name.slice("resource_pack/".length), bytes); });
+  const zips = fs.readdirSync(folder).filter(name => /^bedrock-samples-v[\d.]+-full\.zip$/.test(name)).sort();
+  if (!zips.length) fail("no bedrock-samples-v<release>-full.zip in " + path.relative(TOOLS, folder) + " (download it from github.com/Mojang/bedrock-samples/releases)");
+  const file = path.join(folder, zips[zips.length - 1]), files = new Map(), sizes = new Map();
+  readZip(file, name => RESOURCES.test(name)).forEach((bytes, name) => {
+    const rel = name.slice("resource_pack/".length), image = /^(.+)\.(png|tga)$/.exec(rel);
+    if (!image) files.set(rel, bytes);
+    else if (image[2] === "png" || !sizes.has(image[1])) sizes.set(image[1], Object.assign({ file: rel }, imageSize(bytes, image[2])));
+  });
   if (!files.has("blocks.json")) fail(path.basename(file) + " has no resource_pack/blocks.json");
+  const scaffold = {};
+  SCAFFOLD.forEach(name => {
+    const table = path.join(folder, "scaffold", name + ".json");
+    if (!fs.existsSync(table)) fail("missing " + path.relative(TOOLS, table) + " (Scaffold's scaffold/lookups/" + name + ".json)");
+    scaffold[name] = parseJson(fs.readFileSync(table), "scaffold/" + name + ".json");
+  });
+  const license = path.join(folder, "scaffold", "LICENSE");
+  if (!fs.existsSync(license)) fail("missing " + path.relative(TOOLS, license) + " (Scaffold's LICENSE)");
   return {
-    file, files,
+    file, sizes, scaffold, license: fs.readFileSync(license, "utf8"),
     blocks: parseJson(files.get("blocks.json"), "vanilla blocks.json"),
     terrain: parseJson(files.get("textures/terrain_texture.json"), "vanilla textures/terrain_texture.json").texture_data,
+    flipbooks: flipbookTable(parseJson(files.get("textures/flipbook_textures.json"), "vanilla textures/flipbook_textures.json")),
   };
+}
+
+// An image's size from its header: PNG's IHDR, TGA's image specification.
+const imageSize = (bytes, ext) => (ext === "png" ? { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) } : { width: bytes.readUInt16LE(12), height: bytes.readUInt16LE(14) });
+// flipbook_textures.json: texture -> { tick, seq }, seq the frames' order when it lists one.
+function flipbookTable(list) {
+  const out = new Map();
+  list.forEach(e => out.set(e.flipbook_texture, { tick: e.ticks_per_frame || 1, seq: Array.isArray(e.frames) ? e.frames : null }));
+  return out;
+}
+// What Ponder needs of a texture: its file and size and, for an animation (a strip of square
+// frames, top to bottom), how many frames, how many ticks each, and their order.
+function textureEntry(size, flipbook) {
+  const out = { file: size.file, w: size.width, h: size.height };
+  if (flipbook) {
+    out.frames = Math.max(1, Math.round(size.height / size.width));
+    out.tick = flipbook.tick;
+    if (flipbook.seq) out.seq = flipbook.seq;
+  }
+  return out;
 }
 
 // A texture's file in a pack, with its extension (textures/blocks/stone -> textures/blocks/stone.png).
@@ -304,35 +346,107 @@ function terrainPath(entry) {
   return typeof t === "string" ? t : null;
 }
 const terrainFile = (files, terrain, name) => { const t = terrainPath(terrain[name]); return t && textureFile(files, t); };
-// bedrock-samples' min.zip holds no images, so a vanilla texture is taken to be a .png; the few
-// that are only .tga in the game (cactus, ferns, the double plants) do not load that way.
-const vanillaTexture = (vanilla, name) => { const t = terrainPath(vanilla.terrain[name]); return t ? t + ".png" : null; };
+// Every texture a terrain_texture.json entry lists, tinted or not, in order: a block's state
+// picks one by its place in the list.
+function terrainList(entry) {
+  const t = entry && entry.textures, list = Array.isArray(t) ? t : [t];
+  return list.map(x => (typeof x === "string" ? x : (x && x.path) || null));
+}
 
-// vanilla_blocks.json: block name (the id without minecraft:) -> its texture file, or one per face
-// { up, down, north, south, west, east }. blocks.json names each face's texture, the inventory
-// look (carried_textures) first; terrain_texture.json gives its file. A block with a face the
-// game tints is left out, and Ponder falls back to its own table for it.
+// vanilla_blocks.json:
+//   textures { path: { file, w, h, frames, tick, seq } }, every texture the rest names;
+//   cubes { block: path, or one per face { up, down, north, south, west, east } }, a block drawn
+//     as a plain cube, block being the id without minecraft:. blocks.json names each face's
+//     texture, the inventory look (carried_textures) first, and terrain_texture.json its file. A
+//     block with a face the game tints is left out, and Ponder falls back to its own table;
+//   shapes, the blocks Scaffold gives a shape (vanillaShapes).
 const FACE_NAMES = ["up", "down", "north", "south", "west", "east"];
 const VANILLA_TABLE = "hbui/ponder/blocks/vanilla_blocks.json";
+const VANILLA_LICENSE = "hbui/ponder/blocks/vanilla_shapes_LICENSE.txt";
+const SHAPES_NOTICE = "The block shapes in vanilla_blocks.json (\"shapes\") are converted from the lookup tables of\n"
+  + "Scaffold, https://github.com/EvilSlimeLabs/Scaffold (scaffold/lookups/), under its licence:\n\n";
 function vanillaBlockTable(vanilla) {
-  const blocks = vanilla.blocks, table = {};
+  const textures = {}, cubes = {};
+  // A texture path the table names, or null when the pack has no such image.
+  const use = p => {
+    if (!p) return null;
+    if (!(p in textures)) { const size = vanilla.sizes.get(p); textures[p] = size ? textureEntry(size, vanilla.flipbooks.get(p)) : null; }
+    return textures[p] ? p : null;
+  };
   const faces = names => {
     const out = {};
     for (const face of FACE_NAMES) {
       const name = typeof names === "string" ? names : names[face] || names.side;
-      const file = name && vanillaTexture(vanilla, name);
-      if (!file) return null;
-      out[face] = file;
+      const p = name && use(terrainPath(vanilla.terrain[name]));
+      if (!p) return null;
+      out[face] = p;
     }
     return out;
   };
-  Object.keys(blocks).forEach(name => {
-    const entry = blocks[name];
+  Object.keys(vanilla.blocks).forEach(name => {
+    const entry = vanilla.blocks[name];
     if (!entry || typeof entry !== "object") return;
     const found = (entry.carried_textures && faces(entry.carried_textures)) || (entry.textures && faces(entry.textures));
-    if (found) table[name] = FACE_NAMES.every(face => found[face] === found.up) ? found.up : found;
+    if (found) cubes[name] = FACE_NAMES.every(face => found[face] === found.up) ? found.up : found;
   });
-  return table;
+  const shapes = vanillaShapes(vanilla, use);
+  Object.keys(textures).forEach(p => { if (!textures[p]) delete textures[p]; });
+  return { textures, cubes, shapes };
+}
+
+// The blocks Scaffold draws: shapes.blocks { block: family }; shapes.families { family: { pick,
+// data, turn_by, texture_by, forms } }, Scaffold's rules and its forms, without the simpler ones
+// its low geometry draws; shapes.rotations { family: { value: [x, y, z] } }, Minecraft's angles;
+// shapes.faces { block: terrain name, or { face: terrain name } } and shapes.terrain { name:
+// [texture path or null] }, the placed look in blocks.json and terrain_texture.json, as Scaffold
+// reads them; shapes.dust, the rules redstone dust joins by. A form's cubes keep Scaffold's
+// frame, blocks from the cell's low corner as a .geo.json has it. Scaffold draws a plain cube
+// 0.95 across so a ghost block lets the one behind show; here it fills its cell again. A face
+// with no area, which Scaffold does not draw, is left out, and so is one whose texture the pack
+// does not have. Water and lava stay as they were drawn before.
+const RULES = ["pick", "data", "turn_by", "texture_by"];
+const LIQUIDS = /^(flowing_)?(water|lava)$/;
+function vanillaShapes(vanilla, use) {
+  const s = vanilla.scaffold, geometry = s.block_geometry.families, standard = s.state_rotations.states;
+  const shapes = { blocks: {}, families: {}, rotations: {}, faces: {}, terrain: {} };
+  const trim = form => ({ center: form.center, cubes: form.cubes.map(c => {
+    const ghost = form.cubes.length === 1 && c.size.every(v => v === 0.95) && c.offset.every(v => v === 0.025);
+    const cube = { size: ghost ? [1, 1, 1] : c.size, offset: ghost ? [0, 0, 0] : c.offset, faces: {} };
+    if (c.rotation && c.rotation.some(Boolean)) cube.rotation = c.rotation;
+    FACE_NAMES.forEach(face => {
+      const f = c.faces[face];
+      if (!f || !f.size[0] || !f.size[1] || (f.texture && f.texture.texture && !use(f.texture.texture))) return;
+      cube.faces[face] = f;
+    });
+    return cube;
+  }).filter(c => Object.keys(c.faces).length) });
+  Object.entries(s.block_definition.blocks).forEach(([block, family]) => {
+    if (LIQUIDS.test(block)) return;
+    shapes.blocks[block] = family;
+    if (family === "ignore" || shapes.families[family] || !geometry[family]) return;
+    const entry = geometry[family], kept = { forms: {} };
+    RULES.forEach(r => { if (entry[r]) kept[r] = entry[r]; });
+    Object.keys(entry.forms).forEach(f => { kept.forms[f] = trim(entry.forms[f]); });
+    shapes.families[family] = kept;
+    const turns = s.block_rotation.families[family];
+    if (turns) shapes.rotations[family] = typeof turns === "string" ? standard[turns] : turns;
+  });
+  Object.keys(shapes.blocks).forEach(block => {
+    const declared = vanilla.blocks[block], layout = declared && declared.textures;
+    if (!layout) return;
+    const faces = {};
+    if (typeof layout === "string") FACE_NAMES.forEach(f => { faces[f] = layout; });
+    else {
+      if (layout.side) ["north", "south", "east", "west"].forEach(f => { faces[f] = layout.side; });
+      FACE_NAMES.forEach(f => { if (layout[f]) faces[f] = layout[f]; });
+    }
+    const names = Object.values(faces);
+    shapes.faces[block] = names.length === 6 && names.every(n => n === names[0]) ? names[0] : faces;
+    names.forEach(name => { if (!(name in shapes.terrain)) shapes.terrain[name] = terrainList(vanilla.terrain[name]).map(use); });
+  });
+  const d = s.dust_connections;
+  shapes.dust = { dust: d.dust, directions: d.directions, attract: d.attract, not_conductors: d.not_conductors, holds_dust: d.holds_dust };
+  return shapes;
 }
 
 // ---- an add-on's own blocks ----
@@ -373,9 +487,10 @@ function geometryEntries(json) {
 
 // ponder_blocks.json: blocks { id: { states, look, permutations: [{ condition, look }] } }, look
 // holding the block's geometry, material_instances and transformation; geometries { identifier:
-// { width, height, bones } }; textures { name: { pack, file } }, pack being the uuid of the
-// resource pack that has the file (none for vanilla's). Only blocks that say how they look, and
-// only the geometries and textures they use.
+// { width, height, bones } }; textures { name: { pack, file, w, h, frames, tick, seq } }, pack
+// being the uuid of the resource pack that has the file (none for vanilla's) and the rest as in
+// vanilla_blocks.json. Only blocks that say how they look, and only the geometries and textures
+// they use.
 function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
   const index = { blocks: {}, geometries: {}, textures: {} }, missing = [];
   const geometries = new Set(), textures = new Set();
@@ -404,18 +519,26 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
       if (geometries.has(g.identifier) && !index.geometries[g.identifier]) index.geometries[g.identifier] = { width: g.width, height: g.height, bones: g.bones };
     });
   }));
-  // A texture name is looked up in each resource pack's terrain_texture.json, then vanilla's.
+  // A texture name is looked up in each resource pack's terrain_texture.json, then vanilla's. Each
+  // keeps its size, and its animation from that pack's flipbook_textures.json.
   const terrains = resourcePacks.map(pack => {
     const bytes = pack.files.get("textures/terrain_texture.json");
     return bytes ? parseJson(bytes, pack.name + " textures/terrain_texture.json").texture_data || {} : {};
   });
+  const flipbooks = resourcePacks.map(pack => {
+    const bytes = pack.files.get("textures/flipbook_textures.json");
+    return bytes ? flipbookTable(parseJson(bytes, pack.name + " textures/flipbook_textures.json")) : new Map();
+  });
   textures.forEach(name => {
     for (let i = 0; i < resourcePacks.length; i++) {
       const file = terrainFile(resourcePacks[i].files, terrains[i], name);
-      if (file) { index.textures[name] = { pack: resourcePacks[i].uuid, file }; return; }
+      if (!file) continue;
+      const size = Object.assign({ file }, imageSize(resourcePacks[i].files.get(file), path.extname(file).slice(1)));
+      index.textures[name] = Object.assign({ pack: resourcePacks[i].uuid }, textureEntry(size, flipbooks[i].get(file.replace(/\.(png|tga)$/, ""))));
+      return;
     }
-    const file = vanillaTexture(vanilla, name);
-    if (file) index.textures[name] = { file };
+    const p = terrainPath(vanilla.terrain[name]), size = p && vanilla.sizes.get(p);
+    if (size) index.textures[name] = textureEntry(size, vanilla.flipbooks.get(p));
     else missing.push("texture " + name);
   });
   geometries.forEach(id => { if (!BUILT_IN_GEOMETRY.has(id) && !index.geometries[id]) missing.push("geometry " + id); });
@@ -537,7 +660,7 @@ function main() {
   const loadVanilla = () => {
     if (vanilla) return vanilla;
     vanilla = vanillaPack(folder);
-    console.log("vanilla blocks from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/"));
+    console.log("vanilla blocks from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/") + " and " + path.relative(TOOLS, path.join(folder, "scaffold")).split(path.sep).join("/"));
     return vanilla;
   };
   for (const group of groups) {
@@ -546,7 +669,9 @@ function main() {
       const table = vanillaBlockTable(loadVanilla());
       resourcePacks.filter(pack => pack.files.has("hbui/gameplay.html")).forEach(pack => {
         pack.files.set(VANILLA_TABLE, Buffer.from(JSON.stringify(table)));
-        pack.report.changes.push(VANILLA_TABLE + ": " + Object.keys(table).length + " vanilla blocks");
+        pack.files.set(VANILLA_LICENSE, Buffer.from(SHAPES_NOTICE + vanilla.license));
+        pack.report.changes.push(VANILLA_TABLE + ": " + Object.keys(table.textures).length + " textures, " + Object.keys(table.cubes).length + " cube blocks, "
+          + Object.keys(table.shapes.blocks).length + " blocks in " + Object.keys(table.shapes.families).length + " shapes; " + VANILLA_LICENSE);
       });
       continue;
     }
