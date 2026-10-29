@@ -1,8 +1,11 @@
 // Adapts Ponder packs to another game version. Node only, no packages.
 //
-//   1. Put the packs to adapt in tools/input/ as .zip, .mcpack or .mcaddon.
-//   2. Copy the game's gui folder into tools/version/<version>/, so that
-//      tools/version/<version>/gui/dist/hbui/gameplay.html exists.
+//   1. Put the packs in tools/input/ as .zip, .mcpack or .mcaddon: Ponder itself (src/BP and
+//      src/RP) and the add-ons with Ponder scenes, each add-on whole (behavior and resource pack).
+//   2. Into tools/version/<version>/ put the game's gui folder, so that
+//      tools/version/<version>/gui/dist/hbui/gameplay.html exists, and Mojang's
+//      bedrock-samples-v<release>-min.zip (github.com/Mojang/bedrock-samples/releases, the newest
+//      full release no newer than <version>), which has vanilla's resource pack.
 //   3. node tools/adapter/adapt.js <version>
 //   4. Take the results from tools/output/<version>/.
 //
@@ -12,13 +15,17 @@
 // An add-on's behavior and resource packs belong in the same run, so that each one's dependency
 // on the other moves to the other's new version.
 //
-// For each pack it:
+// Ponder (the input whose resource pack has hbui/gameplay.html):
 // - swaps vanilla's hashed bundle names at the top of hbui/gameplay.html for the target's;
 // - renames the vanilla queries and commands Ponder calls to what the target bundle calls them
 //   (NAMES below), and stops if the bundle has none of the known names;
-// - sets header.min_engine_version to the target version and adds 1 to the last digit of
-//   header.version, so the game takes it as a new pack; dependencies on packs adapted in the
-//   same run follow. UUIDs stay the same.
+// - writes hbui/ponder/blocks/vanilla_blocks.json, every vanilla block's textures;
+// - sets header.min_engine_version to the target version.
+// An add-on: for each hbui/ponder_addons/<folder>/ in its resource pack, writes ponder_blocks.json
+// there, what Ponder needs to draw the add-on's own blocks. Its scripts and min_engine_version
+// stay as they are.
+// Every pack: 1 is added to the last digit of header.version, so the game takes it as a new
+// pack; dependencies on packs adapted in the same run follow. UUIDs stay the same.
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -54,6 +61,13 @@ function queryIdKind(bundle) {
 }
 
 const fail = message => { console.error("error: " + message); process.exit(1); };
+
+// JSON as the game reads it, which allows a byte order mark and // and /* */ comments.
+const stripComments = text => text.replace(/("(?:\\.|[^"\\])*")|\/\/[^\n]*|\/\*[\s\S]*?\*\//g, (match, string) => string || "");
+function parseJson(bytes, name) {
+  try { return JSON.parse(stripComments(bytes.toString("utf8").replace(/^\uFEFF/, ""))); }
+  catch (e) { fail(name + " is not JSON: " + e.message); }
+}
 
 // ---- the target version's gui folder ----
 
@@ -158,10 +172,7 @@ function packsOf(files) {
   });
 }
 
-function manifestOf(pack) {
-  try { return JSON.parse(pack.get("manifest.json").toString("utf8")); }
-  catch (e) { fail("manifest.json is not JSON: " + e.message); }
-}
+const manifestOf = pack => parseJson(pack.get("manifest.json"), "manifest.json");
 
 // ---- changes ----
 
@@ -181,10 +192,11 @@ function bumped(version) {
 
 function sameVersion(a, b) { return a.length === b.length && a.every((part, i) => part === b[i]); }
 
-function adaptManifest(manifest, engine, versions) {
+// Only Ponder itself moves to the target's min_engine_version; an add-on keeps its own.
+function adaptManifest(manifest, engine, versions, main) {
   const header = manifest.header;
   const changes = [];
-  if (!sameVersion(header.min_engine_version, engine)) {
+  if (main && !sameVersion(header.min_engine_version, engine)) {
     changes.push("min_engine_version " + header.min_engine_version.join(".") + " -> " + engine.join("."));
     header.min_engine_version = engine;
   }
@@ -233,12 +245,14 @@ function adaptText(text, list) {
 
 const TEXT = new Set([".js", ".html", ".css", ".json", ".lang"]);
 
-function adaptPack(pack, target, engine, versions) {
+// `main`: the pack is Ponder's own. An add-on's files other than its manifest are left as they are.
+function adaptPack(pack, target, engine, versions, main) {
   const manifest = manifestOf(pack);
-  const report = { name: manifest.header.name, uuid: manifest.header.uuid, changes: adaptManifest(manifest, engine, versions) };
+  const report = { name: manifest.header.name, uuid: manifest.header.uuid, changes: adaptManifest(manifest, engine, versions, main) };
   // Two-space JSON with number arrays on one line, as the packs write it.
   const json = JSON.stringify(manifest, null, 2).replace(/\[\s*(\d+(?:,\s*\d+)*)\s*\]/g, (match, list) => "[" + list.split(/,\s*/).join(", ") + "]");
   pack.set("manifest.json", Buffer.from(json + "\n"));
+  if (!main) return report;
 
   const html = pack.get("hbui/gameplay.html");
   if (html) {
@@ -260,6 +274,152 @@ function adaptPack(pack, target, engine, versions) {
   });
   renamed.forEach((files, change) => report.changes.push(change + " in " + files.join(", ")));
   return report;
+}
+
+// ---- vanilla's blocks, from bedrock-samples ----
+
+// The resource pack in the version folder's bedrock-samples-v<release>-min.zip: one pack, every
+// version layer already merged.
+function vanillaPack(folder) {
+  const zips = fs.readdirSync(folder).filter(name => /^bedrock-samples-v[\d.]+-min\.zip$/.test(name)).sort();
+  if (!zips.length) fail("no bedrock-samples-v<release>-min.zip in " + path.relative(TOOLS, folder) + " (download it from github.com/Mojang/bedrock-samples/releases)");
+  const file = path.join(folder, zips[zips.length - 1]), files = new Map();
+  readZip(file).forEach((bytes, name) => { if (name.startsWith("resource_pack/")) files.set(name.slice("resource_pack/".length), bytes); });
+  if (!files.has("blocks.json")) fail(path.basename(file) + " has no resource_pack/blocks.json");
+  return {
+    file, files,
+    blocks: parseJson(files.get("blocks.json"), "vanilla blocks.json"),
+    terrain: parseJson(files.get("textures/terrain_texture.json"), "vanilla textures/terrain_texture.json").texture_data,
+  };
+}
+
+// A texture's file in a pack, with its extension (textures/blocks/stone -> textures/blocks/stone.png).
+const textureFile = (files, texture) => [".png", ".tga"].map(ext => texture + ext).find(name => files.has(name)) || null;
+// The texture a terrain_texture.json entry draws: its first variant. One the game tints
+// (overlay_color, tint_color) gives null, since its file alone is not what the game shows.
+function terrainPath(entry) {
+  let t = entry && entry.textures;
+  if (Array.isArray(t)) t = t[0];
+  if (t && typeof t === "object") return t.overlay_color || t.tint_color ? null : t.path || null;
+  return typeof t === "string" ? t : null;
+}
+const terrainFile = (files, terrain, name) => { const t = terrainPath(terrain[name]); return t && textureFile(files, t); };
+// bedrock-samples' min.zip holds no images, so a vanilla texture is taken to be a .png; the few
+// that are only .tga in the game (cactus, ferns, the double plants) do not load that way.
+const vanillaTexture = (vanilla, name) => { const t = terrainPath(vanilla.terrain[name]); return t ? t + ".png" : null; };
+
+// vanilla_blocks.json: block name (the id without minecraft:) -> its texture file, or one per face
+// { up, down, north, south, west, east }. blocks.json names each face's texture, the inventory
+// look (carried_textures) first; terrain_texture.json gives its file. A block with a face the
+// game tints is left out, and Ponder falls back to its own table for it.
+const FACE_NAMES = ["up", "down", "north", "south", "west", "east"];
+const VANILLA_TABLE = "hbui/ponder/blocks/vanilla_blocks.json";
+function vanillaBlockTable(vanilla) {
+  const blocks = vanilla.blocks, table = {};
+  const faces = names => {
+    const out = {};
+    for (const face of FACE_NAMES) {
+      const name = typeof names === "string" ? names : names[face] || names.side;
+      const file = name && vanillaTexture(vanilla, name);
+      if (!file) return null;
+      out[face] = file;
+    }
+    return out;
+  };
+  Object.keys(blocks).forEach(name => {
+    const entry = blocks[name];
+    if (!entry || typeof entry !== "object") return;
+    const found = (entry.carried_textures && faces(entry.carried_textures)) || (entry.textures && faces(entry.textures));
+    if (found) table[name] = FACE_NAMES.every(face => found[face] === found.up) ? found.up : found;
+  });
+  return table;
+}
+
+// ---- an add-on's own blocks ----
+
+const ADDON_INDEX = "ponder_blocks.json";
+// The states the placement traits add, default first.
+const TRAIT_STATES = {
+  "minecraft:placement_direction": {
+    "minecraft:cardinal_direction": ["south", "west", "north", "east"],
+    "minecraft:facing_direction": ["down", "up", "south", "west", "north", "east"],
+  },
+  "minecraft:placement_position": {
+    "minecraft:block_face": ["down", "up", "north", "south", "west", "east"],
+    "minecraft:vertical_half": ["bottom", "top"],
+  },
+};
+// The components that decide how a block looks.
+const LOOK = ["minecraft:geometry", "minecraft:material_instances", "minecraft:transformation"];
+function lookOf(components) {
+  const out = {};
+  LOOK.forEach(key => { if (components && components[key] !== undefined) out[key.slice("minecraft:".length)] = components[key]; });
+  return out;
+}
+const range = state => { const out = []; for (let i = state.values.min; i <= state.values.max; i++) out.push(i); return out; };
+const BUILT_IN_GEOMETRY = new Set(["minecraft:geometry.full_block", "minecraft:geometry.cross"]);
+const isResourcePack = pack => (manifestOf(pack.files).modules || []).some(module => module.type === "resources");
+const addonFolders = pack => [...new Set([...pack.files.keys()].map(name => /^hbui\/ponder_addons\/([^/]+)\//.exec(name)).filter(Boolean).map(m => m[1]))];
+const blockFiles = pack => [...pack.files.keys()].filter(name => /^blocks\/.*\.json$/.test(name));
+
+// Every geometry a model file defines: format 1.12 and later list them under minecraft:geometry,
+// 1.8 keys them geometry.<name>.
+function geometryEntries(json) {
+  if (Array.isArray(json["minecraft:geometry"])) return json["minecraft:geometry"].map(g => ({
+    identifier: g.description.identifier, width: g.description.texture_width || 16, height: g.description.texture_height || 16, bones: g.bones || [] }));
+  return Object.keys(json).filter(key => key.startsWith("geometry.")).map(key => ({
+    identifier: key.split(":")[0], width: json[key].texturewidth || 16, height: json[key].textureheight || 16, bones: json[key].bones || [] }));
+}
+
+// ponder_blocks.json: blocks { id: { states, look, permutations: [{ condition, look }] } }, look
+// holding the block's geometry, material_instances and transformation; geometries { identifier:
+// { width, height, bones } }; textures { name: { pack, file } }, pack being the uuid of the
+// resource pack that has the file (none for vanilla's). Only blocks that say how they look, and
+// only the geometries and textures they use.
+function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
+  const index = { blocks: {}, geometries: {}, textures: {} }, missing = [];
+  const geometries = new Set(), textures = new Set();
+  const uses = look => {
+    if (look.geometry) geometries.add(typeof look.geometry === "string" ? look.geometry : look.geometry.identifier);
+    Object.values(look.material_instances || {}).forEach(m => { if (m && typeof m === "object" && m.texture) textures.add(m.texture); });
+  };
+  behaviorPacks.forEach(pack => blockFiles(pack).forEach(name => {
+    const block = parseJson(pack.files.get(name), pack.name + " " + name)["minecraft:block"];
+    if (!block || !block.description) return;
+    const d = block.description, states = {};
+    Object.keys(d.states || {}).forEach(s => { states[s] = Array.isArray(d.states[s]) ? d.states[s] : range(d.states[s]); });
+    Object.keys(d.traits || {}).forEach(trait => (d.traits[trait].enabled_states || []).forEach(s => {
+      if (TRAIT_STATES[trait] && TRAIT_STATES[trait][s]) states[s] = TRAIT_STATES[trait][s];
+    }));
+    const look = lookOf(block.components);
+    const permutations = (block.permutations || []).map(p => ({ condition: p.condition, look: lookOf(p.components) })).filter(p => Object.keys(p.look).length);
+    if (!Object.keys(look).length && !permutations.length) return;
+    index.blocks[d.identifier] = { states, look, permutations };
+    uses(look);
+    permutations.forEach(p => uses(p.look));
+  }));
+  resourcePacks.forEach(pack => pack.files.forEach((bytes, name) => {
+    if (!/^models\/.*\.json$/.test(name)) return;
+    geometryEntries(parseJson(bytes, pack.name + " " + name)).forEach(g => {
+      if (geometries.has(g.identifier) && !index.geometries[g.identifier]) index.geometries[g.identifier] = { width: g.width, height: g.height, bones: g.bones };
+    });
+  }));
+  // A texture name is looked up in each resource pack's terrain_texture.json, then vanilla's.
+  const terrains = resourcePacks.map(pack => {
+    const bytes = pack.files.get("textures/terrain_texture.json");
+    return bytes ? parseJson(bytes, pack.name + " textures/terrain_texture.json").texture_data || {} : {};
+  });
+  textures.forEach(name => {
+    for (let i = 0; i < resourcePacks.length; i++) {
+      const file = terrainFile(resourcePacks[i].files, terrains[i], name);
+      if (file) { index.textures[name] = { pack: resourcePacks[i].uuid, file }; return; }
+    }
+    const file = vanillaTexture(vanilla, name);
+    if (file) index.textures[name] = { file };
+    else missing.push("texture " + name);
+  });
+  geometries.forEach(id => { if (!BUILT_IN_GEOMETRY.has(id) && !index.geometries[id]) missing.push("geometry " + id); });
+  return { index, missing };
 }
 
 // ---- writing ----
@@ -323,9 +483,15 @@ function writeOutput(groups, version) {
   groups.forEach(group => {
     const single = group.packs.length === 1;
     const file = path.join(outDir, safe(single ? group.packs[0].name : addonName(group)) + (single ? ".mcpack" : ".mcaddon"));
+    // Packs named by a translation key ("pack.name") can share a name; later ones get " 2", " 3".
+    const seen = new Map();
     const folders = single
       ? [{ folder: "", files: group.packs[0].files }]
-      : group.packs.map(pack => ({ folder: safe(pack.name) + "/", files: pack.files }));
+      : group.packs.map(pack => {
+        const name = safe(pack.name), n = (seen.get(name) || 0) + 1;
+        seen.set(name, n);
+        return { folder: (n > 1 ? name + " " + n : name) + "/", files: pack.files };
+      });
     fs.writeFileSync(file, zip(folders));
     written.push(path.relative(TOOLS, file).split(path.sep).join("/"));
   });
@@ -351,19 +517,51 @@ function main() {
   target.renames = renames(target.bundle);
   const engine = engineVersion(version);
 
+  // The input whose resource pack has hbui/gameplay.html is Ponder itself; the others are add-ons.
   const groups = inputsFrom(args).map(input => {
     let files;
     try { files = readInput(input.path); }
     catch (e) { if (e.code === "ENOENT") fail("not found: " + input.path); throw e; }
     const packs = packsOf(files).map(pack => ({ name: manifestOf(pack).header.name, uuid: manifestOf(pack).header.uuid, files: pack }));
-    return { label: input.label, packs };
+    return { label: input.label, packs, main: packs.some(pack => pack.files.has("hbui/gameplay.html")) };
   });
 
   // Every pack's new version, so a dependency on a pack adapted in this run asks for the new one.
   const versions = new Map(groups.flatMap(group => group.packs.map(pack => [pack.uuid, bumped(manifestOf(pack.files).header.version)])));
   groups.forEach(group => group.packs.forEach(pack => {
-    pack.report = adaptPack(pack.files, target, engine, versions);
+    pack.report = adaptPack(pack.files, target, engine, versions, group.main);
   }));
+
+  // Vanilla's resource pack, read the first time a pack needs it.
+  let vanilla = null;
+  const loadVanilla = () => {
+    if (vanilla) return vanilla;
+    vanilla = vanillaPack(folder);
+    console.log("vanilla blocks from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/"));
+    return vanilla;
+  };
+  for (const group of groups) {
+    const resourcePacks = group.packs.filter(isResourcePack), behaviorPacks = group.packs.filter(pack => !isResourcePack(pack));
+    if (group.main) {
+      const table = vanillaBlockTable(loadVanilla());
+      resourcePacks.filter(pack => pack.files.has("hbui/gameplay.html")).forEach(pack => {
+        pack.files.set(VANILLA_TABLE, Buffer.from(JSON.stringify(table)));
+        pack.report.changes.push(VANILLA_TABLE + ": " + Object.keys(table).length + " vanilla blocks");
+      });
+      continue;
+    }
+    // An add-on with scenes (hbui/ponder_addons/) and blocks of its own.
+    const targets = resourcePacks.filter(pack => addonFolders(pack).length);
+    if (!targets.length || !behaviorPacks.some(pack => blockFiles(pack).length)) continue;
+    const { index, missing } = addonBlockIndex(behaviorPacks, resourcePacks, loadVanilla());
+    if (!Object.keys(index.blocks).length) continue;
+    targets.forEach(pack => addonFolders(pack).forEach(f => {
+      const name = "hbui/ponder_addons/" + f + "/" + ADDON_INDEX;
+      pack.files.set(name, Buffer.from(JSON.stringify(index)));
+      pack.report.changes.push(name + ": " + Object.keys(index.blocks).length + " blocks, " + Object.keys(index.geometries).length + " geometries, " + Object.keys(index.textures).length + " textures");
+    }));
+    if (missing.length) targets[0].report.changes.push("not found: " + missing.join(", "));
+  }
 
   const written = writeOutput(groups, path.basename(folder));
   groups.forEach(group => group.packs.forEach(pack => {
