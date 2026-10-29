@@ -100,6 +100,7 @@ scene.world.moveSection(head, [1, 0, 0], 10);
 | `modifyBlocks(选区, 函数, 播粒子)` | 对整个选区 |
 | `cycleBlockProperty([x, y, z], 状态名, 取值列表)` | 状态按列表循环。布尔和 0/1 状态可以不给列表 |
 | `toggleRedstonePower(选区)` | 翻转红石功率：信号 0 与 15 对调，点亮状态取反 |
+| `modifyBlockEntityNBT(选区, 类型, 函数)` | 改方块实体数据。类型是基岩版的方块实体 id（`"Bed"`、`"Banner"`），函数接收数据对象、直接改它 |
 | `restoreBlocks(选区)` | 恢复成结构里的初始方块 |
 | `destroyBlock([x, y, z])` | 破坏并播粒子 |
 | `incrementBlockBreakingProgress([x, y, z])` | 破坏进度加一档，第十档时破坏 |
@@ -119,6 +120,26 @@ P.block("minecraft:unpowered_repeater", { "minecraft:cardinal_direction": "west"
 栅栏、玻璃板、铁栏杆怎么连，楼梯怎么拐角，也是状态（`minecraft:connection_north` 等、`minecraft:corner`），要连就写上；墙用 `wall_connection_type_*` 和 `wall_post_bit`。红石粉不用写，按周围的方块自动连。
 
 水和岩浆的液位是 `liquid_depth`：0 是源头，1 到 7 是流动的（越大越浅），8 及以上是往下落的。水面高度和流向按周围的方块算，不用另写。
+
+`P.block` 的第三个参数写状态以外的东西：`liquid` 是含水方块里的水，`nbt` 是方块实体数据。结构文件里的含水方块和方块实体会自动读进来，不用另写。
+
+```js
+P.block("minecraft:stone_block_slab", { "minecraft:vertical_half": "bottom" }, { liquid: P.block("minecraft:water", { liquid_depth: 0 }) })
+P.block("minecraft:bed", { direction: 2, head_piece_bit: true }, { nbt: { id: "Bed", color: 11 } })
+```
+
+床和旗帜的数据按基岩版存档的写法：
+
+- 床：`{ id: "Bed", color }`，`color` 从 0 白到 15 黑（白、橙、品红、淡蓝、黄、黄绿、粉红、灰、淡灰、青、紫、蓝、棕、绿、红、黑）。
+- 旗帜：`{ id: "Banner", Base, Patterns: [{ Color, Pattern }], Type }`。`Base` 和 `Color` 的颜色顺序反过来，0 黑到 15 白；`Pattern` 是图案代号（`cre` 苦力怕、`bo` 边框、`ss` 竖条纹等）；`Type` 为 1 是不祥旗帜。
+
+没写数据的床是红色的，旗帜是白色的。床的状态是 `direction`（床头朝向，0 南、1 西、2 北、3 东）和 `head_piece_bit`；立着的旗帜是 `ground_sign_direction`（0 到 15，0 朝南），挂墙的是 `facing_direction`（2 北、3 南、4 西、5 东）。
+
+```js
+scene.world.modifyBlockEntityNBT(util.select.position(2, 1, 2), "Banner", nbt => {
+  nbt.Patterns.push({ Color: 1, Pattern: "cre" });
+});
+```
 
 `modifyBlock` 的函数里：
 
