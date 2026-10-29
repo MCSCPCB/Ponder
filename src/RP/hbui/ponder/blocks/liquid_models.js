@@ -3,26 +3,33 @@
 // the liquid's height averaged with its neighbours', in the still texture or the flowing one
 // turned along the flow; the sides up to those corners in the flowing texture; the bottom; each
 // face left out against the same liquid or a block that covers it. The neighbours are the
-// section's (PonderLevel masks the world to it), outside it air. Bedrock's liquid_depth is Java's
-// LEVEL: 0 a source, 1 to 7 flowing, 8 and up falling.
+// section's (PonderLevel masks the world to it), outside it air; the water a waterlogged block
+// holds (P.liquidOf) counts as water there, and is drawn in its cell the same way. Bedrock's
+// liquid_depth is Java's LEVEL: 0 a source, 1 to 7 flowing, 8 and up falling.
 (function () {
-  const P = window.Ponder;
-  // Which liquid a block is ("water", "lava"), or null.
-  const kindOf = block => {
-    const name = block ? P.blockId(block).replace(/^minecraft:/, "") : "";
-    return P.vanilla.liquids[name] ? name.replace(/^flowing_/, "") : null;
-  };
+  const P = window.Ponder, M = P.Mat;
+  const nameOf = block => P.blockId(block).replace(/^minecraft:/, "");
+  // The liquid in a cell (its FluidState): the block if it is one, else what a waterlogged block
+  // holds, else null.
+  const fluidOf = block => (!block ? null : P.vanilla.liquids[nameOf(block)] ? block : P.liquidOf(block));
+  // Which liquid a cell holds ("water", "lava"), or null.
+  const kindOf = block => { const f = fluidOf(block); return f ? nameOf(f).replace(/^flowing_/, "") : null; };
 
   // A liquid's model has no quads of its own (liquidQuads makes them with its neighbours) and does
-  // not fill its cell, so the faces round it show. `faces` are for its particles.
+  // not fill its cell, so the faces round it show. `faces` are for its particles. Water's sides
+  // against glass and leaves show water_overlay, which Bedrock does not have: Ponder's own (Java's
+  // is one flat colour), tinted as the water.
   const models = new Map();
+  const OVERLAY = "/hbui/ponder/assets/water_overlay.png";
   P.liquidModel = function (block) {
-    const name = P.blockId(block).replace(/^minecraft:/, ""), t = P.vanilla.liquids[name];
+    const name = nameOf(block), t = P.vanilla.liquids[name];
     if (!t) return null;
     if (!models.has(name)) {
-      const still = P.textureOf(P.vanilla.textures[t.still]), flow = P.textureOf(P.vanilla.textures[t.flow]), faces = {};
+      const stillEntry = P.vanilla.textures[t.still], still = P.textureOf(stillEntry), flow = P.textureOf(P.vanilla.textures[t.flow]), faces = {};
       Object.keys(P.FACES).forEach(f => { faces[f] = still.url; });
-      models.set(name, { id: P.blockId(block), shape: "liquid", quads: [], faces, tint: null, full: false, opaque: false, still, flow, lava: kindOf(block) === "lava" });
+      const lava = kindOf(block) === "lava";
+      const overlay = lava ? null : P.textureOf({ url: OVERLAY, w: 16, h: 16, tint: stillEntry.tint, alpha: stillEntry.alpha });
+      models.set(name, { id: P.blockId(block), shape: "liquid", quads: [], faces, tint: null, full: false, opaque: false, still, flow, overlay, lava });
     }
     return models.get(name);
   };
@@ -39,7 +46,7 @@
   // height; 0 with none of it there, -1 for a solid block.
   function heightAt(at, kind, dx, dy, dz) {
     const b = at(dx, dy, dz);
-    if (kindOf(b) === kind) return kindOf(at(dx, dy + 1, dz)) === kind ? 1 : ownHeight(b);
+    if (kindOf(b) === kind) return kindOf(at(dx, dy + 1, dz)) === kind ? 1 : ownHeight(fluidOf(b));
     return solid(b) ? -1 : 0;
   }
   // calculateAverageHeight: the corner of the cell (height `own`) between its neighbours of
@@ -72,8 +79,8 @@
       let diff = 0;
       if (!k) {
         const below = at(d[0], -1, d[1]);
-        if (!solid(b) && kindOf(below) === kind) diff = own - (ownHeight(below) - 0.8888889);
-      } else diff = own - ownHeight(b);
+        if (!solid(b) && kindOf(below) === kind) diff = own - (ownHeight(fluidOf(below)) - 0.8888889);
+      } else diff = own - ownHeight(fluidOf(b));
       x += d[0] * diff; z += d[1] * diff;
     });
     let v = [x, 0, z];
@@ -93,18 +100,14 @@
     return false;
   }
 
-  // A face: `pts` (3 or 4, block space) in the game's order round it, with the tile fractions
-  // `uvs` at them; out of it is (p1 - p0) x (pLast - p0). Quads as block_models.js makes them.
-  function face(out, pts, uvs, look, direction, twoSided) {
-    const o = pts[0], u = pts[1], v = pts[pts.length - 1];
-    const du = [u[0] - o[0], u[1] - o[1], u[2] - o[2]], dv = [v[0] - o[0], v[1] - o[1], v[2] - o[2]];
-    const n = [du[1] * dv[2] - du[2] * dv[1], du[2] * dv[0] - du[0] * dv[2], du[0] * dv[1] - du[1] * dv[0]];
-    const lu = Math.hypot(du[0], du[1], du[2]), lv = Math.hypot(dv[0], dv[1], dv[2]), ln = Math.hypot(n[0], n[1], n[2]);
-    out.push({ o, u, v, look, uvs, n: [n[0] / ln, n[1] / ln, n[2] / ln], eu: [du[0] / lu, du[1] / lu, du[2] / lu], ev: [dv[0] / lv, dv[1] / lv, dv[2] / lv],
-      shade: P.SHADE[direction], cull: null, twoSided, solid: look.solid && pts.length === 4 });
-  }
+  const face = (out, pts, uvs, look, twoSided) => P.blockPolygon(out, M.id(), pts, uvs, look, twoSided);
+  // HalfTransparentBlock (glass, ice, slime, honey) and LeavesBlock, which water shows its overlay
+  // against.
+  const SEE_THROUGH = /^minecraft:(.*glass|ice|frosted_ice|blue_ice|slime|honey_block|.*leaves.*)$/;
+  const showsOverlay = block => !!block && SEE_THROUGH.test(P.blockId(block));
 
-  // The quads of the liquid `block`, `at(dx, dy, dz)` giving the blocks round it (null for none).
+  // The quads of the liquid `block` (a liquid itself, or the water of a waterlogged block),
+  // `at(dx, dy, dz)` giving the blocks round its cell (null for none).
   P.liquidQuads = function (block, at) {
     const model = P.blockModel(block), kind = kindOf(block), out = [];
     // Lava is opaque and grows over seams; water is see-through (its texture's alpha).
@@ -133,22 +136,24 @@
       }
       const pts = [[0, nw, 0], [0, sw, 1], [1, se, 1], [1, ne, 0]], both = backwardUp(at, kind);
       // A top whose corners are not in one plane is the two triangles the game's quad is drawn as.
-      if (Math.abs(nw + se - sw - ne) < 1e-6) face(out, pts, uv, look(tex), "up", both);
+      if (Math.abs(nw + se - sw - ne) < 1e-6) face(out, pts, uv, look(tex), both);
       else {
-        face(out, [pts[0], pts[1], pts[2]], [uv[0], uv[1], uv[2]], look(tex), "up", both);
-        face(out, [pts[0], pts[2], pts[3]], [uv[0], uv[2], uv[3]], look(tex), "up", both);
+        face(out, [pts[0], pts[1], pts[2]], [uv[0], uv[1], uv[2]], look(tex), both);
+        face(out, [pts[0], pts[2], pts[3]], [uv[0], uv[2], uv[3]], look(tex), both);
       }
     }
     // The sides: the top corners seen from outside, left then right, where they stand, and the
     // neighbour's offset. Each shows the top left quarter of the flowing texture, cut at the
-    // corners' heights, from both sides (Bedrock has no water_overlay for the inside).
-    [["north", nw, ne, [0, 0.001], [1, 0.001], [0, 0, -1]], ["south", se, sw, [1, 0.999], [0, 0.999], [0, 0, 1]],
-      ["west", sw, nw, [0.001, 1], [0.001, 0], [-1, 0, 0]], ["east", ne, se, [0.999, 0], [0.999, 1], [1, 0, 0]]].forEach(([direction, h1, h2, a, b, d]) => {
-      if (!other(d[0], d[1], d[2]) || covers(at(d[0], d[1], d[2]))) return;
+    // corners' heights, from both sides; against glass or leaves, water's overlay from outside only.
+    [[nw, ne, [0, 0.001], [1, 0.001], [0, 0, -1]], [se, sw, [1, 0.999], [0, 0.999], [0, 0, 1]],
+      [sw, nw, [0.001, 1], [0.001, 0], [-1, 0, 0]], [ne, se, [0.999, 0], [0.999, 1], [1, 0, 0]]].forEach(([h1, h2, a, b, d]) => {
+      const beside = at(d[0], d[1], d[2]);
+      if (!other(d[0], d[1], d[2]) || covers(beside)) return;
+      const overlay = model.overlay && showsOverlay(beside);
       face(out, [[a[0], h1, a[1]], [b[0], h2, b[1]], [b[0], y0, b[1]], [a[0], y0, a[1]]],
-        [[0, (1 - h1) / 2], [0.5, (1 - h2) / 2], [0.5, 0.5], [0, 0.5]], look(model.flow), direction, true);
+        [[0, (1 - h1) / 2], [0.5, (1 - h2) / 2], [0.5, 0.5], [0, 0.5]], look(overlay ? model.overlay : model.flow), !overlay);
     });
-    if (down) face(out, [[0, y0, 1], [0, y0, 0], [1, y0, 0], [1, y0, 1]], [[0, 1], [0, 0], [1, 0], [1, 1]], look(model.still), "down", false);
+    if (down) face(out, [[0, y0, 1], [0, y0, 0], [1, y0, 0], [1, y0, 1]], [[0, 1], [0, 0], [1, 0], [1, 1]], look(model.still), false);
     return out;
   };
 })();

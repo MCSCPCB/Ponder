@@ -36,18 +36,25 @@
         const om = P.blockModel(other);
         return om.full && (om.opaque || om.id === model.id);
       };
+      const around = (dx, dy, dz) => (has(p[0] + dx, p[1] + dy, p[2] + dz) ? world.getBlock(p[0] + dx, p[1] + dy, p[2] + dz) : null);
       if (model.shape === "liquid") {
-        const quads = P.liquidQuads(block, (dx, dy, dz) => (has(p[0] + dx, p[1] + dy, p[2] + dz) ? world.getBlock(p[0] + dx, p[1] + dy, p[2] + dz) : null));
+        const quads = P.liquidQuads(block, around);
         if (quads.length) out.push({ p, model, quads });
         return;
       }
       if (model.shape === "model") {
         const quads = model.quads.filter(q => !q.cull || !hidden(q.cull));
-        if (quads.length) out.push({ p, model, quads });
-        return;
+        if (quads.length || model.moving) out.push({ p, model, quads });
+      } else {
+        const faces = model.shape === "wire" ? [["up", P.WIRE_FACE]] : Object.keys(DIRS).filter(f => !hidden(f)).map(f => [f, P.FACES[f]]);
+        if (faces.length) out.push({ p, model, faces });
       }
-      const faces = model.shape === "wire" ? [["up", P.WIRE_FACE]] : Object.keys(DIRS).filter(f => !hidden(f)).map(f => [f, P.FACES[f]]);
-      if (faces.length) out.push({ p, model, faces });
+      // The water in a waterlogged block, over it.
+      const liquid = P.liquidOf(block);
+      if (liquid) {
+        const quads = P.liquidQuads(liquid, around);
+        if (quads.length) out.push({ p, model: P.blockModel(liquid), quads });
+      }
     });
     e.built = out;
     e.builtVersion = e.version;
@@ -97,7 +104,12 @@
       if (it.draw) { it.draw(d); return; }
       // renderBreakingTexture: destroy_stage_<progress> over the block's faces.
       const stage = breaking.get(P.blockKey(it.b.p[0], it.b.p[1], it.b.p[2]));
-      if (it.b.quads) { drawQuads(d, M.translate(it.m, it.b.p[0], it.b.p[1], it.b.p[2]), it.b.quads, it.light, grow, size, stage, it.b.model.tint, ticks); return; }
+      if (it.b.quads) {
+        // A model with a moving part (a banner's flag) adds that part's quads for this frame.
+        const quads = it.b.model.moving ? it.b.quads.concat(it.b.model.moving(ticks, it.b.p)) : it.b.quads;
+        drawQuads(d, M.translate(it.m, it.b.p[0], it.b.p[1], it.b.p[2]), quads, it.light, grow, size, stage, it.b.model.tint, ticks);
+        return;
+      }
       it.b.faces.forEach(f => {
         const face = f[1];
         if (!facing(it.m, face.n)) return;
@@ -114,7 +126,8 @@
   // A model's quads under matrix m (block space), far to near, each showing its texture's piece
   // at `ticks` (P.quadImage) with the texture's tint, and an overlay's image under it untinted.
   // Solid ones are pushed out by `grow` blocks along their edges to close seams; two-sided ones
-  // show from behind too; a look with `tint` takes the model's.
+  // show from behind too; a look with `tint` takes the model's, one with `color` [r, g, b] its own
+  // (a bed's or banner's dye).
   function drawQuads(d, m, quads, light, grow, size, stage, tint, ticks) {
     const list = [];
     quads.forEach(q => {
@@ -123,13 +136,14 @@
       const at = (p, su, sv) => M.apply(m, p[0] + (eu[0] * su + ev[0] * sv) * g, p[1] + (eu[1] * su + ev[1] * sv) * g, p[2] + (eu[2] * su + ev[2] * sv) * g);
       const o = at(q.o, -1, -1), u = at(q.u, 1, -1), v = at(q.v, -1, 1);
       // A triangle's centre, else the parallelogram's.
-      list.push({ q, o, u, v, depth: q.uvs && q.uvs.length === 3 ? (o[2] + u[2] + v[2]) / 3 : (u[2] + v[2]) / 2 });
+      list.push({ q, o, u, v, depth: q.uvs && q.uvs.length === 3 ? (o[2] + u[2] + v[2]) / 3 : (u[2] + v[2]) / 2, i: list.length });
     });
-    list.sort((a, b) => a.depth - b.depth);
+    // Quads at one depth (a banner's flag and its patterns) keep their order.
+    list.sort((a, b) => a.depth - b.depth || a.i - b.i);
     list.forEach(it => {
-      const img = P.quadImage(it.q, ticks), tex = it.q.look.tex, shade = it.q.shade * light;
+      const img = P.quadImage(it.q, ticks), l = it.q.look, tex = l.tex, shade = it.q.shade * light;
       if (tex.under) d.texturedQuadMap(tex.under.url, it.o, it.u, it.v, img.a, img.b, img.c, img.clip, filterOf(shade, null, null), size);
-      d.texturedQuadMap(img.src, it.o, it.u, it.v, img.a, img.b, img.c, img.clip, filterOf(shade, it.q.look.tint ? tint : null, tex), size);
+      d.texturedQuadMap(img.src, it.o, it.u, it.v, img.a, img.b, img.c, img.clip, filterOf(shade, l.color || (l.tint ? tint : null), tex), size);
       if (stage != null) d.texturedQuad(destroyStage(stage), it.o, it.u, it.v, null, size);
     });
   }
@@ -170,7 +184,11 @@
   function drawCube(d, m, id, px) {
     const model = P.blockModel(id), size = Math.max(16, Math.round(px * P.view.cssPerGui));
     const c = M.translate(m, -0.5, -0.5, -0.5);
-    if (model.quads) { drawQuads(d, c, model.quads, 1, 0, size, null, model.tint, animationTicks()); return; }
+    if (model.quads) {
+      const ticks = animationTicks(), quads = model.moving ? model.quads.concat(model.moving(ticks, [0, 0, 0])) : model.quads;
+      drawQuads(d, c, quads, 1, 0, size, null, model.tint, ticks);
+      return;
+    }
     Object.keys(P.FACES).forEach(f => {
       const face = P.FACES[f];
       if (!facing(c, face.n)) return;

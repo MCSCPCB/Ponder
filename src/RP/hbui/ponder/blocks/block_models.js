@@ -100,9 +100,10 @@
   // frames, top to bottom), its frame count, ticks per frame and frame order; and the tint the
   // game gives it in plains (tint [r, g, b], alpha, and `under`, the image drawn untinted under
   // an overlay such as grass_side). One per file.
+  // An entry with a `url` is an image of Ponder's own (hbui/ponder/assets/).
   const textures = new Map();
   P.textureOf = function (entry) {
-    const url = `pack://${entry.file}?filtering=point${entry.pack ? "&packId=" + entry.pack : ""}`;
+    const url = entry.url || `pack://${entry.file}?filtering=point${entry.pack ? "&packId=" + entry.pack : ""}`;
     let t = textures.get(url);
     if (!t) textures.set(url, (t = { url, w: entry.w, h: entry.h, frames: entry.frames || 1, tick: entry.tick || 1, seq: entry.seq || null,
       tint: entry.tint || null, alpha: entry.alpha != null ? entry.alpha : 1, under: entry.under ? P.textureOf(entry.under) : null }));
@@ -176,9 +177,26 @@
     const f = P.FACES[face], at = c => [c[0] ? hi[0] : lo[0], c[1] ? hi[1] : lo[1], c[2] ? hi[2] : lo[2]];
     quad(out, m, at(f.o), at(f.u), at(f.v), region, look);
   }
-  // vanilla_models.js and blocks.js build their quads with these too.
+  // A face as the game's code makes them (LiquidBlockRenderer, ModelPart.Polygon): `pts` (3 or 4,
+  // block space, under matrix m) wound so that (p1 - p0) x (pLast - p0) points out of it, with the
+  // tile fractions `uvs` at them. Shaded by the side it faces most.
+  function polygon(out, m, pts, uvs, look, twoSided) {
+    const w = pts.map(p => M.apply(m, p[0], p[1], p[2])), o = w[0], u = w[1], v = w[w.length - 1];
+    const du = [u[0] - o[0], u[1] - o[1], u[2] - o[2]], dv = [v[0] - o[0], v[1] - o[1], v[2] - o[2]];
+    const n = [du[1] * dv[2] - du[2] * dv[1], du[2] * dv[0] - du[0] * dv[2], du[0] * dv[1] - du[1] * dv[0]];
+    const lu = Math.hypot(du[0], du[1], du[2]), lv = Math.hypot(dv[0], dv[1], dv[2]), ln = Math.hypot(n[0], n[1], n[2]);
+    if (lu < 1e-6 || lv < 1e-6 || ln < 1e-9) return;
+    n[0] /= ln; n[1] /= ln; n[2] /= ln;
+    const ax = [1, 2].reduce((best, i) => (Math.abs(n[i]) > Math.abs(n[best]) ? i : best), 0);
+    out.push({ o, u, v, look, uvs, n, eu: [du[0] / lu, du[1] / lu, du[2] / lu], ev: [dv[0] / lv, dv[1] / lv, dv[2] / lv],
+      shade: look.dim === false ? 1 : P.SHADE[DIRECTION[ax][n[ax] > 0 ? 1 : 0]], cull: null, twoSided: !!twoSided, solid: !!look.solid && w.length === 4 });
+  }
+
+  // vanilla_models.js, liquid_models.js, block_entity_models.js and blocks.js build their quads
+  // with these too.
   P.blockQuad = quad;
   P.blockBox = box;
+  P.blockPolygon = polygon;
 
   // An add-on material's look: its texture from the index, and its render_method.
   function addonLook(index, material) {

@@ -1,5 +1,7 @@
 widgets.png and logo.png are copied unchanged from Ponder
 (https://github.com/Creators-of-Create/Ponder, assets/ponder/textures/gui/).
+water_overlay.png is this project's own: one flat colour, as Java Edition's water_overlay is,
+which Bedrock Edition does not have.
 
 MIT License
 

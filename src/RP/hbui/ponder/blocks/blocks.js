@@ -4,10 +4,18 @@
 (function () {
   const P = window.Ponder;
 
-  // A block with states; ids alone stay strings.
-  P.block = (id, states) => (states && Object.keys(states).length ? { id, states } : id);
+  // A block with states, and with what Bedrock keeps beside them: `liquid`, the water in a
+  // waterlogged block (a block itself), and `nbt`, its block entity's data as the game saves it
+  // (a bed's colour, a banner's patterns). Ids alone stay strings.
+  P.block = (id, states, extra) => ((states && Object.keys(states).length) || (extra && (extra.liquid || extra.nbt))
+    ? Object.assign({ id, states: states || {} }, extra && extra.liquid ? { liquid: extra.liquid } : {}, extra && extra.nbt ? { nbt: extra.nbt } : {}) : id);
   P.blockStates = block => (typeof block === "string" ? {} : block.states);
-  P.withStates = (block, changes) => P.block(P.blockId(block), Object.assign({}, P.blockStates(block), changes));
+  P.liquidOf = block => (block && typeof block === "object" && block.liquid) || null;
+  P.blockNbt = block => (block && typeof block === "object" && block.nbt) || null;
+  const extraOf = block => ({ liquid: P.liquidOf(block), nbt: P.blockNbt(block) });
+  P.withStates = (block, changes) => P.block(P.blockId(block), Object.assign({}, P.blockStates(block), changes), extraOf(block));
+  P.withLiquid = (block, liquid) => P.block(P.blockId(block), P.blockStates(block), Object.assign(extraOf(block), { liquid }));
+  P.withNbt = (block, nbt) => P.block(P.blockId(block), P.blockStates(block), Object.assign(extraOf(block), { nbt }));
 
   // Files under textures/blocks/ for packs not run through tools/adapter, which have no table
   // (grass in its inventory look, as the game tints it). A block in neither uses its own name.
@@ -50,10 +58,12 @@
   // Vanilla's look, from hbui/ponder/blocks/vanilla_blocks.json, which tools/adapter writes from
   // the game's blocks.json, terrain_texture.json and textures, and Scaffold's shapes: textures
   // { path: { file, w, h, frames, tick, seq, tint, alpha, under } } (P.textureOf), cubes { block:
-  // path or { face: path } }, liquids { block: { still, flow } } (liquid_models.js) and shapes
-  // (vanilla_models.js). (pack://blocks.json gives only the topmost pack's file, which another
-  // pack can hide.) A pack not run through tools/adapter has none of it.
-  P.vanilla = { textures: {}, cubes: {}, liquids: {}, shapes: { blocks: {}, families: {}, rotations: {}, faces: {}, terrain: {} } };
+  // path or { face: path } }, liquids { block: { still, flow } } (liquid_models.js), blockEntities
+  // { bed: [path by colour], banner: { base, illager, patterns: { code: path } } }
+  // (block_entity_models.js) and shapes (vanilla_models.js). (pack://blocks.json gives only the
+  // topmost pack's file, which another pack can hide.) A pack not run through tools/adapter has
+  // none of it.
+  P.vanilla = { textures: {}, cubes: {}, liquids: {}, blockEntities: null, shapes: { blocks: {}, families: {}, rotations: {}, faces: {}, terrain: {} } };
   // A JSON file; a missing one reads as {}.
   P.readJson = url => new Promise(resolve => {
     const xhr = new XMLHttpRequest();
@@ -106,7 +116,7 @@
       }
       return cache.get(key);
     }
-    const addon = P.addonBlockModel(block) || P.liquidModel(block) || P.vanillaShapeModel(block);
+    const addon = P.addonBlockModel(block) || P.liquidModel(block) || P.blockEntityModel(block) || P.vanillaShapeModel(block);
     if (addon) return addon;
     const id = P.blockId(block), power = P.blockStates(block).redstone_signal || 0, key = id + "#" + power;
     let model = cache.get(key);
@@ -164,7 +174,7 @@
     if ("redstone_signal" in states) states.redstone_signal = states.redstone_signal === 0 ? 15 : 0;
     BITS.forEach(bit => { if (bit in states) states[bit] = flip(states[bit]); });
     if (id === "minecraft:lever") states.open_bit = flip(states.open_bit);
-    return P.block(SWAP.get(id) || id, states);
+    return P.block(SWAP.get(id) || id, states, extraOf(block));
   };
 
   // Each face: outward normal and where its texture's (0,0), (16,0) and (0,16) corners lie in

@@ -384,6 +384,22 @@
     }
     modifyBlocks(selection, stateFunc, spawnParticles) { this.b.addInstruction(new I.ReplaceBlocks(selection, stateFunc, false, spawnParticles)); }
     toggleRedstonePower(selection) { this.modifyBlocks(selection, P.toggleRedstonePower, false); }
+    // The block entity data (P.blockEntityData) of each block in the selection whose block entity
+    // is `type`, Bedrock's id for it ("Bed", "Banner"), handed to `consumer` to change. Blocks are
+    // drawn again either way: Ponder's are made once per change, where Java's block entity
+    // renderers draw every frame.
+    modifyBlockEntityNBT(selection, type, consumer) {
+      this.b.addInstruction(scene => {
+        const w = scene.world;
+        selection.keys.forEach(k => {
+          const p = k.split(",").map(Number), block = w.getBlock(p[0], p[1], p[2]), nbt = block && P.blockEntityData(block);
+          if (!nbt || nbt.id !== type) return;
+          consumer(nbt);
+          w.setBlock(p[0], p[1], p[2], P.withNbt(block, nbt));
+        });
+        redraw(scene);
+      });
+    }
   }
   const at = pos => S.box(pos[0], pos[1], pos[2], pos[0], pos[1], pos[2]);
   const redraw = scene => scene.forEach(P.WorldSectionElement, e => e.queueRedraw());
