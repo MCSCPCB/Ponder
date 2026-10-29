@@ -22,9 +22,10 @@
 // - swaps vanilla's hashed bundle names at the top of hbui/gameplay.html for the target's;
 // - renames the vanilla queries and commands Ponder calls to what the target bundle calls them
 //   (NAMES below), and stops if the bundle has none of the known names;
-// - writes hbui/ponder/blocks/vanilla_blocks.json: vanilla's textures (size, animation), each
-//   block's textures and, from Scaffold's tables, the shapes of the blocks that are not a plain
-//   cube, with Scaffold's licence beside it;
+// - writes hbui/ponder/blocks/vanilla_blocks.json: vanilla's textures (size, animation, the tint
+//   plains gives grass, leaves and water), each block's textures, water's and lava's and, from
+//   Scaffold's tables, the shapes of the blocks that are not a plain cube, with Scaffold's
+//   licence beside it;
 // - sets header.min_engine_version to the target version.
 // An add-on: for each hbui/ponder_addons/<folder>/ in its resource pack, writes ponder_blocks.json
 // there, what Ponder needs to draw the add-on's own blocks. Its scripts and min_engine_version
@@ -285,20 +286,28 @@ function adaptPack(pack, target, engine, versions, main) {
 // ---- vanilla's blocks, from bedrock-samples ----
 
 // The resource pack in the version folder's bedrock-samples-v<release>-full.zip (one pack, every
-// version layer already merged; of its images only their sizes are kept), and Scaffold's tables
-// in its scaffold/.
+// version layer already merged; of its images only their sizes and the colour maps are kept),
+// plains' climate from its behavior pack, and Scaffold's tables in its scaffold/.
 const SCAFFOLD = ["block_definition", "block_geometry", "block_rotation", "state_rotations", "dust_connections"];
-const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga))$/;
+const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json)$|^behavior_pack\/biomes\/plains\.biome\.json$/;
+// blocks.json keys some blocks by an older name than their id.
+const LEGACY_NAMES = {
+  grass: "grass_block", chain: "iron_chain", seaLantern: "sea_lantern", tripWire: "trip_wire", invisibleBedrock: "invisible_bedrock",
+  movingBlock: "moving_block", pistonArmCollision: "piston_arm_collision", stickyPistonArmCollision: "sticky_piston_arm_collision",
+};
 function vanillaPack(folder) {
   const zips = fs.readdirSync(folder).filter(name => /^bedrock-samples-v[\d.]+-full\.zip$/.test(name)).sort();
   if (!zips.length) fail("no bedrock-samples-v<release>-full.zip in " + path.relative(TOOLS, folder) + " (download it from github.com/Mojang/bedrock-samples/releases)");
   const file = path.join(folder, zips[zips.length - 1]), files = new Map(), sizes = new Map();
+  // Files by their path in their pack (biomes/plains.biome.json is the behavior pack's).
   readZip(file, name => RESOURCES.test(name)).forEach((bytes, name) => {
-    const rel = name.slice("resource_pack/".length), image = /^(.+)\.(png|tga)$/.exec(rel);
-    if (!image) files.set(rel, bytes);
-    else if (image[2] === "png" || !sizes.has(image[1])) sizes.set(image[1], Object.assign({ file: rel }, imageSize(bytes, image[2])));
+    const rel = name.slice(name.indexOf("/") + 1), image = /^(.+)\.(png|tga)$/.exec(rel);
+    if (!image || /^textures\/colormap\//.test(rel)) files.set(rel, bytes);
+    if (image && (image[2] === "png" || !sizes.has(image[1]))) sizes.set(image[1], Object.assign({ file: rel }, imageSize(bytes, image[2])));
   });
   if (!files.has("blocks.json")) fail(path.basename(file) + " has no resource_pack/blocks.json");
+  const blocks = parseJson(files.get("blocks.json"), "vanilla blocks.json");
+  Object.keys(LEGACY_NAMES).forEach(name => { if (blocks[name]) blocks[LEGACY_NAMES[name]] = blocks[name]; });
   const scaffold = {};
   SCAFFOLD.forEach(name => {
     const table = path.join(folder, "scaffold", name + ".json");
@@ -307,12 +316,100 @@ function vanillaPack(folder) {
   });
   const license = path.join(folder, "scaffold", "LICENSE");
   if (!fs.existsSync(license)) fail("missing " + path.relative(TOOLS, license) + " (Scaffold's LICENSE)");
+  const terrain = parseJson(files.get("textures/terrain_texture.json"), "vanilla textures/terrain_texture.json").texture_data;
   return {
-    file, sizes, scaffold, license: fs.readFileSync(license, "utf8"),
-    blocks: parseJson(files.get("blocks.json"), "vanilla blocks.json"),
-    terrain: parseJson(files.get("textures/terrain_texture.json"), "vanilla textures/terrain_texture.json").texture_data,
+    file, sizes, scaffold, license: fs.readFileSync(license, "utf8"), blocks, terrain,
     flipbooks: flipbookTable(parseJson(files.get("textures/flipbook_textures.json"), "vanilla textures/flipbook_textures.json")),
+    tints: textureTints(plainsColors(files), terrain),
   };
+}
+
+// ---- plains' colours ----
+
+// Ponder's world is all plains (SchematicLevel.getBiome), so the textures the game tints by biome
+// take plains' colours: a colour its client biome names, else its colour map's at plains' climate
+// (GrassColor.get, FoliageColor.get). Water: the surface colour, and its opacity, which client
+// biomes no longer write; 0.65 is what biomes_client.json's default gave.
+const WATER_OPACITY = 0.65;
+function plainsColors(files) {
+  const climate = parseJson(files.get("biomes/plains.biome.json"), "vanilla behavior_pack/biomes/plains.biome.json")["minecraft:biome"].components["minecraft:climate"];
+  const client = parseJson(files.get("biomes/plains.client_biome.json"), "vanilla biomes/plains.client_biome.json")["minecraft:client_biome"].components;
+  const fromMap = map => colorMapAt(files.get("textures/colormap/" + map + ".png"), map, climate.temperature, climate.downfall);
+  // An appearance component's colour: "#rrggbb", { color_map }, or none (the default map).
+  const named = (component, map) => {
+    const c = client[component] && client[component].color;
+    return typeof c === "string" ? hexColor(c) : fromMap(c && c.color_map ? c.color_map : map);
+  };
+  const water = client["minecraft:water_appearance"];
+  return {
+    grass: named("minecraft:grass_appearance", "grass"), foliage: named("minecraft:foliage_appearance", "foliage"),
+    dry_foliage: named("minecraft:dry_foliage_color", "dry_foliage"), birch: fromMap("birch"), evergreen: fromMap("evergreen"),
+    water: hexColor(water.surface_color), waterOpacity: water.surface_opacity != null ? water.surface_opacity : WATER_OPACITY,
+  };
+}
+const hexColor = hex => [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) / 255 * 1000) / 1000);
+// The colour of a 256 by 256 colour map at a climate, as the game reads one.
+function colorMapAt(png, name, temperature, downfall) {
+  const image = decodePng(png, "colormap/" + name + ".png");
+  const t = Math.min(Math.max(temperature, 0), 1), d = Math.min(Math.max(downfall, 0), 1) * t;
+  const x = Math.floor((1 - t) * 255), y = Math.floor((1 - d) * 255), at = (y * image.width + x) * image.channels;
+  return [0, 1, 2].map(c => Math.round(image.pixels[at + c] / 255 * 1000) / 1000);
+}
+// An 8-bit RGB or RGBA PNG's pixels, unfiltered.
+function decodePng(bytes, name) {
+  const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20), depth = bytes[24], type = bytes[25];
+  if (depth !== 8 || (type !== 2 && type !== 6)) fail(name + " is not an 8-bit RGB or RGBA PNG");
+  const channels = type === 6 ? 4 : 3, stride = width * channels, data = [];
+  for (let p = 8; p < bytes.length;) {
+    const length = bytes.readUInt32BE(p);
+    if (bytes.toString("latin1", p + 4, p + 8) === "IDAT") data.push(bytes.subarray(p + 8, p + 8 + length));
+    p += 12 + length;
+  }
+  const raw = zlib.inflateSync(Buffer.concat(data)), pixels = Buffer.alloc(height * stride);
+  for (let y = 0; y < height; y++) {
+    const filter = raw[y * (stride + 1)], row = y * stride;
+    for (let i = 0; i < stride; i++) {
+      const left = i >= channels ? pixels[row + i - channels] : 0, up = y ? pixels[row - stride + i] : 0;
+      const corner = y && i >= channels ? pixels[row - stride + i - channels] : 0;
+      let add = 0;
+      if (filter === 1) add = left;
+      else if (filter === 2) add = up;
+      else if (filter === 3) add = (left + up) >> 1;
+      else if (filter === 4) {
+        const guess = left + up - corner, a = Math.abs(guess - left), b = Math.abs(guess - up), c = Math.abs(guess - corner);
+        add = a <= b && a <= c ? left : b <= c ? up : corner;
+      }
+      pixels[row + i] = raw[y * (stride + 1) + 1 + i] + add;
+    }
+  }
+  return { width, height, channels, pixels };
+}
+// The textures the game tints and with what (BlockColors, in Bedrock's names). An `overlay`
+// tints only where the image's alpha is set (grass_side); the rest of it is the image the game
+// shows with it untinted, which Ponder draws under it.
+const TINTS = {
+  grass: ["grass_top", "tallgrass", "fern", "double_plant_grass_top", "double_plant_grass_bottom", "double_plant_fern_top", "double_plant_fern_bottom", "bush"],
+  foliage: ["leaves_oak", "leaves_oak_opaque", "leaves_jungle", "leaves_jungle_opaque", "leaves_acacia", "leaves_acacia_opaque",
+    "leaves_big_oak", "leaves_big_oak_opaque", "mangrove_leaves", "mangrove_leaves_opaque", "vine"],
+  birch: ["leaves_birch", "leaves_birch_opaque"],
+  evergreen: ["leaves_spruce", "leaves_spruce_opaque"],
+  dry_foliage: ["leaf_litter"],
+  water: ["water_still_grey", "water_flow_grey", "cauldron_water"],
+};
+const OVERLAYS = { grass_side: { tint: "grass", under: "grass_side_carried" } };
+// Texture path -> { tint, alpha, under }: the lists above, and the fixed tint_color of
+// terrain_texture.json (waterlily).
+function textureTints(colors, terrain) {
+  const out = new Map(), blocks = name => "textures/blocks/" + name;
+  Object.keys(TINTS).forEach(kind => TINTS[kind].forEach(name => {
+    out.set(blocks(name), kind === "water" ? { tint: colors.water, alpha: colors.waterOpacity } : { tint: colors[kind] });
+  }));
+  Object.keys(OVERLAYS).forEach(name => out.set(blocks(name), { tint: colors[OVERLAYS[name].tint], under: blocks(OVERLAYS[name].under) }));
+  Object.values(terrain).forEach(entry => {
+    const t = entry.textures;
+    (Array.isArray(t) ? t : [t]).forEach(x => { if (x && x.tint_color && !out.has(x.path)) out.set(x.path, { tint: hexColor(x.tint_color) }); });
+  });
+  return out;
 }
 
 // An image's size from its header: PNG's IHDR, TGA's image specification.
@@ -335,14 +432,25 @@ function textureEntry(size, flipbook) {
   return out;
 }
 
+// A vanilla texture's entry with the tint the game gives it in plains (textureTints): `tint`
+// [r, g, b], `alpha`, and `under`, the entry of the image drawn under an overlay.
+function tintedEntry(entry, tint, vanilla) {
+  if (!tint) return entry;
+  entry.tint = tint.tint;
+  if (tint.alpha != null) entry.alpha = tint.alpha;
+  if (tint.under) entry.under = textureEntry(vanilla.sizes.get(tint.under));
+  return entry;
+}
+
 // A texture's file in a pack, with its extension (textures/blocks/stone -> textures/blocks/stone.png).
 const textureFile = (files, texture) => [".png", ".tga"].map(ext => texture + ext).find(name => files.has(name)) || null;
 // The texture a terrain_texture.json entry draws: its first variant. One the game tints
-// (overlay_color, tint_color) gives null, since its file alone is not what the game shows.
-function terrainPath(entry) {
+// (overlay_color, tint_color) gives null unless `tints` says how, since its file alone is not
+// what the game shows.
+function terrainPath(entry, tints) {
   let t = entry && entry.textures;
   if (Array.isArray(t)) t = t[0];
-  if (t && typeof t === "object") return t.overlay_color || t.tint_color ? null : t.path || null;
+  if (t && typeof t === "object") return (t.overlay_color || t.tint_color) && !(tints && tints.has(t.path)) ? null : t.path || null;
   return typeof t === "string" ? t : null;
 }
 const terrainFile = (files, terrain, name) => { const t = terrainPath(terrain[name]); return t && textureFile(files, t); };
@@ -354,11 +462,14 @@ function terrainList(entry) {
 }
 
 // vanilla_blocks.json:
-//   textures { path: { file, w, h, frames, tick, seq } }, every texture the rest names;
+//   textures { path: { file, w, h, frames, tick, seq, tint, alpha, under } }, every texture the
+//     rest names, with the tint it takes in plains (tintedEntry);
 //   cubes { block: path, or one per face { up, down, north, south, west, east } }, a block drawn
 //     as a plain cube, block being the id without minecraft:. blocks.json names each face's
-//     texture, the inventory look (carried_textures) first, and terrain_texture.json its file. A
-//     block with a face the game tints is left out, and Ponder falls back to its own table;
+//     texture and terrain_texture.json its file: the placed look when a face of it is tinted
+//     (grass, leaves), else the inventory look (carried_textures) first. A block with a face the
+//     game tints in a way not known here is left out, and Ponder falls back to its own table;
+//   liquids { block: { still, flow } }, water's and lava's textures (liquid_models.js);
 //   shapes, the blocks Scaffold gives a shape (vanillaShapes).
 const FACE_NAMES = ["up", "down", "north", "south", "west", "east"];
 const VANILLA_TABLE = "hbui/ponder/blocks/vanilla_blocks.json";
@@ -366,32 +477,44 @@ const VANILLA_LICENSE = "hbui/ponder/blocks/vanilla_shapes_LICENSE.txt";
 const SHAPES_NOTICE = "The block shapes in vanilla_blocks.json (\"shapes\") are converted from the lookup tables of\n"
   + "Scaffold, https://github.com/EvilSlimeLabs/Scaffold (scaffold/lookups/), under its licence:\n\n";
 function vanillaBlockTable(vanilla) {
-  const textures = {}, cubes = {};
+  const textures = {}, cubes = {}, liquids = {};
   // A texture path the table names, or null when the pack has no such image.
   const use = p => {
     if (!p) return null;
-    if (!(p in textures)) { const size = vanilla.sizes.get(p); textures[p] = size ? textureEntry(size, vanilla.flipbooks.get(p)) : null; }
+    if (!(p in textures)) {
+      const size = vanilla.sizes.get(p);
+      textures[p] = size ? tintedEntry(textureEntry(size, vanilla.flipbooks.get(p)), vanilla.tints.get(p), vanilla) : null;
+    }
     return textures[p] ? p : null;
   };
+  // Each face's texture path, or null when a face has none.
   const faces = names => {
     const out = {};
     for (const face of FACE_NAMES) {
       const name = typeof names === "string" ? names : names[face] || names.side;
-      const p = name && use(terrainPath(vanilla.terrain[name]));
-      if (!p) return null;
+      const p = name && terrainPath(vanilla.terrain[name], vanilla.tints);
+      if (!p || !vanilla.sizes.has(p)) return null;
       out[face] = p;
     }
     return out;
   };
+  const tinted = found => !!found && FACE_NAMES.some(face => vanilla.tints.has(found[face]));
   Object.keys(vanilla.blocks).forEach(name => {
     const entry = vanilla.blocks[name];
     if (!entry || typeof entry !== "object") return;
-    const found = (entry.carried_textures && faces(entry.carried_textures)) || (entry.textures && faces(entry.textures));
-    if (found) cubes[name] = FACE_NAMES.every(face => found[face] === found.up) ? found.up : found;
+    if (LIQUIDS.test(name)) {
+      liquids[name] = { still: use(terrainPath(vanilla.terrain[entry.textures.up])), flow: use(terrainPath(vanilla.terrain[entry.textures.side])) };
+      return;
+    }
+    const placed = entry.textures && faces(entry.textures);
+    const found = tinted(placed) ? placed : (entry.carried_textures && faces(entry.carried_textures)) || placed;
+    if (!found) return;
+    FACE_NAMES.forEach(face => use(found[face]));
+    cubes[name] = FACE_NAMES.every(face => found[face] === found.up) ? found.up : found;
   });
   const shapes = vanillaShapes(vanilla, use);
   Object.keys(textures).forEach(p => { if (!textures[p]) delete textures[p]; });
-  return { textures, cubes, shapes };
+  return { textures, cubes, liquids, shapes };
 }
 
 // The blocks Scaffold draws: shapes.blocks { block: family }; shapes.families { family: { pick,
@@ -403,7 +526,7 @@ function vanillaBlockTable(vanilla) {
 // frame, blocks from the cell's low corner as a .geo.json has it. Scaffold draws a plain cube
 // 0.95 across so a ghost block lets the one behind show; here it fills its cell again. A face
 // with no area, which Scaffold does not draw, is left out, and so is one whose texture the pack
-// does not have. Water and lava stay as they were drawn before.
+// does not have. Water and lava are not Scaffold's: Ponder draws them from `liquids`.
 const RULES = ["pick", "data", "turn_by", "texture_by"];
 const LIQUIDS = /^(flowing_)?(water|lava)$/;
 function vanillaShapes(vanilla, use) {
@@ -670,7 +793,9 @@ function main() {
       resourcePacks.filter(pack => pack.files.has("hbui/gameplay.html")).forEach(pack => {
         pack.files.set(VANILLA_TABLE, Buffer.from(JSON.stringify(table)));
         pack.files.set(VANILLA_LICENSE, Buffer.from(SHAPES_NOTICE + vanilla.license));
-        pack.report.changes.push(VANILLA_TABLE + ": " + Object.keys(table.textures).length + " textures, " + Object.keys(table.cubes).length + " cube blocks, "
+        pack.report.changes.push(VANILLA_TABLE + ": " + Object.keys(table.textures).length + " textures ("
+          + Object.values(table.textures).filter(t => t.tint).length + " tinted as in plains), " + Object.keys(table.cubes).length + " cube blocks, "
+          + Object.keys(table.liquids).length + " liquids, "
           + Object.keys(table.shapes.blocks).length + " blocks in " + Object.keys(table.shapes.families).length + " shapes; " + VANILLA_LICENSE);
       });
       continue;
