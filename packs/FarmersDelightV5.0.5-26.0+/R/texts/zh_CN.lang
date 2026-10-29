@@ -306,3 +306,9 @@ tile.farmersdelight:pumpkin_pie.name=南瓜派
 item.farmersdelight:pumpkin_pie_slice=南瓜派切片
 tile.farmersdelight:gleaming_salad_block.name=闪耀沙拉
 item.farmersdelight:gleaming_salad=闪耀沙拉
+## 2026-10-29 为 Ponder 示例添加（不属于农夫乐事 5.0.5）
+farmersdelight.ponder.cooking_pot.header=厨锅
+farmersdelight.ponder.cooking_pot.text_1=厨锅可以用来制作和储存食物。
+farmersdelight.ponder.cooking_pot.text_2=要制作食物，厨锅下方必须有热源：火焰、岩浆、营火或点燃的炉灶。厨锅上方冒出气泡或烟雾，说明它已受热。
+farmersdelight.ponder.cooking_pot.text_3=用打火石点燃炉灶，它就会加热上方的厨锅。
+farmersdelight.ponder.cooking_pot.text_4=用锹或水桶可以熄灭点燃的炉灶。

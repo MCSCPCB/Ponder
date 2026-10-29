@@ -295,3 +295,9 @@ tile.farmersdelight:pumpkin_pie.name=Pumpkin Pie
 item.farmersdelight:pumpkin_pie_slice=Slice of Pumpkin Pie
 tile.farmersdelight:gleaming_salad_block.name=Gleaming Salad
 item.farmersdelight:gleaming_salad=Gleaming Salad
+## Added 2026-10-29 for the Ponder example (not part of Farmer's Delight 5.0.5)
+farmersdelight.ponder.cooking_pot.header=Cooking Pot
+farmersdelight.ponder.cooking_pot.text_1=The Cooking Pot is used for cooking and storing food
+farmersdelight.ponder.cooking_pot.text_2=To prepare food, it needs a heat source below it: fire, lava, a campfire or a lit Stove. Bubbles or smoke above the pot show that it is heated
+farmersdelight.ponder.cooking_pot.text_3=Flint and Steel lights the Stove, which then heats the pot above it
+farmersdelight.ponder.cooking_pot.text_4=A shovel or a water bucket puts a lit Stove out

@@ -38,6 +38,8 @@ import "./customComponents/block/DishComponent";
 import "./customComponents/block/PastryComponent";
 import "./customComponents/block/SugarCaneComponent";
 import { PumpkinPie } from "./item/PumpkinPie";
+// Added 2026-10-29 for the Ponder example: registers this pack's Ponder scenes (ponder.js).
+import "./ponder";
 CookingPotRecipeRegistries.initCookingPotScoRegistries();
 CuttingBoardRegistries.initCuttingBoardScoRegistries();
 CookRecipeRegistries.initCookScoRegistries();
