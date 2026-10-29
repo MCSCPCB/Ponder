@@ -1,12 +1,16 @@
 // Adapts Ponder packs to another game version. Node only, no packages.
 //
-//   node tools/adapter/adapt.js <version> [input...]
+//   1. Put the packs to adapt in tools/input/ as .zip, .mcpack or .mcaddon.
+//   2. Copy the game's gui folder into tools/version/<version>/, so that
+//      tools/version/<version>/gui/dist/hbui/gameplay.html exists.
+//   3. node tools/adapter/adapt.js <version>
+//   4. Take the results from tools/output/<version>/.
 //
-// <version> names a folder under tools/version/ (1-26-60-4 or 1.26.60.4) holding that version's
-// gui folder, copied from the game: tools/version/<version>/gui/dist/hbui/gameplay.html and the
-// bundles it names. Each input is a folder, .mcpack, .mcaddon or .zip; every manifest.json found
-// in it is one pack. Without inputs, everything in tools/input/ is adapted. Results go to
-// tools/output/<version>/: one .mcpack per single-pack input, one .mcaddon otherwise.
+// <version> is the folder's name, 1.26.60.4 or 1-26-60-4. Inputs can also be given after it
+// (folders, .zip, .mcpack, .mcaddon) instead of using tools/input/. Every manifest.json in an
+// input is one pack; an input with one pack becomes a .mcpack, one with more an .mcaddon.
+// An add-on's behavior and resource packs belong in the same run, so that each one's dependency
+// on the other moves to the other's new version.
 //
 // For each pack it:
 // - swaps vanilla's hashed bundle names at the top of hbui/gameplay.html for the target's;
@@ -53,12 +57,12 @@ const fail = message => { console.error("error: " + message); process.exit(1); }
 
 // ---- the target version's gui folder ----
 
+// The folder may be named 1.26.60.4 or 1-26-60-4, whichever way the version was typed.
 function versionFolder(version) {
-  const folder = path.join(TOOLS, "version", version);
-  if (fs.existsSync(folder)) return folder;
-  const dashed = version.replace(/\./g, "-");
-  if (dashed !== version && fs.existsSync(path.join(TOOLS, "version", dashed))) return path.join(TOOLS, "version", dashed);
-  fail("no folder tools/version/" + version + " (put that version's gui folder there)");
+  const names = [version, version.replace(/\./g, "-"), version.replace(/-/g, ".")];
+  const found = names.map(name => path.join(TOOLS, "version", name)).find(folder => fs.existsSync(folder));
+  if (!found) fail("no folder tools/version/" + version + " (put that version's gui folder there)");
+  return found;
 }
 
 // gameplay.html names the bundles the game loads; everything Ponder calls lives in the .js one.
@@ -106,24 +110,32 @@ function readDir(dir) {
   return files;
 }
 
+// Sizes come from the central directory: zips written with data descriptors leave them 0 in the
+// local headers. Folders, and macOS's __MACOSX copies, are skipped.
 function readZip(file) {
   const data = fs.readFileSync(file);
   const files = new Map();
-  let offset = 0;
-  while (offset + 30 <= data.length && data.readUInt32LE(offset) === 0x04034b50) {
-    const method = data.readUInt16LE(offset + 8);
-    const compressed = data.readUInt32LE(offset + 18);
-    const nameLength = data.readUInt16LE(offset + 26);
-    const extraLength = data.readUInt16LE(offset + 28);
-    const name = data.toString("utf8", offset + 30, offset + 30 + nameLength);
-    const start = offset + 30 + nameLength + extraLength;
-    if (name && !name.endsWith("/")) {
-      const bytes = data.subarray(start, start + compressed);
-      if (method === 0) files.set(name, Buffer.from(bytes));
-      else if (method === 8) files.set(name, zlib.inflateRawSync(bytes));
-      else fail(path.basename(file) + " stores " + name + " with compression method " + method);
-    }
-    offset = start + compressed;
+  let end = data.length - 22;
+  while (end >= 0 && data.readUInt32LE(end) !== 0x06054b50) end--;
+  if (end < 0) fail(path.basename(file) + " is not a zip");
+  const count = data.readUInt16LE(end + 10);
+  let entry = data.readUInt32LE(end + 16);
+  for (let i = 0; i < count; i++) {
+    if (data.readUInt32LE(entry) !== 0x02014b50) fail(path.basename(file) + " has a broken central directory");
+    const method = data.readUInt16LE(entry + 10);
+    const compressed = data.readUInt32LE(entry + 20);
+    const nameLength = data.readUInt16LE(entry + 28);
+    const extraLength = data.readUInt16LE(entry + 30);
+    const commentLength = data.readUInt16LE(entry + 32);
+    const local = data.readUInt32LE(entry + 42);
+    const name = data.toString("utf8", entry + 46, entry + 46 + nameLength).replace(/\\/g, "/");
+    entry += 46 + nameLength + extraLength + commentLength;
+    if (!name || name.endsWith("/") || name.startsWith("__MACOSX/")) continue;
+    const start = local + 30 + data.readUInt16LE(local + 26) + data.readUInt16LE(local + 28);
+    const bytes = data.subarray(start, start + compressed);
+    if (method === 0) files.set(name, Buffer.from(bytes));
+    else if (method === 8) files.set(name, zlib.inflateRawSync(bytes));
+    else fail(path.basename(file) + " stores " + name + " with compression method " + method);
   }
   if (!files.size) fail(path.basename(file) + " has no files");
   return files;
@@ -306,7 +318,6 @@ function safe(name) { return name.replace(/[<>:"/\\|?*]/g, "").trim() || "pack";
 
 function writeOutput(groups, version) {
   const outDir = path.join(TOOLS, "output", version);
-  fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(outDir, { recursive: true });
   const written = [];
   groups.forEach(group => {
