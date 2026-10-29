@@ -188,6 +188,21 @@
       const css = `position:absolute;left:0;top:0;width:${s}px;height:${s}px;image-rendering:pixelated${filter ? ";filter:" + filter : ""}`;
       if (n.imgCss !== css) { n.img.style.cssText = css; n.imgCss = css; }
     }
+    // texturedQuad for a region of the texture: o, u and v show the texture at fractions
+    // (u0, v0), (u1, v0) and (u0, v1), flipped where u1 < u0 or v1 < v0. The whole texture is laid
+    // out as texturedQuad would and clipped to the region.
+    texturedQuadPart(src, o, u, v, u0, v0, u1, v1, filter, size) {
+      const a = [(u[0] - o[0]) / (u1 - u0), (u[1] - o[1]) / (u1 - u0)], b = [(v[0] - o[0]) / (v1 - v0), (v[1] - o[1]) / (v1 - v0)];
+      const x = o[0] - u0 * a[0] - v0 * b[0], y = o[1] - u0 * a[1] - v0 * b[1];
+      const s = size || 16, k = P.view.cssPerGui / s, f = n => n.toFixed(5), at = n => (n * s).toFixed(3) + "px";
+      const l = at(Math.min(u0, u1)), r = at(Math.max(u0, u1)), t = at(Math.min(v0, v1)), bt = at(Math.max(v0, v1));
+      const n = this.style(this.take("image"), `position:absolute;left:0;top:0;width:${s}px;height:${s}px;transform-origin:0 0;` +
+        `transform:matrix(${f(a[0] * k)},${f(a[1] * k)},${f(b[0] * k)},${f(b[1] * k)},${P.num(x)},${P.num(y)});clip-path:polygon(${l} ${t},${r} ${t},${r} ${bt},${l} ${bt})`);
+      if (!n.img) { n.img = document.createElement("img"); n.el.appendChild(n.img); }
+      if (n.src !== src) { n.img.src = src; n.src = src; }
+      const css = `position:absolute;left:0;top:0;width:${s}px;height:${s}px;image-rendering:pixelated${filter ? ";filter:" + filter : ""}`;
+      if (n.imgCss !== css) { n.img.style.cssText = css; n.imgCss = css; }
+    }
     // A line from GUI point a to b, `width` GUI pixels thick.
     line(a, b, width, c) {
       const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);

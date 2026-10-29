@@ -19,24 +19,29 @@
     return e.transform(m, pt);
   }
 
-  // The faces of the section's blocks that are not against a full block of the section.
+  // The faces of the section's blocks (an add-on model's quads) that are not against a full
+  // block of the section.
   function blocksOf(world, e) {
     if (e.built && e.builtVersion === e.version) return e.built;
     const out = [], has = (x, y, z) => e.section.has(x, y, z);
     e.section.keys.forEach(k => {
       const p = k.split(",").map(Number), block = world.getBlock(p[0], p[1], p[2]);
       if (!block) return;
-      const model = P.blockModel(block), faces = [];
-      if (model.shape === "wire") faces.push(["up", P.WIRE_FACE]);
-      else Object.keys(DIRS).forEach(f => {
+      const model = P.blockModel(block);
+      // Whether the neighbour on side f hides this block's face there.
+      const hidden = f => {
         const d = DIRS[f], nx = p[0] + d[0], ny = p[1] + d[1], nz = p[2] + d[2];
         const other = has(nx, ny, nz) && world.getBlock(nx, ny, nz);
-        if (other) {
-          const om = P.blockModel(other);
-          if (om.shape === "cube" && (om.opaque || om.id === model.id)) return;
-        }
-        faces.push([f, P.FACES[f]]);
-      });
+        if (!other) return false;
+        const om = P.blockModel(other);
+        return om.full && (om.opaque || om.id === model.id);
+      };
+      if (model.shape === "model") {
+        const quads = model.quads.filter(q => !q.cull || !hidden(q.cull));
+        if (quads.length) out.push({ p, model, quads });
+        return;
+      }
+      const faces = model.shape === "wire" ? [["up", P.WIRE_FACE]] : Object.keys(DIRS).filter(f => !hidden(f)).map(f => [f, P.FACES[f]]);
       if (faces.length) out.push({ p, model, faces });
     });
     e.built = out;
@@ -84,15 +89,36 @@
       if (it.draw) { it.draw(d); return; }
       // renderBreakingTexture: destroy_stage_<progress> over the block's faces.
       const stage = breaking.get(P.blockKey(it.b.p[0], it.b.p[1], it.b.p[2]));
+      if (it.b.quads) { drawQuads(d, M.translate(it.m, it.b.p[0], it.b.p[1], it.b.p[2]), it.b.quads, it.light, grow, size, stage); return; }
       it.b.faces.forEach(f => {
         const face = f[1];
         if (!facing(it.m, face.n)) return;
         const c = corners(it.m, it.b.p, face, it.b.model.opaque ? grow : 0);
         d.texturedQuad(it.b.model.faces[f[0]], c[0], c[1], c[2], filterOf(P.SHADE[f[0]] * it.light, it.b.model.tint), size);
-        if (stage != null) d.texturedQuad(`pack://textures/environment/destroy_stage_${stage}.png?filtering=point`, c[0], c[1], c[2], null, size);
+        if (stage != null) d.texturedQuad(destroyStage(stage), c[0], c[1], c[2], null, size);
       });
     });
   };
+  const destroyStage = stage => `pack://textures/environment/destroy_stage_${stage}.png?filtering=point`;
+
+  // An add-on model's quads under matrix m (block space), far to near. Solid ones are pushed out
+  // by `grow` blocks along their edges to close seams; two-sided ones show from behind too.
+  function drawQuads(d, m, quads, light, grow, size, stage) {
+    const list = [];
+    quads.forEach(q => {
+      if (!q.twoSided && !facing(m, q.n)) return;
+      const g = q.solid ? grow : 0, eu = q.eu, ev = q.ev;
+      const at = (p, su, sv) => M.apply(m, p[0] + (eu[0] * su + ev[0] * sv) * g, p[1] + (eu[1] * su + ev[1] * sv) * g, p[2] + (eu[2] * su + ev[2] * sv) * g);
+      const o = at(q.o, -1, -1), u = at(q.u, 1, -1), v = at(q.v, -1, 1);
+      list.push({ q, o, u, v, depth: (u[2] + v[2]) / 2 });
+    });
+    list.sort((a, b) => a.depth - b.depth);
+    list.forEach(it => {
+      const r = it.q.region;
+      d.texturedQuadPart(it.q.src, it.o, it.u, it.v, r[0], r[1], r[2], r[3], filterOf(it.q.shade * light, null), size);
+      if (stage != null) d.texturedQuad(destroyStage(stage), it.o, it.u, it.v, null, size);
+    });
+  }
 
   // ItemEntityRenderer.render + renderMultipleFromCount (1.21.1). The ground display transforms
   // are vanilla's: block.json translation (0, 3, 0) px, scale 0.25; item/generated.json
@@ -130,6 +156,7 @@
   function drawCube(d, m, id, px) {
     const model = P.blockModel(id), size = Math.max(16, Math.round(px * P.view.cssPerGui));
     const c = M.translate(m, -0.5, -0.5, -0.5);
+    if (model.quads) { drawQuads(d, c, model.quads, 1, 0, size, null); return; }
     Object.keys(P.FACES).forEach(f => {
       const face = P.FACES[f];
       if (!facing(c, face.n)) return;
