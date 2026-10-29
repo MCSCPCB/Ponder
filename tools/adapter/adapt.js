@@ -290,7 +290,7 @@ function adaptPack(pack, target, engine, versions, main) {
 // version layer already merged; of its images only their sizes and the colour maps are kept),
 // plains' climate from its behavior pack, and Scaffold's tables in its scaffold/.
 const SCAFFOLD = ["block_definition", "block_geometry", "block_rotation", "state_rotations", "dust_connections"];
-const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json)$|^behavior_pack\/biomes\/plains\.biome\.json$/;
+const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json|(entity|models\/entity|animations|animation_controllers|render_controllers)\/.+\.json|models\/mobs\.json)$|^behavior_pack\/biomes\/plains\.biome\.json$/;
 // blocks.json keys some blocks by an older name than their id.
 const LEGACY_NAMES = {
   grass: "grass_block", chain: "iron_chain", seaLantern: "sea_lantern", tripWire: "trip_wire", invisibleBedrock: "invisible_bedrock",
@@ -319,7 +319,7 @@ function vanillaPack(folder) {
   if (!fs.existsSync(license)) fail("missing " + path.relative(TOOLS, license) + " (Scaffold's LICENSE)");
   const terrain = parseJson(files.get("textures/terrain_texture.json"), "vanilla textures/terrain_texture.json").texture_data;
   return {
-    file, sizes, scaffold, license: fs.readFileSync(license, "utf8"), blocks, terrain,
+    file, files, sizes, scaffold, license: fs.readFileSync(license, "utf8"), blocks, terrain,
     flipbooks: flipbookTable(parseJson(files.get("textures/flipbook_textures.json"), "vanilla textures/flipbook_textures.json")),
     tints: textureTints(plainsColors(files), terrain),
   };
@@ -476,6 +476,7 @@ function terrainList(entry) {
 const FACE_NAMES = ["up", "down", "north", "south", "west", "east"];
 const VANILLA_TABLE = "hbui/ponder/blocks/vanilla_blocks.json";
 const VANILLA_LICENSE = "hbui/ponder/blocks/vanilla_shapes_LICENSE.txt";
+const ENTITY_TABLE = "hbui/ponder/entities/vanilla_entities.json";
 const SHAPES_NOTICE = "The block shapes in vanilla_blocks.json (\"shapes\") are converted from the lookup tables of\n"
   + "Scaffold, https://github.com/EvilSlimeLabs/Scaffold (scaffold/lookups/), under its licence:\n\n";
 function vanillaBlockTable(vanilla) {
@@ -602,7 +603,7 @@ function vanillaShapes(vanilla, use) {
 
 // ---- an add-on's own blocks ----
 
-const ADDON_INDEX = "ponder_blocks.json";
+const ADDON_INDEX = "ponder_blocks.json", ADDON_ENTITIES = "ponder_entities.json";
 // The states the placement traits add, default first.
 const TRAIT_STATES = {
   "minecraft:placement_direction": {
@@ -629,11 +630,13 @@ const blockFiles = pack => [...pack.files.keys()].filter(name => /^blocks\/.*\.j
 
 // Every geometry a model file defines: format 1.12 and later list them under minecraft:geometry,
 // 1.8 keys them geometry.<name>.
+// 1.8's geometry.<name>:geometry.<parent> takes its parent's bones and texture size where it gives
+// none of its own (`parent`). The texture size is left out where the file gives none.
 function geometryEntries(json) {
   if (Array.isArray(json["minecraft:geometry"])) return json["minecraft:geometry"].map(g => ({
-    identifier: g.description.identifier, width: g.description.texture_width || 16, height: g.description.texture_height || 16, bones: g.bones || [] }));
+    identifier: g.description.identifier, width: g.description.texture_width, height: g.description.texture_height, bones: g.bones || [] }));
   return Object.keys(json).filter(key => key.startsWith("geometry.")).map(key => ({
-    identifier: key.split(":")[0], width: json[key].texturewidth || 16, height: json[key].textureheight || 16, bones: json[key].bones || [] }));
+    identifier: key.split(":")[0], parent: key.split(":")[1], width: json[key].texturewidth, height: json[key].textureheight, bones: json[key].bones || [] }));
 }
 
 // ponder_blocks.json: blocks { id: { states, look, permutations: [{ condition, look }] } }, look
@@ -667,7 +670,7 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
   resourcePacks.forEach(pack => pack.files.forEach((bytes, name) => {
     if (!/^models\/.*\.json$/.test(name)) return;
     geometryEntries(parseJson(bytes, pack.name + " " + name)).forEach(g => {
-      if (geometries.has(g.identifier) && !index.geometries[g.identifier]) index.geometries[g.identifier] = { width: g.width, height: g.height, bones: g.bones };
+      if (geometries.has(g.identifier) && !index.geometries[g.identifier]) index.geometries[g.identifier] = { width: g.width || 16, height: g.height || 16, bones: g.bones };
     });
   }));
   // A texture name is looked up in each resource pack's terrain_texture.json, then vanilla's. Each
@@ -695,6 +698,95 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
   geometries.forEach(id => { if (!BUILT_IN_GEOMETRY.has(id) && !index.geometries[id]) missing.push("geometry " + id); });
   return { index, missing };
 }
+
+// The entity tables: vanilla_entities.json (hbui/ponder/entities/), every client entity of the
+// game, and an add-on's ponder_entities.json, its own. Each holds the entities' definitions
+// (entities { id: { textures, geometry, animations, animation_controllers, render_controllers,
+// scripts, materials } }, the names as the definition gives them) and what those names point at,
+// cut to what the entity renderer reads: geometries { identifier: { width, height, bones } },
+// animations, controllers (animation controllers) and renders (render controllers) by name, and
+// textures { path: { pack, file, w, h, frames, tick, seq } } (textureEntry, `pack` as in
+// ponder_blocks.json). An add-on's names may point at vanilla's (`base`), which it does not
+// repeat. A name nothing defines is in `missing`.
+// `sources` are { files, texture(path) }: a pack's files by path, and a texture's entry or null.
+function entityTable(sources, base) {
+  const entities = {}, geometries = {}, animations = {}, controllers = {}, renders = {}, textures = {}, missing = [];
+  const each = (prefix, fn) => sources.forEach(s => { for (const [name, bytes] of s.files) if (name.startsWith(prefix) && name.endsWith(".json")) fn(parseJson(bytes, name)); });
+  const raw = {};
+  each("models/", json => geometryEntries(json).forEach(g => { if (!raw[g.identifier]) raw[g.identifier] = g; }));
+  // A 1.8 geometry with a parent: the parent's bones, each replaced by the child's of the same name.
+  const known = id => geometries[id] || (base && base.geometries[id]);
+  const resolve = (id, seen) => {
+    if (known(id) || !raw[id]) return known(id);
+    const g = raw[id], parent = g.parent && !seen.has(g.parent) ? resolve(g.parent, new Set([...seen, id])) : null;
+    if (g.parent && !parent) missing.push("geometry " + g.parent);
+    const own = new Set(g.bones.map(b => b.name));
+    const bones = parent ? parent.bones.filter(b => !own.has(b.name)).concat(g.bones) : g.bones;
+    return (geometries[id] = { width: g.width || (parent && parent.width) || 64, height: g.height || (parent && parent.height) || 64, bones });
+  };
+  Object.keys(raw).forEach(id => resolve(id, new Set()));
+  each("animations/", json => Object.assign(animations, json.animations || {}));
+  each("animation_controllers/", json => Object.assign(controllers, json.animation_controllers || {}));
+  each("render_controllers/", json => Object.assign(renders, json.render_controllers || {}));
+  // Several files can define one entity: the game uses the one with the highest min_engine_version.
+  const versionOf = d => String(d.min_engine_version || "0").split(".").map(Number);
+  const newer = (a, b) => { for (let i = 0; i < Math.max(a.length, b.length); i++) { const x = a[i] || 0, y = b[i] || 0; if (x !== y) return x > y; } return false; };
+  const chosen = new Map();
+  each("entity/", json => {
+    const d = (json["minecraft:client_entity"] || {}).description;
+    if (d && d.identifier && (!chosen.has(d.identifier) || newer(versionOf(d), versionOf(chosen.get(d.identifier))))) chosen.set(d.identifier, d);
+  });
+  const has = (table, id) => (table === "geometries" ? geometries : table === "animations" ? animations : table === "controllers" ? controllers : renders)[id]
+    || (base && base[table][id]);
+  const use = p => {
+    if (!(p in textures) && !(base && base.textures[p])) {
+      const entry = sources.map(s => s.texture(p)).find(Boolean);
+      if (entry) textures[p] = entry;
+      else missing.push("texture " + p);
+    }
+    return p;
+  };
+  chosen.forEach((d, id) => {
+    const t = {};
+    Object.keys(d.textures || {}).forEach(k => { t[k] = use(d.textures[k]); });
+    entities[id] = {
+      textures: t, geometry: d.geometry || {}, animations: d.animations || {},
+      animation_controllers: d.animation_controllers || [], render_controllers: d.render_controllers || [],
+      scripts: d.scripts || {}, materials: d.materials || {},
+    };
+    Object.values(d.geometry || {}).forEach(g => { if (!has("geometries", g)) missing.push("geometry " + g); });
+    Object.values(d.animations || {}).forEach(a => { if (!has("animations", a) && !has("controllers", a)) missing.push("animation " + a); });
+    (d.animation_controllers || []).forEach(entry => Object.values(typeof entry === "string" ? { entry } : entry).forEach(c => {
+      if (!has("controllers", c)) missing.push("animation controller " + c);
+    }));
+    (d.render_controllers || []).forEach(entry => Object.keys(typeof entry === "string" ? { [entry]: 0 } : entry).forEach(r => {
+      if (!has("renders", r)) missing.push("render controller " + r);
+    }));
+  });
+  // Only what an entity names.
+  const named = { geometries: new Set(), animations: new Set(), renders: new Set() };
+  Object.values(entities).forEach(e => {
+    Object.values(e.geometry).forEach(g => named.geometries.add(g));
+    Object.values(e.animations).forEach(a => named.animations.add(a));
+    e.animation_controllers.forEach(entry => Object.values(typeof entry === "string" ? { entry } : entry).forEach(c => named.animations.add(c)));
+    e.render_controllers.forEach(entry => Object.keys(typeof entry === "string" ? { [entry]: 0 } : entry).forEach(r => named.renders.add(r)));
+  });
+  const only = (table, set) => { const out = {}; Object.keys(table).forEach(k => { if (set.has(k)) out[k] = table[k]; }); return out; };
+  return {
+    entities, geometries: only(geometries, named.geometries), animations: only(animations, named.animations),
+    controllers: only(controllers, named.animations), renders: only(renders, named.renders), textures, missing: [...new Set(missing)],
+  };
+}
+// Vanilla's, from bedrock-samples.
+const vanillaEntityTable = vanilla => entityTable([{ files: vanilla.files, texture: p => {
+  const size = vanilla.sizes.get(p);
+  return size ? textureEntry(size, vanilla.flipbooks.get(p)) : null;
+} }], null);
+// An add-on's, from its resource packs, its textures in the first pack that has the file.
+const addonEntityTable = (resourcePacks, base) => entityTable(resourcePacks.map(pack => ({ files: pack.files, texture: p => {
+  const file = textureFile(pack.files, p);
+  return file ? Object.assign({ pack: pack.uuid }, textureEntry(Object.assign({ file }, imageSize(pack.files.get(file), path.extname(file).slice(1))))) : null;
+} })), base);
 
 // ---- writing ----
 
@@ -814,13 +906,20 @@ function main() {
     console.log("vanilla blocks from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/") + " and " + path.relative(TOOLS, path.join(folder, "scaffold")).split(path.sep).join("/"));
     return vanilla;
   };
+  let vanillaEntities = null;
+  const loadVanillaEntities = () => vanillaEntities || (vanillaEntities = vanillaEntityTable(loadVanilla()));
   for (const group of groups) {
     const resourcePacks = group.packs.filter(isResourcePack), behaviorPacks = group.packs.filter(pack => !isResourcePack(pack));
     if (group.main) {
       const table = vanillaBlockTable(loadVanilla());
+      const entityTable = loadVanillaEntities();
       resourcePacks.filter(pack => pack.files.has("hbui/gameplay.html")).forEach(pack => {
         pack.files.set(VANILLA_TABLE, Buffer.from(JSON.stringify(table)));
         pack.files.set(VANILLA_LICENSE, Buffer.from(SHAPES_NOTICE + vanilla.license));
+        pack.files.set(ENTITY_TABLE, Buffer.from(JSON.stringify(entityTable)));
+        pack.report.changes.push(ENTITY_TABLE + ": " + Object.keys(entityTable.entities).length + " entities, "
+          + Object.keys(entityTable.geometries).length + " geometries, " + Object.keys(entityTable.animations).length + " animations, "
+          + Object.keys(entityTable.textures).length + " textures" + (entityTable.missing.length ? "; not found: " + entityTable.missing.join(", ") : ""));
         pack.report.changes.push(VANILLA_TABLE + ": " + Object.keys(table.textures).length + " textures ("
           + Object.values(table.textures).filter(t => t.tint).length + " tinted as in plains), " + Object.keys(table.cubes).length + " cube blocks, "
           + Object.keys(table.liquids).length + " liquids, "
@@ -828,17 +927,27 @@ function main() {
       });
       continue;
     }
-    // An add-on with scenes (hbui/ponder_addons/) and blocks of its own.
+    // An add-on with scenes (hbui/ponder_addons/): its own blocks and entities.
     const targets = resourcePacks.filter(pack => addonFolders(pack).length);
-    if (!targets.length || !behaviorPacks.some(pack => blockFiles(pack).length)) continue;
-    const { index, missing } = addonBlockIndex(behaviorPacks, resourcePacks, loadVanilla());
-    if (!Object.keys(index.blocks).length) continue;
-    targets.forEach(pack => addonFolders(pack).forEach(f => {
-      const name = "hbui/ponder_addons/" + f + "/" + ADDON_INDEX;
-      pack.files.set(name, Buffer.from(JSON.stringify(index)));
-      pack.report.changes.push(name + ": " + Object.keys(index.blocks).length + " blocks, " + Object.keys(index.geometries).length + " geometries, " + Object.keys(index.textures).length + " textures");
+    if (!targets.length) continue;
+    const write = (file, table, report) => targets.forEach(pack => addonFolders(pack).forEach(f => {
+      const name = "hbui/ponder_addons/" + f + "/" + file;
+      pack.files.set(name, Buffer.from(JSON.stringify(table)));
+      pack.report.changes.push(name + ": " + report);
     }));
-    if (missing.length) targets[0].report.changes.push("not found: " + missing.join(", "));
+    if (behaviorPacks.some(pack => blockFiles(pack).length)) {
+      const { index, missing } = addonBlockIndex(behaviorPacks, resourcePacks, loadVanilla());
+      if (Object.keys(index.blocks).length) {
+        write(ADDON_INDEX, index, Object.keys(index.blocks).length + " blocks, " + Object.keys(index.geometries).length + " geometries, " + Object.keys(index.textures).length + " textures");
+        if (missing.length) targets[0].report.changes.push("not found: " + missing.join(", "));
+      }
+    }
+    if (resourcePacks.some(pack => [...pack.files.keys()].some(name => /^entity\/.*\.json$/.test(name)))) {
+      const entities = addonEntityTable(resourcePacks, loadVanillaEntities());
+      write(ADDON_ENTITIES, entities, Object.keys(entities.entities).length + " entities, " + Object.keys(entities.geometries).length + " geometries, "
+        + Object.keys(entities.animations).length + " animations, " + Object.keys(entities.textures).length + " textures"
+        + (entities.missing.length ? "; not found: " + entities.missing.join(", ") : ""));
+    }
   }
 
   const written = writeOutput(groups, path.basename(folder));
