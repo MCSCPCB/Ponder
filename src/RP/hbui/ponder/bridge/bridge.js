@@ -1,14 +1,16 @@
 // Talks to the server's data-driven form the way the vanilla bundle does (read from its
 // 1.26.40 build): queries go over window.engine ("query:subscribe/<name>" -> "query:updated/<id>"),
 // button presses through window.__commands__. The form the behavior pack opens carries the
-// marker "ponder:<item id>;"; while it is up, Ponder covers it and vanilla's #root is hidden.
+// marker "ponder:<item id>#<stamp>;"; while it is up, Ponder covers it and vanilla's #root is
+// hidden. The stamp is new for every form, so one opened right after another for the same item
+// still reads as a new form.
 (function () {
   const P = window.Ponder;
-  const MARKER = /ponder:([a-z0-9_.-]+:[a-z0-9_./-]+);/;
+  const MARKER = /ponder:([a-z0-9_.-]+:[a-z0-9_./-]+#\d+);/;
   const ADDONS = /ponder\.addons:(\[[^;]*\]);/;
   const CLOSE_LABEL = "ponder:close;"; // the behavior pack's own close button
   const GROUP = "vanillaCoreDataStoreSetCommandGroup";
-  const bridge = (P.bridge = { screenId: "", definition: "", data: {}, item: null, onOpen: null, onClose: null });
+  const bridge = (P.bridge = { screenId: "", definition: "", tree: null, data: {}, form: null, item: null, onOpen: null, onClose: null });
 
   // Vanilla ids are uint32 hashes, passed as strings up to 1.26.51 and as numbers from 1.26.60;
   // tools/adapter sets QUERY_ID for the target version. Ours count down from the top of the range.
@@ -70,8 +72,10 @@
       P.log("screen", screenId || "(none)");
       bridge.screenId = screenId;
       bridge.definition = "";
+      bridge.tree = null;
       if (dropDefinition) dropDefinition();
       dropDefinition = screenId ? subscribe("vanilla.CoreDataDrivenUIDefinitionQuery", [1, screenId], def => {
+        bridge.tree = def;
         bridge.definition = strings(def, []).join("\n");
         if (P.DEBUG) P.log("definition", bridge.definition.slice(0, 300).replace(/\n/g, " | "));
         watchData();
@@ -105,22 +109,30 @@
     if (root) root.style.cssText = hidden ? "opacity:0;pointer-events:none" : "";
   }
 
-  // Set when our close did not take: Ponder steps aside until the form goes away.
-  let gaveUp = false;
+  // bridge.form is the form on screen, "<item id>#<stamp>", and `closed` the last one Ponder
+  // closed itself: a closed form's data can stay as it was (1.26.60), so that one is not read as
+  // open again. `gaveUp` is set when Ponder shows nothing for the form, which is then vanilla's.
+  let closed = null, gaveUp = false;
   function poll() {
-    const item = find(MARKER);
-    if (item === bridge.item) return;
-    if (bridge.item && !gaveUp && bridge.onClose) bridge.onClose();
-    bridge.item = item;
+    let form = find(MARKER);
+    if (form === closed) form = null;
+    if (form === bridge.form) return;
+    if (bridge.form && !gaveUp && bridge.onClose) bridge.onClose();
+    bridge.form = form;
+    bridge.item = form && form.slice(0, form.lastIndexOf("#"));
     gaveUp = false;
-    setVanillaHidden(!!item);
-    if (!item) return;
-    // onOpen resolves to false when there is nothing to show; the vanilla form then comes back.
-    Promise.resolve(bridge.onOpen(item, findAddons())).then(shown => {
-      if (shown || bridge.item !== item) return;
+    setVanillaHidden(!!form);
+    if (!form) return;
+    const giveBack = () => {
+      if (bridge.form !== form) return;
       gaveUp = true;
+      if (bridge.onClose) bridge.onClose();
       setVanillaHidden(false);
-    });
+    };
+    // onOpen resolves to false when there is nothing to show, and the vanilla form comes back,
+    // as it does when opening fails.
+    new Promise(resolve => resolve(bridge.onOpen(bridge.item, findAddons()))).then(shown => { if (!shown) giveBack(); },
+      e => { P.log("open failed:", e && e.message); giveBack(); });
   }
 
   // Presses the vanilla button showing `label`: the innermost element with that text gets the
@@ -143,36 +155,49 @@
     P.log("close: pressed", target.tagName, label);
   }
 
-  // "$.<datastore>.<property>.<path...>.closeAction" -> the arguments of the press command.
+  // The close button's binding, made absolute the way vanilla's renderer does: a "$relativePath"
+  // is read from the nearest Context above it, whose data is a "$path" or relative itself. In
+  // 1.26.60 it is "$.closeButton.onClick.closeAction" under "$.minecraft.custom_form_data_…".
+  function closeAction(node, context) {
+    if (!node || typeof node !== "object") return null;
+    const attribs = typeof node.dynamicAttribs === "string" ? JSON.parse(node.dynamicAttribs) : null;
+    const absolute = b => (b.$path != null ? b.$path : context + b.$relativePath.slice(1));
+    if (node.component === "Context" && attribs && attribs.data) context = absolute(attribs.data);
+    const click = attribs && attribs.onClick;
+    if (click && /\.closeAction$/.test(click.$path || click.$relativePath || "")) return absolute(click);
+    for (const child of node.children || []) {
+      const found = closeAction(child, context);
+      if (found) return found;
+    }
+    return null;
+  }
+  // "$.<datastore>.<property>.<path...>.closeAction" -> the press command's arguments, as
+  // vanilla's "$.$datastore.$property.$path*.closeAction" binding gives them.
   function pressArgs(path) {
     const parts = path.split(".").slice(1);
     parts.pop();
     return [parts[0], parts[1], parts.slice(2).join(".")];
   }
-  // Closes the form through its own close button, as pressing it would.
+  // Closes the form through its own close button, as pressing it would. Ponder steps aside at
+  // once rather than waiting for the form's data to say it went.
   bridge.close = function () {
-    const paths = bridge.definition.split("\n").filter(s => /^\$\..*\.(closeAction|action)$/.test(s));
-    const close = paths.filter(p => /\.closeAction$/.test(p))[0] || paths[0];
+    const action = closeAction(bridge.tree, "$");
     const commands = window.__commands__ && window.__commands__[GROUP];
-    const name = close && /\.closeAction$/.test(close) ? "dataStoreCloseButtonPress" : "dataStoreButtonPress";
-    const command = commands && commands[name];
-    if (close && command && command.callable) {
-      const args = pressArgs(close);
-      P.log("close via", name, args.join(" | "));
+    const command = commands && commands.dataStoreCloseButtonPress;
+    if (action && command) {
+      const args = pressArgs(action);
+      P.log("close", args.join(" | "));
       command.callable.apply(command, args);
     } else {
-      P.log("close: no command", close || "(no path)", commands ? Object.keys(commands).join(",") : "(no group)");
+      P.log("close: no close button", action || "(no binding)", commands ? "" : "(no command group)");
       pressByLabel(CLOSE_LABEL);
     }
-    // Still open a second later: give the player the vanilla form (and its close button) back.
-    const item = bridge.item;
-    setTimeout(() => {
-      if (bridge.item !== item || gaveUp) return;
-      P.log("close failed; vanilla form shown");
-      gaveUp = true;
-      setVanillaHidden(false);
-      if (bridge.onClose) bridge.onClose();
-    }, 1000);
+    closed = bridge.form;
+    poll();
+    // The form takes a moment to go; vanilla's #root stays hidden meanwhile so it does not flash,
+    // and shows again if the form is still there (the close did not take).
+    setVanillaHidden(true);
+    setTimeout(() => { if (!bridge.form) setVanillaHidden(false); }, 500);
   };
 
   // Test aid (P.DEBUG). Logs the first time vanilla sends each data-driven query, and checks each

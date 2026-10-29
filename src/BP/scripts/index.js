@@ -17,16 +17,18 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 const hasPonder = (itemId) => [...addons.values()].some((a) => a.items.includes(itemId));
 
 // The resource pack finds these markers in the form, hides the form and draws Ponder over it.
-// ";" ends each, since Ore UI's text runs straight into whatever is drawn next.
-const marker = (itemId) => `ponder:${itemId};`;
+// ";" ends each, since Ore UI's text runs straight into whatever is drawn next. The stamp tells
+// one form from the next, even for the same item.
+const marker = (itemId, stamp) => `ponder:${itemId}#${stamp};`;
 const addonMarker = () => `ponder.addons:${JSON.stringify([...addons].filter(([, a]) => a.script).map(([modId, a]) => ({ modId, script: a.script })))};`;
 // Ponder's Close presses this button when it cannot press the form's own close button.
 const CLOSE_LABEL = "ponder:close;";
 
 // Opens Ponder for an item. Every way in goes through here.
 function openPonder(player, itemId) {
-  const form = new CustomForm(player, marker(itemId));
-  form.label(marker(itemId)).label(addonMarker()).button(CLOSE_LABEL, () => form.close()).closeButton();
+  const mark = marker(itemId, Date.now());
+  const form = new CustomForm(player, mark);
+  form.label(mark).label(addonMarker()).button(CLOSE_LABEL, () => form.close()).closeButton();
   void form.show();
 }
 

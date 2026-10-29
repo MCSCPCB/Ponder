@@ -40,11 +40,12 @@
   }
 
   P.bridge.onOpen = function (item, addons) {
+    const form = P.bridge.form;
     return Promise.all([loadAddons(addons), P.loadBlockData(addons)]).then(() => {
       P.registerAll();
       return P.loadStructures(P.structurePaths());
     }).then(() => {
-      if (P.bridge.item !== item) return false; // the form closed while loading
+      if (P.bridge.form !== form) return false; // the form closed, or another opened, while loading
       let screen = null;
       if (item === "ponder:index") screen = new P.PonderIndexScreen();
       else if (item === "ponder:tags") screen = new P.PonderTagIndexScreen();

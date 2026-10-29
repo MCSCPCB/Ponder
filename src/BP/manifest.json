@@ -5,7 +5,7 @@
     "description": "Opens Ponder (drawn by the resource pack in Ore UI) when a ponder item is used.",
     "min_engine_version": [1, 21, 0],
     "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
-    "version": [1, 0, 0]
+    "version": [1, 0, 1]
   },
   "modules": [
     {
@@ -24,7 +24,7 @@
   "dependencies": [
     {
       "uuid": "73ea98eb-f333-4c8f-989c-e8936d1b4e35",
-      "version": [1, 0, 0]
+      "version": [1, 0, 1]
     },
     {
       "module_name": "@minecraft/server",
