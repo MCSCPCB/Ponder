@@ -4,7 +4,11 @@
 
 ## 方块模型
 
-没有注册过的方块没有贴图。在插件脚本里注册：
+原版方块按游戏的贴图画。附属包自己的方块（行为包 `blocks/` 里定义的）也不用注册：把整个附属包（行为包和资源包）放进 `tools/input/` 跑一遍适配器，适配器会在资源包的 `hbui/ponder_addons/<文件夹>/` 下写一份 `ponder_blocks.json`，Ponder 按方块定义里的 `minecraft:geometry`、`minecraft:material_instances`、`minecraft:transformation` 和 `permutations` 来画。场景里直接写方块 id 和状态，例如 `P.block("farmersdelight:stove", { "farmersdelight:is_working": true })`。例子见 `packs/FarmersDelightV5.0.5-26.0+`。
+
+自动画法支持整块（`minecraft:geometry.full_block`，或不写 geometry）、`minecraft:geometry.cross`、资源包里的模型文件（逐面 UV、骨骼和方块的旋转、`bone_visibility`），以及按方块状态生效的 permutations。不支持 box UV 和 `tint_method` 染色。
+
+游戏里不存在的方块（只在场景里出现），或者想换掉自动画法时，在插件脚本里注册：
 
 ```js
 P.registerBlockModel("my_mod:widget", block => ({
