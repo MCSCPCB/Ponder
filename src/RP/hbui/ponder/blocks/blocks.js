@@ -9,9 +9,8 @@
   P.blockStates = block => (typeof block === "string" ? {} : block.states);
   P.withStates = (block, changes) => P.block(P.blockId(block), Object.assign({}, P.blockStates(block), changes));
 
-  // Files under textures/blocks/ for the common blocks vanilla_blocks.json leaves out (grass: the
-  // game tints it), and for packs not run through tools/adapter, which have no table. A block in
-  // neither uses its own name.
+  // Files under textures/blocks/ for packs not run through tools/adapter, which have no table
+  // (grass in its inventory look, as the game tints it). A block in neither uses its own name.
   const TABLE = {
     grass_block: { up: "grass_carried", down: "dirt", side: "grass_side_carried" },
     oak_log: { up: "log_oak_top", down: "log_oak_top", side: "log_oak" },
@@ -50,10 +49,11 @@
 
   // Vanilla's look, from hbui/ponder/blocks/vanilla_blocks.json, which tools/adapter writes from
   // the game's blocks.json, terrain_texture.json and textures, and Scaffold's shapes: textures
-  // { path: { file, w, h, frames, tick, seq } }, cubes { block: path or { face: path } }, and
-  // shapes (vanilla_models.js). (pack://blocks.json gives only the topmost pack's file, which
-  // another pack can hide.) A pack not run through tools/adapter has none of it.
-  P.vanilla = { textures: {}, cubes: {}, shapes: { blocks: {}, families: {}, rotations: {}, faces: {}, terrain: {} } };
+  // { path: { file, w, h, frames, tick, seq, tint, alpha, under } } (P.textureOf), cubes { block:
+  // path or { face: path } }, liquids { block: { still, flow } } (liquid_models.js) and shapes
+  // (vanilla_models.js). (pack://blocks.json gives only the topmost pack's file, which another
+  // pack can hide.) A pack not run through tools/adapter has none of it.
+  P.vanilla = { textures: {}, cubes: {}, liquids: {}, shapes: { blocks: {}, families: {}, rotations: {}, faces: {}, terrain: {} } };
   // A JSON file; a missing one reads as {}.
   P.readJson = url => new Promise(resolve => {
     const xhr = new XMLHttpRequest();
@@ -91,9 +91,10 @@
 
   const cache = new Map();
   P.blockId = block => (typeof block === "string" ? block : block.id);
-  // A model's shape is "cube" (a texture per side), "wire" (redstone dust) or "model" (an add-on's
-  // quads, block_models.js). `full` when it fills its cell: faces against it are then hidden,
-  // unless it is see-through (`opaque` false) and another block.
+  // A model's shape is "cube" (a texture per side), "wire" (redstone dust), "model" (quads,
+  // block_models.js) or "liquid" (quads made with its neighbours, liquid_models.js). `full` when
+  // it fills its cell: faces against it are then hidden, unless it is see-through (`opaque`
+  // false) and another block.
   P.blockModel = function (block) {
     const make = custom.get(P.blockId(block));
     if (make) {
@@ -105,7 +106,7 @@
       }
       return cache.get(key);
     }
-    const addon = P.addonBlockModel(block) || P.vanillaShapeModel(block);
+    const addon = P.addonBlockModel(block) || P.liquidModel(block) || P.vanillaShapeModel(block);
     if (addon) return addon;
     const id = P.blockId(block), power = P.blockStates(block).redstone_signal || 0, key = id + "#" + power;
     let model = cache.get(key);
@@ -122,8 +123,9 @@
     model = { id, shape: wire ? "wire" : "cube", full: !wire, opaque: !TRANSPARENT.test(name), faces: {},
       tint: wire ? wireColor(power) : null };
     SIX.forEach(f => { model.faces[f] = texture(f); });
-    // A face with an animation (a strip of frames: magma, sea lantern) is drawn a frame at a time.
-    if (files && !wire && SIX.some(f => files[f].frames > 1)) {
+    // A face with an animation (a strip of frames: magma, sea lantern) is drawn a frame at a time,
+    // and a tinted one (grass, leaves) with its own tint.
+    if (files && !wire && SIX.some(f => files[f].frames > 1 || files[f].tint)) {
       model.shape = "model";
       model.quads = [];
       SIX.forEach(f => P.blockBox(model.quads, P.Mat.id(), [0, 0, 0], [1, 1, 1], f, [0, 0, 1, 1], { tex: files[f], crop: true, dim: true, solid: model.opaque }));

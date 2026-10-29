@@ -19,8 +19,8 @@
     return e.transform(m, pt);
   }
 
-  // The faces of the section's blocks (an add-on model's quads) that are not against a full
-  // block of the section.
+  // The faces of the section's blocks (a model's quads) that are not against a full block of the
+  // section, and the liquids' faces, made with the section's blocks round them.
   function blocksOf(world, e) {
     if (e.built && e.builtVersion === e.version) return e.built;
     const out = [], has = (x, y, z) => e.section.has(x, y, z);
@@ -36,6 +36,11 @@
         const om = P.blockModel(other);
         return om.full && (om.opaque || om.id === model.id);
       };
+      if (model.shape === "liquid") {
+        const quads = P.liquidQuads(block, (dx, dy, dz) => (has(p[0] + dx, p[1] + dy, p[2] + dz) ? world.getBlock(p[0] + dx, p[1] + dy, p[2] + dz) : null));
+        if (quads.length) out.push({ p, model, quads });
+        return;
+      }
       if (model.shape === "model") {
         const quads = model.quads.filter(q => !q.cull || !hidden(q.cull));
         if (quads.length) out.push({ p, model, quads });
@@ -49,10 +54,13 @@
     return out;
   }
 
-  const filterOf = (shade, tint) => {
-    const r = (tint ? tint[0] : 1) * shade, g = (tint ? tint[1] : 1) * shade, b = (tint ? tint[2] : 1) * shade;
-    if (r > 0.995 && g > 0.995 && b > 0.995) return null;
-    return `coh-color-matrix(${r.toFixed(3)}, 0, 0, 0, 0, 0, ${g.toFixed(3)}, 0, 0, 0, 0, 0, ${b.toFixed(3)}, 0, 0, 0, 0, 0, 1, 0)`;
+  // The colour matrix a face is drawn with: its shade, its model's tint (redstone dust) and its
+  // texture's (P.textureOf: plains' grass, foliage, water), with the texture's alpha.
+  const filterOf = (shade, tint, tex) => {
+    const t = tex && tex.tint, a = tex ? tex.alpha : 1;
+    const c = [0, 1, 2].map(i => (tint ? tint[i] : 1) * (t ? t[i] : 1) * shade);
+    if (c.every(v => v > 0.995) && a > 0.995) return null;
+    return `coh-color-matrix(${c[0].toFixed(3)}, 0, 0, 0, 0, 0, ${c[1].toFixed(3)}, 0, 0, 0, 0, 0, ${c[2].toFixed(3)}, 0, 0, 0, 0, 0, ${a.toFixed(3)}, 0)`;
   };
   // A face's three texture corners on screen, pushed out by `grow` blocks to close seams.
   function corners(m, p, face, grow) {
@@ -104,8 +112,9 @@
   const animationTicks = () => Date.now() / 50;
 
   // A model's quads under matrix m (block space), far to near, each showing its texture's piece
-  // at `ticks` (P.quadImage). Solid ones are pushed out by `grow` blocks along their edges to
-  // close seams; two-sided ones show from behind too; a look with `tint` takes the model's.
+  // at `ticks` (P.quadImage) with the texture's tint, and an overlay's image under it untinted.
+  // Solid ones are pushed out by `grow` blocks along their edges to close seams; two-sided ones
+  // show from behind too; a look with `tint` takes the model's.
   function drawQuads(d, m, quads, light, grow, size, stage, tint, ticks) {
     const list = [];
     quads.forEach(q => {
@@ -113,12 +122,14 @@
       const g = q.solid ? grow : 0, eu = q.eu, ev = q.ev;
       const at = (p, su, sv) => M.apply(m, p[0] + (eu[0] * su + ev[0] * sv) * g, p[1] + (eu[1] * su + ev[1] * sv) * g, p[2] + (eu[2] * su + ev[2] * sv) * g);
       const o = at(q.o, -1, -1), u = at(q.u, 1, -1), v = at(q.v, -1, 1);
-      list.push({ q, o, u, v, depth: (u[2] + v[2]) / 2 });
+      // A triangle's centre, else the parallelogram's.
+      list.push({ q, o, u, v, depth: q.uvs && q.uvs.length === 3 ? (o[2] + u[2] + v[2]) / 3 : (u[2] + v[2]) / 2 });
     });
     list.sort((a, b) => a.depth - b.depth);
     list.forEach(it => {
-      const img = P.quadImage(it.q, ticks);
-      d.texturedQuadMap(img.src, it.o, it.u, it.v, img.a, img.b, img.c, img.clip, filterOf(it.q.shade * light, it.q.look.tint ? tint : null), size);
+      const img = P.quadImage(it.q, ticks), tex = it.q.look.tex, shade = it.q.shade * light;
+      if (tex.under) d.texturedQuadMap(tex.under.url, it.o, it.u, it.v, img.a, img.b, img.c, img.clip, filterOf(shade, null, null), size);
+      d.texturedQuadMap(img.src, it.o, it.u, it.v, img.a, img.b, img.c, img.clip, filterOf(shade, it.q.look.tint ? tint : null, tex), size);
       if (stage != null) d.texturedQuad(destroyStage(stage), it.o, it.u, it.v, null, size);
     });
   }
@@ -203,7 +214,11 @@
       if (e.isEmpty()) return;
       // reverseTransformVec
       const inv = M.invert(e.transform(M.id(), 1)), a = M.apply(inv, from[0], from[1], from[2]), b = M.apply(inv, to[0], to[1], to[2]);
-      const hit = traverse(a, b, (x, y, z) => e.section.has(x, y, z) && scene.world.getBlock(x, y, z));
+      // A liquid has no outline to hit (LiquidBlock.getShape).
+      const hit = traverse(a, b, (x, y, z) => {
+        const block = e.section.has(x, y, z) && scene.world.getBlock(x, y, z);
+        return !!block && P.blockModel(block).shape !== "liquid";
+      });
       if (!hit) return;
       const dist = Math.hypot(hit.at[0] - a[0], hit.at[1] - a[1], hit.at[2] - a[2]);
       if (!best || dist < best.distance) best = { element: e, pos: hit.pos, block: scene.world.getBlock(hit.pos[0], hit.pos[1], hit.pos[2]), distance: dist };

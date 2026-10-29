@@ -97,8 +97,11 @@
   class TerrainParticle extends Particle {
     constructor(world, x, y, z, xSpeed, ySpeed, zSpeed, block) {
       super(world, x, y, z, xSpeed, ySpeed, zSpeed);
-      const model = P.blockModel(block), tint = model.tint || [1, 1, 1];
-      this.texture = model.faces.north;
+      // The face's texture with the tint the block gives it (leaves: plains' foliage); an
+      // overlay's (grass_side) is the image under it, untinted.
+      const model = P.blockModel(block), tex = P.textureAt(model.faces.north);
+      const tint = model.tint || (tex && !tex.under && tex.tint) || [1, 1, 1];
+      this.texture = tex && tex.under ? tex.under.url : model.faces.north;
       this.gravity = 1;
       this.rCol = 0.6 * tint[0]; this.gCol = 0.6 * tint[1]; this.bCol = 0.6 * tint[2];
       this.quadSize /= 2;

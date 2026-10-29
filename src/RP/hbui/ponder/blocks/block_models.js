@@ -96,15 +96,20 @@
     if (typeof m === "string") m = materials[m];
     return m || null;
   }
-  // A texture's image and what is known of it: its size and, for an animation (a strip of square
-  // frames, top to bottom), its frame count, ticks per frame and frame order. One per file.
+  // A texture's image and what is known of it: its size; for an animation (a strip of square
+  // frames, top to bottom), its frame count, ticks per frame and frame order; and the tint the
+  // game gives it in plains (tint [r, g, b], alpha, and `under`, the image drawn untinted under
+  // an overlay such as grass_side). One per file.
   const textures = new Map();
   P.textureOf = function (entry) {
     const url = `pack://${entry.file}?filtering=point${entry.pack ? "&packId=" + entry.pack : ""}`;
     let t = textures.get(url);
-    if (!t) textures.set(url, (t = { url, w: entry.w, h: entry.h, frames: entry.frames || 1, tick: entry.tick || 1, seq: entry.seq || null }));
+    if (!t) textures.set(url, (t = { url, w: entry.w, h: entry.h, frames: entry.frames || 1, tick: entry.tick || 1, seq: entry.seq || null,
+      tint: entry.tint || null, alpha: entry.alpha != null ? entry.alpha : 1, under: entry.under ? P.textureOf(entry.under) : null }));
     return t;
   };
+  // The texture P.textureOf made for a URL, or null.
+  P.textureAt = url => textures.get(url) || null;
   // The piece of the image a look reads, as fractions [x0, y0, x1, y1]: the frame an animation
   // is on; else a `window`'s 16 by 16 pixels (from the top left when the image has no room for
   // it, as Scaffold reads it); else, with `crop`, the top left 16 by 16; else all of it.
@@ -124,13 +129,18 @@
   // Where (s, t) of a tile turned `turn` degrees clockwise lies in the tile as it is.
   const unturned = (turn, s, t) => (turn === 90 ? [t, 1 - s] : turn === 180 ? [1 - s, 1 - t] : turn === 270 ? [1 - t, s] : [s, t]);
   // What a quad draws at `ticks`: its image, the image fractions its corners o, u and v show, and
-  // the part of the image (fractions) it may show.
+  // the outline (fractions) it shows. A quad's tile fractions are its `region` [u0, v0, u1, v1],
+  // or, for one that is not a rectangle of the tile (liquid_models.js), its `uvs`: one per
+  // corner, in order round it from o through u to v.
   P.quadImage = function (q, ticks) {
-    const look = q.look, tile = tileOf(look, ticks), r = q.region;
-    const at = (s, t) => { const p = unturned(look.turn, s, t); return [tile[0] + p[0] * (tile[2] - tile[0]), tile[1] + p[1] * (tile[3] - tile[1])]; };
-    const a = at(r[0], r[1]), b = at(r[2], r[1]), c = at(r[0], r[3]);
-    const xs = [a[0], b[0], c[0], b[0] + c[0] - a[0]], ys = [a[1], b[1], c[1], b[1] + c[1] - a[1]];
-    return { src: look.tex.url, a, b, c, clip: [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)] };
+    const look = q.look, tile = tileOf(look, ticks);
+    const at = st => { const p = unturned(look.turn, st[0], st[1]); return [tile[0] + p[0] * (tile[2] - tile[0]), tile[1] + p[1] * (tile[3] - tile[1])]; };
+    if (q.uvs) {
+      const clip = q.uvs.map(at);
+      return { src: look.tex.url, a: clip[0], b: clip[1], c: clip[clip.length - 1], clip };
+    }
+    const r = q.region, a = at([r[0], r[1]]), b = at([r[2], r[1]]), c = at([r[0], r[3]]);
+    return { src: look.tex.url, a, b, c, clip: [a, b, [b[0] + c[0] - a[0], b[1] + c[1] - a[1]], c] };
   };
   const SOLID = /^(opaque|double_sided)$/, TWO_SIDED = /^(double_sided|alpha_test)$/;
   const DIRECTION = [["west", "east"], ["down", "up"], ["north", "south"]];

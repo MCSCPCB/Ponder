@@ -189,8 +189,8 @@
       if (n.imgCss !== css) { n.img.style.cssText = css; n.imgCss = css; }
     }
     // texturedQuad for any part of the texture: the GUI points o, u and v show the texture at
-    // fractions a, b and c ([x, y]; turned or flipped as they come), and only the part `clip`
-    // [x0, y0, x1, y1] (fractions) is drawn. The whole texture is laid out so and clipped.
+    // fractions a, b and c ([x, y]; turned or flipped as they come), and only the polygon `clip`
+    // ([x, y] fractions) is drawn. The whole texture is laid out so and clipped.
     texturedQuadMap(src, o, u, v, a, b, c, clip, filter, size) {
       const p1 = b[0] - a[0], q1 = b[1] - a[1], p2 = c[0] - a[0], q2 = c[1] - a[1], det = p1 * q2 - p2 * q1;
       const ux = u[0] - o[0], uy = u[1] - o[1], vx = v[0] - o[0], vy = v[1] - o[1];
@@ -198,9 +198,8 @@
       const jx = [(ux * q2 - vx * q1) / det, (uy * q2 - vy * q1) / det], jy = [(vx * p1 - ux * p2) / det, (vy * p1 - uy * p2) / det];
       const x = o[0] - jx[0] * a[0] - jy[0] * a[1], y = o[1] - jx[1] * a[0] - jy[1] * a[1];
       const s = size || 16, k = P.view.cssPerGui / s, f = n => n.toFixed(5), at = n => (n * s).toFixed(3) + "px";
-      const l = at(clip[0]), t = at(clip[1]), r = at(clip[2]), bt = at(clip[3]);
       const n = this.style(this.take("image"), `position:absolute;left:0;top:0;width:${s}px;height:${s}px;transform-origin:0 0;` +
-        `transform:matrix(${f(jx[0] * k)},${f(jx[1] * k)},${f(jy[0] * k)},${f(jy[1] * k)},${P.num(x)},${P.num(y)});clip-path:polygon(${l} ${t},${r} ${t},${r} ${bt},${l} ${bt})`);
+        `transform:matrix(${f(jx[0] * k)},${f(jx[1] * k)},${f(jy[0] * k)},${f(jy[1] * k)},${P.num(x)},${P.num(y)});clip-path:polygon(${clip.map(p => at(p[0]) + " " + at(p[1])).join(",")})`);
       if (!n.img) { n.img = document.createElement("img"); n.el.appendChild(n.img); }
       if (n.src !== src) { n.img.src = src; n.src = src; }
       const css = `position:absolute;left:0;top:0;width:${s}px;height:${s}px;image-rendering:pixelated${filter ? ";filter:" + filter : ""}`;
