@@ -1,0 +1,23 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Vanilla Ponder Resources",
+    "description": "The vanilla Ponder scenes (hbui/ponder_addons/vanilla).",
+    "min_engine_version": [1, 21, 0],
+    "uuid": "14a30c2e-d03a-4832-adfa-76dfd07a8536",
+    "version": [1, 0, 3]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "69f55bb0-1f17-465d-a8f1-4c955297881f",
+      "version": [1, 0, 0]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "d7f523eb-acc8-431d-9b4b-44b9ba24f69b",
+      "version": [1, 0, 3]
+    }
+  ]
+}

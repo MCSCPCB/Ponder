@@ -8,8 +8,7 @@ Ponder 是 [Java 版 Create 的 Ponder](https://github.com/Creators-of-Create/Cr
 
 仓库里还有两个示例包，演示怎么给自己的附加包写思索场景：
 
-- `packs/Redstone`：红石灯、活塞、拉杆与按钮、中继器、比较器、漏斗。
-- `packs/Gathering`：挖矿、骨粉、TNT。演示自定义粒子、实体、方块模型，以及往 `packs/Redstone` 的标签和场景里加内容。
+- `packs/Vanilla`：红石灯、活塞、拉杆与按钮、中继器、比较器、漏斗，以及挖矿、骨粉、TNT。演示大部分场景指令，以及自定义粒子、实体和方块模型。
 
 ## 玩家怎么打开
 

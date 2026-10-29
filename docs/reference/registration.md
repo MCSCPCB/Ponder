@@ -70,7 +70,7 @@ helper.forComponents(物品1, 物品2, ...)
 | `orderBefore(场景 id)` | 排在同一物品的另一个场景之前 |
 | `orderAfter(场景 id)` | 排在之后 |
 
-标签不带冒号时属于本插件，带冒号时是完整 id，例如 `"redstone:redstone"`。
+标签不带冒号时属于本插件，带冒号时是完整 id，例如 `"vanilla:redstone"`。
 
 `orderBefore` 和 `orderAfter` 给一个参数时指本插件的场景，给两个参数时是 `(命名空间, 场景 id)`，用来排到别的插件的场景前后。场景 id 是场景函数里 `scene.title` 的第一个参数。没有排序要求的场景按注册顺序排列。
 
@@ -133,7 +133,7 @@ registerTags(helper) {
 | `helper.addToComponent(物品, ...).add(标签).add(...)` | 反过来写，效果相同 |
 | `helper.addTagToComponent(物品, 标签)` | 一次一对 |
 
-标签可以是别的插件的，写完整 id 即可，例如 `helper.addToTag("redstone:redstone").add("minecraft:tnt")`。
+标签可以是别的插件的，写完整 id 即可，例如 `helper.addToTag("vanilla:redstone").add("minecraft:tnt")`。
 
 ## 共享文本
 

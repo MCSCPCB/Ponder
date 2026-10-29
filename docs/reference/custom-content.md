@@ -1,6 +1,6 @@
 # 接口参考：自定义方块、粒子与实体
 
-场景里出现你自己的方块、粒子或实体时，需要告诉 Ponder 怎么画它们。`packs/Gathering` 里有这三样的完整例子。
+场景里出现你自己的方块、粒子或实体时，需要告诉 Ponder 怎么画它们。`packs/Vanilla` 里有这三样的完整例子。
 
 ## 方块模型
 
@@ -83,7 +83,7 @@ scene.effects.emitParticles(
 
 继承 `P.PonderEntity`，实现 `tick()` 和 `render(场景矩阵, 插值, 每方块像素)`。`render` 返回 `{ depth, draw(d) }` 的数组：`depth` 是图形中心变换后的 z，和方块一起从小到大绘制；`draw` 收到画布后画上去。
 
-下面是一个慢慢上浮的方块，画法和 `packs/Gathering` 里的点燃 TNT 相同：
+下面是一个慢慢上浮的方块，画法和 `packs/Vanilla` 里的点燃 TNT 相同：
 
 ```js
 const M = P.Mat;
