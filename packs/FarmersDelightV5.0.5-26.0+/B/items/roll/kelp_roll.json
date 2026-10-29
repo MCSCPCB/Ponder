@@ -1,0 +1,46 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 12,
+        "saturation_modifier": 0.6
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:kelp_roll"
+        }
+      },
+       "minecraft:wearable": {
+        "slot": "slot.weapon.offhand"
+      },
+      "farmersdelight:cuttable": {
+        "loot": [
+          ["farmersdelight:kelp_roll_slice", 3]
+        ],
+        "tool": {
+          "type": "tag",
+          "name": "farmersdelight:is_knife"
+        }
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 2.0
+      },
+      "minecraft:compostable": {
+        "composting_chance": 45
+      },
+      "efm:realistic_food":{
+        "expire_time":6
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:kelp_roll",
+      "menu_category": {
+        "category": "equipment",
+        "group": "farmersdelight:itemGroup.name.miscFood"
+      }
+    }
+  }
+}

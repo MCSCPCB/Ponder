@@ -1,0 +1,30 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:block_placer": {
+        "block": "farmersdelight:cabbage_block",
+        "use_on": [
+          "minecraft:farmland",
+          "farmersdelight:rich_soil_farmland"
+        ]
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:cabbage_seeds"
+        }
+      },
+      "farmersdelight:seed": "farmersdelight:cabbage_block",
+      "minecraft:compostable": {
+        "composting_chance": 35
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:cabbage_seeds",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.seed"
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:block_placer": {
+        "block": "farmersdelight:chocolate_pie",
+        "replace_block_item":true
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:chocolate_pie"
+        }
+      },
+       "minecraft:wearable": {
+        "slot": "slot.weapon.offhand"
+      },
+      "farmersdelight:cuttable": {
+        "loot": [
+          ["farmersdelight:chocolate_pie_slice", 4]
+        ],
+        "tool": {
+          "type": "tag",
+          "name": "farmersdelight:is_knife"
+        }
+      },
+      "minecraft:compostable": {
+        "composting_chance": 45
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:chocolate_pie",
+      "menu_category": {
+        "category": "equipment",
+        "group": "farmersdelight:itemGroup.name.miscFood"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:block_placer": {
+        "block": "farmersdelight:half_tatami_mat",
+        "replace_block_item":true
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:half_tatami_mat"
+        }
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:half_tatami_mat",
+      "menu_category": {
+        "category": "items"
+      }
+    }
+  }
+}

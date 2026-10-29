@@ -1,0 +1,40 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 4,
+        "saturation_modifier": 0.4
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:fried_egg"
+        }
+      },
+      "minecraft:tags": {
+        "tags": [
+          "farmersdelight:is_cooked_egg"
+        ]
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 65
+      },
+      "efm:realistic_food":{
+        "expire_time":3
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:fried_egg",
+      "menu_category": {
+        "category": "equipment",
+        "group": "farmersdelight:itemGroup.name.miscFood"
+      }
+    }
+  }
+}

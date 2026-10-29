@@ -1,0 +1,48 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 5,
+        "saturation_modifier": 0.3
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:ham"
+        }
+      },
+       "minecraft:wearable": {
+        "slot": "slot.weapon.offhand"
+      },
+      "farmersdelight:cuttable": {
+        "loot": [
+          ["minecraft:porkchop", 2],
+          ["minecraft:bone_meal", 1]
+        ],
+        "tool": {
+          "type": "tag",
+          "name": "farmersdelight:is_knife"
+        }
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 80
+      },
+      "efm:realistic_food":{
+        "expire_time":3
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:ham",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.rawFood"
+      }
+    }
+  }
+}

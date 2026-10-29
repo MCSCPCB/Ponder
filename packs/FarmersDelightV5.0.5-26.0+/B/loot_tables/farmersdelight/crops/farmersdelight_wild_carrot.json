@@ -1,0 +1,40 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "conditions": [
+            {
+              "condition": "match_tool",
+              "minecraft:match_tool_filter_none": [
+                "minecraft:is_shears"
+              ]
+            }
+          ],
+          "type": "item",
+          "name": "minecraft:carrot",
+          "functions": [
+            {
+              "function": "explosion_decay"
+            }
+          ]
+        }, {
+          "conditions": [
+            {
+              "condition": "match_tool",
+              "count": {
+                "range_min": 1
+              },
+              "minecraft:match_tool_filter_any": [
+                "minecraft:is_shears"
+              ]
+            }
+          ],
+          "type": "item",
+          "name": "farmersdelight:wild_carrots"
+        }
+      ]
+    }
+  ]
+}

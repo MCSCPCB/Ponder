@@ -1,0 +1,35 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 14,
+        "saturation_modifier": 0.8
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:smoked_ham"
+        }
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 85
+      },
+      "efm:realistic_food":{
+        "expire_time":60
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:smoked_ham",
+      "menu_category": {
+        "category": "equipment",
+        "group": "farmersdelight:itemGroup.name.miscFood"
+      }
+    }
+  }
+}

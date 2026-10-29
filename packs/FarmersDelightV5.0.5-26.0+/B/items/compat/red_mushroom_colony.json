@@ -1,0 +1,37 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:block_placer": {
+        "block": "farmersdelight:red_mushroom_colony"
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:red_mushroom_colony"
+        }
+      },
+      "minecraft:wearable": {
+        "slot": "slot.weapon.offhand"
+      },
+      "farmersdelight:cuttable": {
+        "loot": [
+          ["minecraft:red_mushroom", 5]
+        ],
+        "tool": {
+          "type": "tag",
+          "name": "farmersdelight:is_knife"
+        }
+      },
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:red_mushroom_colony_item",
+      "menu_category": {
+        "category": "none",
+        "is_hidden_in_commands": true
+      }
+    }
+  }
+}

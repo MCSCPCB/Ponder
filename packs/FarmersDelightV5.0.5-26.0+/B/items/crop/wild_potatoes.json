@@ -1,0 +1,40 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:block_placer": {
+        "block": "farmersdelight:wild_potatoes",
+        "replace_block_item":true
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:wild_potatoes"
+        }
+      },
+       "minecraft:wearable": {
+        "slot": "slot.weapon.offhand"
+      },
+      "farmersdelight:cuttable": {
+        "loot": [
+          ["farmersdelight:potatoes", 1],
+          ["minecraft:purple_dye", 1,0.5],
+          ["minecraft:purple_dye", 1,0.5]
+        ],
+        "tool": {
+          "type": "tag",
+          "name": "farmersdelight:is_knife"
+        }
+      },
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:wild_potatoes",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.wildcrop"
+      }
+    }
+  }
+}

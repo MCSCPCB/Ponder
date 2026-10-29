@@ -1,0 +1,178 @@
+import {
+    Block,
+    Entity,
+    EntityInventoryComponent,
+    EquipmentSlot,
+    ItemComponentTypes,
+    ItemStack,
+    PlayerInteractWithBlockAfterEvent,
+    system,
+    world,
+} from "@minecraft/server";
+import { attachedBlockEntity, subscribeEvent } from "../lib/EventSubscriber";
+import { getBlockEntity } from "../lib/BlockWithEntity";
+import { dropsItems } from "../lib/EntityUtil";
+import { cuttingBoardRecipeManager } from "../data/recipe/cuttingBoardRecipe";
+import { hurtEquippedItem, spawnStack } from "../lib/ItemUtil";
+
+@attachedBlockEntity({ eventTypes: ["farmersdelight:cutting_board_tick"] })
+export class CuttingBoardBlockEntity {
+    //方块被破坏/替换时，掉落砧板上的物品（容器 slot 0）
+    static onDiscard(entity: Entity): undefined {
+        dropsItems(entity);
+    }
+
+    static onTick(entity: Entity, block: Block) {
+        const { x, y, z }: { x: number; y: number; z: number } = entity.location;
+        const currentTick: number = system.currentTick % 2;
+        const itemStack: string = JSON.parse((entity.getDynamicProperty('farmersdelight:blockEntityItemStackData') as string) ?? '{"item":"minecraft:air"}')["item"];
+
+        if (!currentTick && itemStack) {
+            const id = itemStack.split(':');
+            const name = id[0] == 'minecraft' ? `farmersdelight:${id[0]}_${id[1]}` : itemStack;
+            entity.dimension.spawnParticle(name, { x: x, y: y + 0.0563, z: z });
+        }
+    }
+
+    @subscribeEvent(world.afterEvents.playerInteractWithBlock)
+    static onInteract(args: PlayerInteractWithBlockAfterEvent): void {
+        const block = args.block;
+        if (block?.typeId !== "farmersdelight:cutting_board") return;
+
+        const entity = getBlockEntity(block);
+        const { x, y, z } = block.location;
+        const player = args.player;
+        const inventory = player.getComponent("inventory") as EntityInventoryComponent;
+        const container = inventory?.container;
+        if (!entity || !container) return;
+        const itemStack = args.itemStack;
+        const equip = player.getComponent('minecraft:equippable');
+        const itemData = JSON.parse((entity.getDynamicProperty("farmersdelight:blockEntityItemStackData") as string) ?? '{"item":"minecraft:air"}');
+
+        const entityInv = entity.getComponent('minecraft:inventory');
+        const currentItem = itemData.item as string;
+        const face = block.permutation.getState("minecraft:cardinal_direction") as string;
+        const offsets: { [key: string]: { x: number; y: number; z: number } } = {
+            south: { x: -0.15, y: 0, z: 0 },
+            north: { x: 0.15, y: 0, z: 0 },
+            west: { x: 0, y: 0, z: -0.15 },
+            east: { x: 0, y: 0, z: 0.15 }
+        };
+        const offset = offsets[face] ?? { x: 0, y: 0, z: 0 };
+
+        if (currentItem === "minecraft:air") {
+            // 砧板为空，尝试放入物品
+            if (!itemStack) return;
+            const recipes = cuttingBoardRecipeManager.getMatchingRecipes(itemStack);
+            if (recipes.length === 0) {
+                // 无配方定义，显示提示
+                player.onScreenDisplay.setActionBar({ translate: 'farmersdelight.tips.cant_cut' });
+                return;
+            }
+            // 有配方定义，放入物品
+            const recipe = recipes[0];
+            const isBlockType = recipe.is_block_type;
+            entityInv?.container?.setItem(0, itemStack);
+            equip?.setEquipment(EquipmentSlot.Mainhand, undefined);
+            entity.setDynamicProperty("farmersdelight:blockEntityItemStackData", `{"item":"${itemStack.typeId}"}`);
+            entity.setDynamicProperty("farmersdelight:isBlockType", isBlockType);
+            entity.setProperty("farmersdelight:is_block_mode", isBlockType)
+            if (isBlockType) {
+                entity.runCommand(`replaceitem entity @s slot.weapon.mainhand 0 ${itemStack.typeId}`);
+            }
+        } else {
+            const boardItemStack = entityInv?.container?.getItem(0);
+            if (!itemStack) {
+                container.setItem(player.selectedSlotIndex, boardItemStack);
+                entity.runCommand(`replaceitem entity @s slot.weapon.mainhand 0 minecraft:air`);
+                entityInv?.container?.setItem(0, undefined);
+                entity.setDynamicProperty("farmersdelight:blockEntityItemStackData", '{"item":"minecraft:air"}');
+                entity.setProperty("farmersdelight:is_block_mode", false)
+                return;
+            };
+            // 尝试用手持工具进行切割，用存储的物品ID构建ItemStack来匹配配方
+            if (!boardItemStack) return;
+            // 通过recognizeRecipe检查手持工具是否能处理砧板上的物品
+            const recipe = cuttingBoardRecipeManager.recognizeRecipe(boardItemStack, itemStack);
+            if (!recipe) {
+                player.onScreenDisplay.setActionBar({ translate: 'farmersdelight.tips.false_tool' });
+                return;
+            }
+
+            // 获取实体背包中物品的数量
+            const boardItemAmount = boardItemStack.amount;
+            // 检查手持工具是否有耐久度
+            const durabilityComp = itemStack.getComponent(ItemComponentTypes.Durability);
+
+            if (durabilityComp) {
+                // 工具有耐久度
+                const remainingDurability = durabilityComp.maxDurability - durabilityComp.damage;
+                if (remainingDurability > boardItemAmount) {
+                    // 耐久度大于背包物品数量：按背包物品数量执行，生成结果物品
+                    for (let i = 0; i < boardItemAmount; i++) {
+                        for (const resultItem of recipe.result) {
+                            const chance = resultItem.chance ?? 1;
+                            if (Math.random() <= chance) {
+                                const stack = new ItemStack(resultItem.item, resultItem.count ?? 1);
+                                spawnStack(stack, entity);
+                            }
+                        }
+                    }
+                    // 扣除工具耐久
+                    hurtEquippedItem(player, itemStack, boardItemAmount);
+                    // 播放配方声音
+                    block.dimension.playSound(recipe.sound, block.location);
+                    // 清空砧板
+                    entityInv?.container?.setItem(0, undefined);
+                    entity.setDynamicProperty("farmersdelight:blockEntityItemStackData", '{"item":"minecraft:air"}');
+                    entity.setProperty("farmersdelight:is_block_mode", false)
+                    entity.runCommand(`replaceitem entity @s slot.weapon.mainhand 0 minecraft:air`);
+                } else {
+                    // 耐久度小于等于背包物品数量：按耐久度次数处理
+                    for (let i = 0; i < remainingDurability; i++) {
+                        for (const resultItem of recipe.result) {
+                            const chance = resultItem.chance ?? 1;
+                            if (Math.random() <= chance) {
+                                const stack = new ItemStack(resultItem.item, resultItem.count ?? 1);
+                                spawnStack(stack, entity);
+                            }
+                        }
+                    }
+                    // 播放配方声音
+                    block.dimension.playSound(recipe.sound, block.location);
+                    // 扣除背包中对应数量的物品
+                    const newAmount = boardItemAmount - remainingDurability;
+                    if (newAmount > 0) {
+                        boardItemStack.amount = newAmount;
+                        entityInv?.container?.setItem(0, boardItemStack);
+                    } else {
+                        entityInv?.container?.setItem(0, undefined);
+                        entity.setDynamicProperty("farmersdelight:blockEntityItemStackData", '{"item":"minecraft:air"}');
+                        entity.setProperty("farmersdelight:is_block_mode", false)
+                        entity.runCommand(`replaceitem entity @s slot.weapon.mainhand 0 minecraft:air`);
+                    }
+                    // 工具耗尽，清空玩家主手
+                    equip?.setEquipment(EquipmentSlot.Mainhand, undefined);
+                }
+            } else {
+                // 工具无耐久度：直接按背包物品数量处理
+                for (let i = 0; i < boardItemAmount; i++) {
+                    for (const resultItem of recipe.result) {
+                        const chance = resultItem.chance ?? 1;
+                        if (Math.random() <= chance) {
+                            const stack = new ItemStack(resultItem.item, resultItem.count ?? 1);
+                            spawnStack(stack, entity);
+                        }
+                    }
+                }
+                // 播放配方声音
+                block.dimension.playSound(recipe.sound, block.location);
+                // 清空砧板
+                entityInv?.container?.setItem(0, undefined);
+                entity.runCommand(`replaceitem entity @s slot.weapon.mainhand 0 minecraft:air`);
+                entity.setDynamicProperty("farmersdelight:blockEntityItemStackData", '{"item":"minecraft:air"}');
+                entity.setProperty("farmersdelight:is_block_mode", false)
+            }
+        }
+    }
+}

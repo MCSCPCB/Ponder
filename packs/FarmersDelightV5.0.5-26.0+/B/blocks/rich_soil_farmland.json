@@ -1,0 +1,104 @@
+{
+    "format_version": "1.26.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "farmersdelight:rich_soil_farmland",
+            "menu_category": {
+                "category": "nature"
+            },
+            "states": {
+                "farmersdelight:moisturized_amount": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ]
+            }
+        },
+        "permutations": [
+            {
+                "condition": "query.block_state('farmersdelight:moisturized_amount') > 0",
+                "components": {
+                    "minecraft:geometry": "geometry.rich_soil_farmland",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "rich_soil_farmland_moist_side"
+                        },
+                        "top": {
+                            "texture": "rich_soil_farmland_moist"
+                        },
+                        "bottom": {
+                            "texture": "rich_soil"
+                        }
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:moisturized_amount') == 0",
+                "components": {
+                    "minecraft:geometry": "geometry.rich_soil_farmland",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "rich_soil"
+                        },
+                        "top": {
+                            "texture": "rich_soil_farmland"
+                        }
+                    }
+                }
+            }
+        ],
+        "components": {
+            "minecraft:material_instances": {
+                "*": {
+                    "texture": "rich_soil_farmland_moist_side"
+                },
+                "top": {
+                    "texture": "rich_soil_farmland_moist"
+                },
+                "bottom": {
+                    "texture": "rich_soil"
+                }
+            },
+            "farmersdelight:rich_soil_farmland": {},
+            "minecraft:destructible_by_mining": {
+                "seconds_to_destroy": 0.6
+            },
+            "minecraft:destructible_by_explosion": {
+                "explosion_resistance": 3
+            },
+            "minecraft:geometry": "geometry.rich_soil_farmland",
+            "minecraft:collision_box": {
+                "origin": [
+                    -8.0,
+                    0.0,
+                    -8.0
+                ],
+                "size": [
+                    16.0,
+                    15.0,
+                    16.0
+                ]
+            },
+            "minecraft:selection_box": {
+                "origin": [
+                    -8.0,
+                    0.0,
+                    -8.0
+                ],
+                "size": [
+                    16.0,
+                    15.0,
+                    16.0
+                ]
+            },
+            "minecraft:loot": "loot_tables/farmersdelight/rich_soil_farmland.json",
+            "tag:dirt": {},
+            "tag:farmland": {}
+        }
+    }
+}

@@ -1,0 +1,540 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:block": {
+    "description": {
+      "identifier": "farmersdelight:rope",
+      "states": {
+        "farmersdelight:north_connected": [
+          false,
+          true
+        ],
+        "farmersdelight:south_connected": [
+          false,
+          true
+        ],
+        "farmersdelight:east_connected": [
+          false,
+          true
+        ],
+        "farmersdelight:west_connected": [
+          false,
+          true
+        ],
+        "farmersdelight:can_grow": [
+          true,
+          false
+        ],
+        "farmersdelight:stage": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "menu_category": {
+        "category": "none"
+      }
+    },
+    "components": {
+      "minecraft:precipitation_interactions": {
+        "precipitation_behavior": "none"
+      },
+      "minecraft:redstone_conductivity": {
+        "allows_wire_to_step_down": false
+      },
+      "minecraft:tick": {
+        "interval_range": [
+          1,
+          1
+        ]
+      },
+      "minecraft:connection_rule": {
+        "accepts_connections_from":"none"
+      },
+      "minecraft:geometry": {
+        "identifier": "geometry.rope"
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "rope",
+          "ambient_occlusion": false,
+          "render_method": "alpha_test"
+        }
+      },
+      "farmersdelight:rope": {},
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.0
+      },
+      "minecraft:light_dampening": 0,
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 5,
+        "destroy_chance_modifier": 20
+      },
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": {
+        "origin": [
+          -1.0,
+          0.0,
+          -1.0
+        ],
+        "size": [
+          2.0,
+          16.0,
+          2.0
+        ]
+      }
+    },
+    "permutations": [
+      {
+        "condition": "query.block_state('farmersdelight:can_grow') == false",
+        "components": {
+          "tag:cannot_grow": {}
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:loot": "loot_tables/farmersdelight/rope.json",
+          "minecraft:geometry": {
+            "identifier": "geometry.rope",
+            "bone_visibility": {
+              "north": "query.block_state('farmersdelight:north_connected') == true",
+              "south": "query.block_state('farmersdelight:south_connected') == true",
+              "west": "query.block_state('farmersdelight:west_connected') == true",
+              "east": "query.block_state('farmersdelight:east_connected') == true"
+            }
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "rope",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            }
+          },
+          "tag:rope": {}
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:stage') == 1",
+        "components": {
+          "minecraft:loot": "loot_tables/farmersdelight/crops/farmersdelight_tomato.json",
+          "minecraft:geometry": {
+            "identifier": "geometry.crop_with_rope"
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "tomatoes_vine_stage0",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_top": {
+              "texture": "rope_top",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_side": {
+              "texture": "tomatoes_coiled_rope",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "crop": {
+              "texture": "tomatoes_vine_stage0",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            }
+          },
+          "tag:tomato_crop_with_rope": {}
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:stage') == 2",
+        "components": {
+          "minecraft:loot": "loot_tables/farmersdelight/crops/farmersdelight_tomato.json",
+          "minecraft:geometry": {
+            "identifier": "geometry.crop_with_rope"
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "tomatoes_vine_stage0",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_top": {
+              "texture": "rope_top",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_side": {
+              "texture": "tomatoes_coiled_rope",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "crop": {
+              "texture": "tomatoes_vine_stage1",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            }
+          },
+          "tag:tomato_crop_with_rope": {}
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:stage') == 3",
+        "components": {
+          "minecraft:loot": "loot_tables/farmersdelight/crops/farmersdelight_tomato.json",
+          "minecraft:geometry": {
+            "identifier": "geometry.crop_with_rope"
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "tomatoes_vine_stage0",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_top": {
+              "texture": "rope_top",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_side": {
+              "texture": "tomatoes_coiled_rope",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "crop": {
+              "texture": "tomatoes_vine_stage2",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            }
+          },
+          "tag:tomato_crop_with_rope": {}
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:stage') == 4",
+        "components": {
+          "minecraft:loot": "loot_tables/farmersdelight/crops/farmersdelight_tomato_riped.json",
+          "minecraft:geometry": {
+            "identifier": "geometry.crop_with_rope"
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "tomatoes_vine_stage0",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_top": {
+              "texture": "rope_top",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "rope_side": {
+              "texture": "tomatoes_coiled_rope",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            },
+            "crop": {
+              "texture": "tomatoes_vine_stage3",
+              "ambient_occlusion": false,
+              "render_method": "alpha_test"
+            }
+          },
+          "tag:tomato_crop_with_rope": {}
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:stage') >= 1",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -6,
+              0,
+              -6
+            ],
+            "size": [
+              12,
+              16,
+              12
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == true && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              16,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "(query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == false && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == false)&&(query.block_state('farmersdelight:stage') == 0)",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -1,
+              0,
+              -1
+            ],
+            "size": [
+              2,
+              16,
+              2
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == true && query.block_state('farmersdelight:south_connected') == false && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == false&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -1,
+              0,
+              -8
+            ],
+            "size": [
+              2,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == true && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == false&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -1,
+              0,
+              -8
+            ],
+            "size": [
+              2,
+              16,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == true && query.block_state('farmersdelight:south_connected') == false && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              8,
+              0,
+              -8
+            ],
+            "size": [
+              -9,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == true && query.block_state('farmersdelight:south_connected') == false && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == false&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              9,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == true && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == false&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              8,
+              0,
+              -8
+            ],
+            "size": [
+              -9,
+              16,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == true && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              9,
+              16,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              8,
+              0,
+              -8
+            ],
+            "size": [
+              -16,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == false&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              1,
+              0,
+              -1
+            ],
+            "size": [
+              -2,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -1,
+              0,
+              -1
+            ],
+            "size": [
+              9,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == false&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              1,
+              0,
+              -1
+            ],
+            "size": [
+              -9,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == true && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              8,
+              0,
+              -1
+            ],
+            "size": [
+              -16,
+              16,
+              9
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == false && query.block_state('farmersdelight:west_connected') == false && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              8,
+              0,
+              -1
+            ],
+            "size": [
+              -9,
+              16,
+              2
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == false && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == true&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -1
+            ],
+            "size": [
+              16,
+              16,
+              2
+            ]
+          }
+        }
+      },
+      {
+        "condition": "query.block_state('farmersdelight:north_connected') == false && query.block_state('farmersdelight:south_connected') == false && query.block_state('farmersdelight:west_connected') == true && query.block_state('farmersdelight:east_connected') == false&&query.block_state('farmersdelight:stage') == 0",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -1
+            ],
+            "size": [
+              9,
+              16,
+              2
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

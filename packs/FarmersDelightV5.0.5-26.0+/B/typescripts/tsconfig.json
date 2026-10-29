@@ -1,0 +1,29 @@
+{
+  "include": [
+    "../typescripts/**/*"
+  ],
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "module": "ES2020",
+    "declaration": false,
+    "noLib": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": false,
+    "pretty": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "allowUnreachableCode": true,
+    "allowUnusedLabels": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": false,
+    "noImplicitUseStrict": false,
+    "removeComments": true,
+    "outDir": "../scripts",
+    "rootDir": "../typescripts",
+    "baseUrl": "behavior_packs/",
+    "listFiles": false
+  },
+  "compileOnSave": false
+}

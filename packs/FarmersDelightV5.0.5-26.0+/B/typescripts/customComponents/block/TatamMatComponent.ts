@@ -1,0 +1,101 @@
+import {
+    Block,
+    BlockComponentPlayerPlaceBeforeEvent,
+    BlockComponentTickEvent,
+    BlockCustomComponent,
+    BlockPermutation,
+    Direction,
+    EntityInventoryComponent,
+    system
+    
+} from "@minecraft/server";
+import { hasLimitedMaterials, horizontalDirectionOf } from "../../lib/EntityUtil";
+import { takeItem } from "../../lib/ItemUtil";
+import { oppositeOf } from "../../lib/DirectionUtil";
+import { blockComponent } from "../../lib/EventSubscriber";
+
+@blockComponent("farmersdelight:tatami_mat")
+export class TatamMatComponent implements BlockCustomComponent {
+    constructor() {
+        this.onTick = this.onTick.bind(this);
+        this.beforeOnPlayerPlace = this.beforeOnPlayerPlace.bind(this);
+    }
+    beforeOnPlayerPlace(args: BlockComponentPlayerPlaceBeforeEvent): void {
+        const block = args.block;
+        const player = args.player;
+        const dimension = args.dimension;
+
+        const inventory = player?.getComponent("inventory") as EntityInventoryComponent;
+        const container = inventory?.container;
+        if (!player) return;
+        const itemId = container?.getSlot(player.selectedSlotIndex).typeId
+        if (!itemId || itemId != 'farmersdelight:tatami_mat' || args.face != Direction.Up) return
+
+        args.cancel = true
+        system.run(() => {
+            if (!player) return
+            let other: Block | undefined;
+            const direction = horizontalDirectionOf(player);
+            switch (direction) {
+                case Direction.East:
+                    other = block?.east();
+                    break;
+                case Direction.West:
+                    other = block?.west();
+                    break;
+                case Direction.North:
+                    other = block?.north();
+                    break;
+                case Direction.South:
+                    other = block?.south();
+                    break;
+            }
+            if (!other?.isAir) return
+            const mainPerm = BlockPermutation.resolve("farmersdelight:tatami_mat_main", {
+                "minecraft:cardinal_direction": direction.toLowerCase(),
+                "farmersdelight:init": true,
+            });
+            const otherPerm = BlockPermutation.resolve("farmersdelight:tatami_mat_other", {
+                "minecraft:cardinal_direction": oppositeOf(direction).toLowerCase(),
+                "farmersdelight:init": true,
+            });
+            dimension.playSound("dig.cloth", block.location)
+
+            block?.setPermutation(mainPerm);
+            other?.setPermutation(otherPerm);
+            if (hasLimitedMaterials(player)) takeItem(container, player.selectedSlotIndex);
+        })
+    }
+
+    onTick(args: BlockComponentTickEvent): void {
+        const main = args.block
+        const direction = main.permutation.getState('minecraft:cardinal_direction');
+        let other: Block | undefined;
+        switch (direction) {
+            case 'east':
+                other = main?.east();
+                break;
+            case 'west':
+                other = main?.west();
+                break;
+            case 'north':
+                other = main?.north();
+                break;
+            case 'south':
+                other = main?.south();
+                break;
+        }
+        if (main.typeId == 'farmersdelight:tatami_mat_main') {
+            if (other?.typeId != 'farmersdelight:tatami_mat_other') {
+                main.dimension.runCommand(`setblock ${main.location.x} ${main.location.y} ${main.location.z} air destroy`)
+                main.dimension.runCommand(`setblock ${other?.location.x} ${other?.location.y} ${other?.location.z} air destroy`)
+            }
+        }
+        else if (main.typeId == 'farmersdelight:tatami_mat_other') {
+            if (other?.typeId != 'farmersdelight:tatami_mat_main') {
+                main.dimension.runCommand(`setblock ${main.location.x} ${main.location.y} ${main.location.z} air destroy`)
+                main.dimension.runCommand(`setblock ${other?.location.x} ${other?.location.y} ${other?.location.z} air destroy`)
+            }
+        }
+    }
+}

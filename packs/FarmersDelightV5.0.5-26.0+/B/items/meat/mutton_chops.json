@@ -1,0 +1,40 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 2,
+        "saturation_modifier": 0.15
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:mutton_chops"
+        }
+      },
+      "minecraft:tags": {
+        "tags": [
+          "farmersdelight:is_raw_mutton",
+          "farmersdelight:wolf_prey"
+        ]
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 0.8
+      },
+      "minecraft:compostable": {
+        "composting_chance": 35
+      },
+      "efm:realistic_food":{
+        "expire_time":2
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:mutton_chops",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.rawFood"
+      }
+    }
+  }
+}

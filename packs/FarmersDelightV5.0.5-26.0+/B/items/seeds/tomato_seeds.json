@@ -1,0 +1,30 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:block_placer": {
+        "block": "farmersdelight:tomato_block",
+        "use_on": [
+          "minecraft:farmland",
+          "farmersdelight:rich_soil_farmland"
+        ]
+      },
+      "farmersdelight:seed": "farmersdelight:tomato_block",
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:tomato_seeds"
+        }
+      },
+      "minecraft:compostable": {
+        "composting_chance": 35
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:tomato_seeds",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.seed"
+      }
+    }
+  }
+}

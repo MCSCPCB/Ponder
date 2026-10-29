@@ -1,0 +1,134 @@
+{
+   "format_version": "1.26.0",
+   "minecraft:crafting_items_catalog": {
+      "categories": [
+         {
+            "category_name": "equipment",
+            "groups": [
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:diamond_knife",
+                     "name": "farmersdelight:itemGroup.name.knife"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:roast_chicken_block_item",
+                     "name": "farmersdelight:itemGroup.name.miscFood"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:cooked_bacon",
+                     "name": "farmersdelight:itemGroup.name.cookedFood"
+                  },
+                  "items": []
+               }
+            ]
+         },
+         {
+            "category_name": "nature",
+            "groups": [
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:wild_cabbages",
+                     "name": "farmersdelight:itemGroup.name.wildcrop"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:chicken_cuts",
+                     "name": "farmersdelight:itemGroup.name.rawFood"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:cabbage_seeds",
+                     "name": "farmersdelight:itemGroup.name.seed"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:tomato",
+                     "name": "farmersdelight:itemGroup.name.crop"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:rich_soil",
+                     "name": "farmersdelight:itemGroup.name.soil"
+                  },
+                  "items": [
+                     "farmersdelight:rich_soil",
+                     "farmersdelight:rich_soil_farmland",
+                     "farmersdelight:organic_compost"
+                  ]
+               }
+            ]
+         },
+         {
+            "category_name": "items",
+            "groups": [
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:beetroot_crate",
+                     "name": "farmersdelight:itemGroup.name.crate"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:acacia_cabinet",
+                     "name": "farmersdelight:itemGroup.name.cabinet"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:stove",
+                     "name": "farmersdelight:itemGroup.name.cooker"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:book_farmersdelight",
+                     "name": "farmersdelight:itemGroup.name.miscItem"
+                  },
+                  "items": []
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:dog_food",
+                     "name": "farmersdelight:itemGroup.name.animal_food"
+                  },
+                  "items": [
+                     "farmersdelight:dog_food",
+                     "farmersdelight:horse_feed"
+                  ]
+               },
+               {
+                  "group_identifier": {
+                     "icon": "farmersdelight:half_tatami_mat",
+                     "name": "farmersdelight:itemGroup.name.furniture"
+                  },
+                  "items": [
+                     "farmersdelight:rope",
+                     "farmersdelight:safety_net",
+                     "farmersdelight:canvas_rug",
+                     "farmersdelight:tatami",
+                     "farmersdelight:tatami_mat",
+                     "farmersdelight:half_tatami_mat"
+                  ]
+               }
+            ]
+         }
+      ]
+   }
+}

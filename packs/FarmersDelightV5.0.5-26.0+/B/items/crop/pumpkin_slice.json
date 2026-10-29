@@ -1,0 +1,40 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 3,
+        "saturation_modifier": 0.3
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:pumpkin_slice"
+        }
+      },
+      "minecraft:tags": {
+        "tags": [
+          "farmersdelight:is_fertilizer.50"
+        ]
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 50
+      },
+      "efm:realistic_food":{
+        "expire_time":15
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:pumpkin_slice",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.rawFood"
+      }
+    }
+  }
+}

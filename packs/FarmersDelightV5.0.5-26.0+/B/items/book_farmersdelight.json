@@ -1,0 +1,25 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "farmersdelight:farmers_book": {},
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:bookshelf_books"
+        ]
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:book_farmersdelight"
+        }
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:book_farmersdelight",
+      "menu_category": {
+        "category": "Items",
+        "group": "farmersdelight:itemGroup.name.miscItem"
+      }
+    }
+  }
+}

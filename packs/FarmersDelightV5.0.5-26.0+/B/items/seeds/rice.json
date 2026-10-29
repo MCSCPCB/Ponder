@@ -1,0 +1,28 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "farmersdelight:rice_seed":{},
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:rice"
+        }
+      },
+      "minecraft:tags": {
+        "tags": [
+          "farmersdelight:is_rice"
+        ]
+      },
+      "minecraft:compostable": {
+        "composting_chance": 35
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:rice",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.seed"
+      }
+    }
+  }
+}

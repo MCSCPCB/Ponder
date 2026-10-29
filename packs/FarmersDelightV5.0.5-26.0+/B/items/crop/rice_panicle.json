@@ -1,0 +1,35 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:rice_panicle"
+        }
+      },
+       "minecraft:wearable": {
+        "slot": "slot.weapon.offhand"
+      },
+      "farmersdelight:cuttable": {
+        "loot": [
+          ["farmersdelight:straw", 1],
+          ["farmersdelight:rice", 1]
+        ],
+        "tool": {
+          "type": "tag",
+          "name": "farmersdelight:is_knife"
+        }
+      },
+      "minecraft:compostable": {
+        "composting_chance": 65
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:rice_panicle",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.crop"
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:block_placer": {
+        "block": "farmersdelight:onion_block",
+        "use_on": [
+          "minecraft:farmland",
+          "farmersdelight:rich_soil_farmland"
+        ]
+      },
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 2,
+        "saturation_modifier": 0.4
+      },
+      "farmersdelight:seed": "farmersdelight:onion_block",
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:onion"
+        }
+      },
+      "minecraft:tags": {
+        "tags": [
+          "farmersdelight:is_onion"
+        ]
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 35
+      },
+      "efm:realistic_food":{
+        "expire_time":15
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:onion",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.crop"
+      }
+    }
+  }
+}

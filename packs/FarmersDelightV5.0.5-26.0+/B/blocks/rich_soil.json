@@ -1,0 +1,31 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:block": {
+    "description": {
+      "identifier": "farmersdelight:rich_soil",
+      "menu_category": {
+        "category": "nature"
+      }
+    },
+    "components": {
+      "farmersdelight:rich_soil": {},
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.6
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 3
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "rich_soil"
+        }
+      },
+      "tag:dirt": {},
+      "tag:sand": {},
+      "tag:compost_activators": {},
+      "tag:mushroom_grow_block": {},
+      "tag:farmersdelight:mushroom_cluster_habitat": {}
+    }
+  }
+}

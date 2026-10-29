@@ -1,0 +1,42 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 1,
+        "saturation_modifier": 0.3
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:chicken_cuts"
+        }
+      },
+      "minecraft:tags": {
+        "tags": [
+          "farmersdelight:is_raw_chicken",
+          "farmersdelight:wolf_prey",
+          "farmersdelight:cabbage_roll_ingredients"
+        ]
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 30
+      },
+      "efm:realistic_food":{
+        "expire_time":2
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:chicken_cuts",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.rawFood"
+      }
+    }
+  }
+}

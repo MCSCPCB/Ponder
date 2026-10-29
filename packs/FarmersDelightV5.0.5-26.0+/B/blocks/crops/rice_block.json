@@ -1,0 +1,217 @@
+{
+    "format_version": "1.26.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "farmersdelight:rice_block",
+            "states": {
+                "farmersdelight:age": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "farmersdelight:upper": [
+                    false,
+                    true
+                ]
+            }
+        },
+        "permutations": [
+            {
+                "condition": "query.block_state('farmersdelight:age') == 0",
+                "components": {
+                    "minecraft:geometry": "minecraft:geometry.cross",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "rice_stage0",
+                            "ambient_occlusion": false,
+                            "render_method": "alpha_test"
+                        }
+                    },
+                    "minecraft:selection_box": {
+                        "origin": [
+                            -5,
+                            0,
+                            -5
+                        ],
+                        "size": [
+                            10,
+                            8,
+                            10
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:age') == 1",
+                "components": {
+                    "minecraft:geometry": "minecraft:geometry.cross",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "rice_stage1",
+                            "ambient_occlusion": false,
+                            "render_method": "alpha_test"
+                        }
+                    },
+                    "minecraft:selection_box": {
+                        "origin": [
+                            -5,
+                            0,
+                            -5
+                        ],
+                        "size": [
+                            10,
+                            8,
+                            10
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:age') == 2",
+                "components": {
+                    "minecraft:geometry": "minecraft:geometry.cross",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "rice_stage2",
+                            "ambient_occlusion": false,
+                            "render_method": "alpha_test"
+                        }
+                    },
+                    "minecraft:selection_box": {
+                        "origin": [
+                            -7,
+                            0,
+                            -7
+                        ],
+                        "size": [
+                            14,
+                            16,
+                            14
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:age') == 3 && query.block_state('farmersdelight:upper') == false",
+                "components": {
+                    "minecraft:geometry": "minecraft:geometry.cross",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "rice_stage3",
+                            "ambient_occlusion": false,
+                            "render_method": "alpha_test"
+                        }
+                    },
+                    "minecraft:selection_box": {
+                        "origin": [
+                            -7,
+                            0,
+                            -7
+                        ],
+                        "size": [
+                            14,
+                            16,
+                            14
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:age') == 3 && query.block_state('farmersdelight:upper') == true",
+                "components": {
+                    "minecraft:geometry": "minecraft:geometry.cross",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "rice_supporting",
+                            "ambient_occlusion": false,
+                            "render_method": "alpha_test"
+                        }
+                    },
+                    "minecraft:selection_box": {
+                        "origin": [
+                            -7,
+                            0,
+                            -7
+                        ],
+                        "size": [
+                            14,
+                            16,
+                            14
+                        ]
+                    }
+                }
+            }
+        ],
+        "components": {
+            "minecraft:connection_rule": {
+                "accepts_connections_from": "none"
+            },
+            "minecraft:precipitation_interactions": {
+                "precipitation_behavior": "none"
+            },
+            "minecraft:movable": {
+                "movement_type": "popped"
+            },
+            "minecraft:material_instances": {
+                "*": {
+                    "texture": "rice_supporting",
+                    "ambient_occlusion": false,
+                    "render_method": "alpha_test"
+                }
+            },
+            "minecraft:redstone_conductivity": {
+                "allows_wire_to_step_down": false
+            },
+            "minecraft:liquid_detection": {
+                "detection_rules": [
+                    {
+                        "on_liquid_touches": "no_reaction",
+                        "can_contain_liquid": true
+                    }
+                ]
+            },
+            "minecraft:tick": {
+                "interval_range": [
+                    1,
+                    1
+                ]
+            },
+            "farmersdelight:rice": {},
+            "minecraft:loot": "loot_tables/farmersdelight/crops/farmersdelight_rice.json",
+            "minecraft:destructible_by_mining": {
+                "seconds_to_destroy": 0.0
+            },
+            "minecraft:flammable": {
+                "catch_chance_modifier": 30,
+                "destroy_chance_modifier": 30
+            },
+            "minecraft:light_dampening": 0,
+            "minecraft:geometry": "minecraft:geometry.cross",
+            "minecraft:destructible_by_explosion": {
+                "explosion_resistance": 0.0
+            },
+            "minecraft:collision_box": false,
+            "minecraft:placement_filter": {
+                "conditions": [
+                    {
+                        "block_filter": [
+                            {
+                                "tags": "query.any_tag('dirt')"
+                            },
+                            {
+                                "name": "minecraft:farmland"
+                            },
+                            "farmersdelight:rich_soil",
+                            "farmersdelight:rich_soil_farmland"
+                        ],
+                        "allowed_faces": [
+                            "up"
+                        ]
+                    }
+                ]
+            },
+            "tag:crop_block": {}
+        }
+    }
+}

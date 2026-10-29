@@ -1,0 +1,55 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 2,
+        "saturation_modifier": 0.4
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:cabbage"
+        }
+      },
+      "minecraft:tags": {
+        "tags": [
+          "farmersdelight:is_cabbage"
+        ]
+      },
+      "minecraft:wearable": {
+        "slot": "slot.weapon.offhand"
+      },
+      "farmersdelight:cuttable": {
+        "loot": [
+          [
+            "farmersdelight:cabbage_leaf",
+            2
+          ]
+        ],
+        "tool": {
+          "type": "tag",
+          "name": "farmersdelight:is_knife"
+        }
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 65
+      },
+      "efm:realistic_food":{
+        "expire_time":15
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:cabbage",
+      "menu_category": {
+        "category": "nature",
+        "group": "farmersdelight:itemGroup.name.crop"
+      }
+    }
+  }
+}

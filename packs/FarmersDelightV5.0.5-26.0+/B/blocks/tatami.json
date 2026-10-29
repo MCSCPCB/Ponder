@@ -1,0 +1,215 @@
+{
+    "format_version": "1.26.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "farmersdelight:tatami",
+            "menu_category": {
+                "category": "items"
+            },
+            "states": {
+                "farmersdelight:connection": [
+                    "none",
+                    "north",
+                    "south",
+                    "east",
+                    "west",
+                    "up",
+                    "down"
+                ]
+            }
+        },
+        "permutations": [
+            {
+                "condition": "query.block_state('farmersdelight:connection') == 'none'",
+                "components": {
+                    "minecraft:geometry": "geometry.tatami",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "tatami_mat_half"
+                        }
+                    },
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:connection') == 'west'",
+                "components": {
+                    "minecraft:geometry": "geometry.tatami",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "tatami_mat_half"
+                        },
+                        "odd": {
+                            "texture": "tatami_mat_odd"
+                        },
+                        "north": "odd",
+                        "south": "odd",
+                        "up": "odd",
+                        "down": "odd"
+                    },
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            180,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:connection') == 'east'",
+                "components": {
+                    "minecraft:geometry": "geometry.tatami",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "tatami_mat_half"
+                        },
+                        "odd": {
+                            "texture": "tatami_mat_even"
+                        },
+                        "north": "odd",
+                        "south": "odd",
+                        "up": "odd",
+                        "down": "odd"
+                    },
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:connection') == 'north'",
+                "components": {
+                    "minecraft:geometry": "geometry.tatami",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "tatami_mat_half"
+                        },
+                        "odd": {
+                            "texture": "tatami_mat_odd"
+                        },
+                        "north": "odd",
+                        "south": "odd",
+                        "up": "odd",
+                        "down": "odd"
+                    },
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            90,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:connection') == 'south'",
+                "components": {
+                    "minecraft:geometry": "geometry.tatami",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "tatami_mat_half"
+                        },
+                        "odd": {
+                            "texture": "tatami_mat_even"
+                        },
+                        "north": "odd",
+                        "south": "odd",
+                        "up": "odd",
+                        "down": "odd"
+                    },
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            270,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:connection') == 'up'",
+                "components": {
+                    "minecraft:geometry": "geometry.tatami",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "tatami_mat_half"
+                        },
+                        "odd": {
+                            "texture": "tatami_mat_odd"
+                        },
+                        "north": "odd",
+                        "south": "odd",
+                        "up": "odd",
+                        "down": "odd"
+                    },
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            0,
+                            90
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('farmersdelight:connection') == 'down'",
+                "components": {
+                    "minecraft:geometry": "geometry.tatami",
+                    "minecraft:material_instances": {
+                        "*": {
+                            "texture": "tatami_mat_half"
+                        },
+                        "odd": {
+                            "texture": "tatami_mat_even"
+                        },
+                        "north": "odd",
+                        "south": "odd",
+                        "up": "odd",
+                        "down": "odd"
+                    },
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            0,
+                            270
+                        ]
+                    }
+                }
+            }
+        ],
+        "components": {
+            "minecraft:tick": {
+                "interval_range": [
+                    1,
+                    1
+                ]
+            },
+            "minecraft:material_instances": {
+                "*": {
+                    "texture": "tatami_mat_half"
+                }
+            },
+            "farmersdelight:tatami": {},
+            "minecraft:destructible_by_mining": {
+                "seconds_to_destroy": 0.6
+            },
+            "minecraft:destructible_by_explosion": {
+                "explosion_resistance": 3
+            },
+            "minecraft:geometry": "geometry.tatami",
+            "tag:tatami": {},
+            "tag:farmersdelight:straw_blocks": {}
+        }
+    }
+}

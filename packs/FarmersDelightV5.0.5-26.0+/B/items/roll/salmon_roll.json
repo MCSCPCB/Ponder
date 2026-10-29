@@ -1,0 +1,35 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:item": {
+    "components": {
+      "minecraft:food": {
+        "can_always_eat": false,
+        "nutrition": 7,
+        "saturation_modifier": 0.7
+      },
+      "minecraft:icon": {
+        "textures": {
+          "default": "farmersdelight:salmon_roll"
+        }
+      },
+      "minecraft:use_animation": "eat",
+      "minecraft:use_modifiers": {
+        "use_duration": 1.6,
+        "movement_modifier": 0.4
+      },
+      "minecraft:compostable": {
+        "composting_chance": 45
+      },
+      "efm:realistic_food":{
+        "expire_time":6
+      }
+    },
+    "description": {
+      "identifier": "farmersdelight:salmon_roll",
+      "menu_category": {
+        "category": "equipment",
+        "group": "farmersdelight:itemGroup.name.miscFood"
+      }
+    }
+  }
+}

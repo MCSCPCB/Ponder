@@ -1,0 +1,129 @@
+{
+    "format_version": "1.26.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "farmersdelight:cooking_pot",
+            "menu_category": {
+                "category": "items",
+                "group": "farmersdelight:itemGroup.name.cooker"
+            },
+            "traits": {
+                "minecraft:placement_direction": {
+                    "enabled_states": [
+                        "minecraft:cardinal_direction"
+                    ]
+                }
+            }
+        },
+        "permutations": [
+            {
+                "condition": "query.block_state('minecraft:cardinal_direction') == 'north'",
+                "components": {
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            180,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('minecraft:cardinal_direction') == 'south'",
+                "components": {
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('minecraft:cardinal_direction') == 'west'",
+                "components": {
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            270,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "condition": "query.block_state('minecraft:cardinal_direction') == 'east'",
+                "components": {
+                    "minecraft:transformation": {
+                        "rotation": [
+                            0,
+                            90,
+                            0
+                        ]
+                    }
+                }
+            }
+        ],
+        "components": {
+            "minecraft:connection_rule": {
+                "accepts_connections_from": "none"
+            },
+            "minecraft:movable": {
+                "movement_type": "immovable"
+            },
+            "minecraft:redstone_conductivity": {
+                "allows_wire_to_step_down": false
+            },
+            "farmersdelight:interact": {},
+            "farmersdelight:block_entity": "farmersdelight:cooking_pot",
+            "minecraft:destructible_by_mining": {
+                "seconds_to_destroy": 1
+            },
+            "minecraft:destructible_by_explosion": {
+                "explosion_resistance": 6
+            },
+            "minecraft:material_instances": {
+                "*": {
+                    "texture": "cooking_pot_side"
+                },
+                "top": {
+                    "texture": "cooking_pot_top"
+                },
+                "bottom": {
+                    "texture": "cooking_pot_bottom"
+                },
+                "part": {
+                    "texture": "cooking_pot_parts"
+                }
+            },
+            "minecraft:collision_box": {
+                "origin": [
+                    -6.0,
+                    0.0,
+                    -6.0
+                ],
+                "size": [
+                    12.0,
+                    10.0,
+                    12.0
+                ]
+            },
+            "minecraft:selection_box": {
+                "origin": [
+                    -6.0,
+                    0.0,
+                    -6.0
+                ],
+                "size": [
+                    12.0,
+                    10.0,
+                    12.0
+                ]
+            },
+            "minecraft:geometry": {
+                "identifier": "geometry.cooking_pot"
+            }
+        }
+    }
+}
