@@ -2,9 +2,9 @@
 // (the behavior pack registered it with ponder:register). Strings are the English defaults;
 // texts/*.lang has them under redstone.ponder.<scene>.* keys.
 //
-// Pistons, repeaters, comparators, levers, buttons and hoppers are all drawn as full cubes here.
-// Ponder's block renderer only knows cubes and redstone dust, so the scenes show how these blocks
-// behave, not their real shape.
+// The blocks keep Bedrock's ids and states, and Ponder draws them in their vanilla shapes. A
+// repeater's and a comparator's minecraft:cardinal_direction is the side their input is on; a
+// piston's facing_direction is where its head points, 2 south, 3 north, 4 east, 5 west.
 (function () {
   const P = window.Ponder;
   const LAMP = "minecraft:redstone_lamp";
@@ -82,9 +82,9 @@
     fill(world) {
       for (let x = 0; x < 5; x++) for (let z = 0; z < 5; z++)
         world.setBlock(x, 0, z, (x + z) % 2 === 0 ? "minecraft:snow" : "minecraft:light_gray_terracotta");
-      world.setBlock(1, 1, 2, P.block("minecraft:piston", { facing_direction: 5 }));
+      world.setBlock(1, 1, 2, P.block("minecraft:piston", { facing_direction: 4 }));
       world.setBlock(2, 1, 2, "minecraft:stone");
-      world.setBlock(1, 1, 3, P.block("minecraft:sticky_piston", { facing_direction: 5 }));
+      world.setBlock(1, 1, 3, P.block("minecraft:sticky_piston", { facing_direction: 4 }));
       world.setBlock(2, 1, 3, "minecraft:slime");
       world.setBlock(2, 2, 3, "minecraft:oak_planks");
     },
@@ -184,7 +184,7 @@
       for (let x = 0; x < 5; x++) for (let z = 0; z < 5; z++)
         world.setBlock(x, 0, z, (x + z) % 2 === 0 ? "minecraft:snow" : "minecraft:light_gray_terracotta");
       world.setBlock(1, 1, 2, "minecraft:redstone_block");
-      world.setBlock(2, 1, 2, P.block("minecraft:unpowered_repeater", { direction: 1, repeater_delay: 0 }));
+      world.setBlock(2, 1, 2, P.block("minecraft:unpowered_repeater", { "minecraft:cardinal_direction": "west", repeater_delay: 0 }));
       world.setBlock(3, 1, 2, LAMP);
     },
   };
@@ -196,7 +196,7 @@
     scene.idle(10);
     scene.world.showSection(util.select.fromTo(1, 1, 2, 3, 1, 2), "DOWN");
     scene.idle(10);
-    scene.world.setBlock([2, 1, 2], P.block("minecraft:powered_repeater", { direction: 1, repeater_delay: 0 }));
+    scene.world.setBlock([2, 1, 2], P.block("minecraft:powered_repeater", { "minecraft:cardinal_direction": "west", repeater_delay: 0 }));
     scene.world.setBlock([3, 1, 2], LIT);
     scene.overlay.showText(70)
       .text("A repeater passes a signal in one direction only, and refreshes it back to full strength")
@@ -223,7 +223,7 @@
       for (let x = 0; x < 5; x++) for (let z = 0; z < 5; z++)
         world.setBlock(x, 0, z, (x + z) % 2 === 0 ? "minecraft:snow" : "minecraft:light_gray_terracotta");
       world.setBlock(1, 1, 2, "minecraft:chest");
-      world.setBlock(2, 1, 2, P.block("minecraft:unpowered_comparator", { direction: 1, output_lit_bit: false, output_subtract_bit: false }));
+      world.setBlock(2, 1, 2, P.block("minecraft:unpowered_comparator", { "minecraft:cardinal_direction": "west", output_lit_bit: false, output_subtract_bit: false }));
       world.setBlock(3, 1, 2, LAMP);
     },
   };
@@ -241,7 +241,7 @@
       .placeNearTarget()
       .attachKeyFrame();
     scene.idle(40);
-    scene.world.setBlock([2, 1, 2], P.block("minecraft:powered_comparator", { direction: 1, output_lit_bit: true, output_subtract_bit: false }));
+    scene.world.setBlock([2, 1, 2], P.block("minecraft:powered_comparator", { "minecraft:cardinal_direction": "west", output_lit_bit: true, output_subtract_bit: false }));
     scene.world.setBlock([3, 1, 2], LIT);
     scene.overlay.showCenteredScrollInput([2, 1, 2], "UP", 40);
     scene.idle(50);

@@ -5,7 +5,7 @@
     "description": "The redstone Ponder scenes (hbui/ponder_addons/redstone).",
     "min_engine_version": [1, 21, 0],
     "uuid": "8efd9501-f059-4cf6-9e67-b1b74bc045ee",
-    "version": [1, 0, 0]
+    "version": [1, 0, 1]
   },
   "modules": [
     {
@@ -17,7 +17,7 @@
   "dependencies": [
     {
       "uuid": "8907150a-03f9-4fe3-b1eb-eddd08ad195e",
-      "version": [1, 0, 0]
+      "version": [1, 0, 1]
     }
   ]
 }
