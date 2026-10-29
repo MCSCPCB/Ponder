@@ -26,21 +26,26 @@ Ponder 本身是一对行为包和资源包。界面画在资源包的 Ore UI（
 
 ## 示例
 
-仓库里有三份可以直接启用的示例：
+仓库里有四份可以直接启用的示例：
 
 | 位置 | 内容 |
 | --- | --- |
 | `src` | Ponder 本体，自带一个望远镜场景（Java 版的调试场景 1） |
 | `packs/Redstone` | 红石灯、活塞、拉杆与按钮、中继器、比较器、漏斗。演示大部分场景指令 |
 | `packs/Gathering` | 挖矿、骨粉、TNT。演示自定义粒子、实体和方块模型，以及往 `packs/Redstone` 的标签和场景里加内容 |
+| `packs/FarmersDelightV5.0.5-26.0+` | 农夫乐事（GPL-3.0）加一个厨锅场景。演示附属包自己的方块经适配器后自动画出 |
 
 ## 与 Java 版的差异
 
-- **方块外形**。只有红石粉画成薄片，楼梯、台阶、火把、拉杆、按钮、活塞等都画成完整方块。自定义方块同样只有 `"cube"` 和 `"wire"` 两种外形。
+- **方块外形**。原版方块按游戏里的外形画，随方块状态变；附属包自己的方块经适配器后按它的模型画。草、树叶这类按生物群系染色的贴图不染色；水和岩浆画成整块；床的颜色、旗帜图案这类存在方块实体里的样子画成默认的。
 - **方块 id**。用基岩版的 id 和方块状态，例如 Java 的 `snow_block` 在基岩版是 `minecraft:snow`。
 - **实体**。内置的只有掉落物，其他实体要自己写渲染，见[自定义方块、粒子与实体](reference/custom-content.md)。
 - **结构文件**。只读基岩版的小端 `.mcstructure`，不读 Java 版的 `.nbt`。
 - **字体**。沿用原版 Ore UI 的字体，汉字是 Noto Sans，字母和数字是 Minecraft 像素字体。
+
+## 致谢
+
+原版方块的外形取自 [Scaffold](https://github.com/EvilSlimeLabs/Scaffold) 的外形表（MIT 许可）。适配器把它转换进主包的 `hbui/ponder/blocks/vanilla_blocks.json`，许可声明放在同目录的 `vanilla_shapes_LICENSE.txt`。
 
 ## 下一步
 

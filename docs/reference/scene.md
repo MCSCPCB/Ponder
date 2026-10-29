@@ -111,8 +111,12 @@ scene.world.moveSection(head, [1, 0, 0], 10);
 方块用基岩版 id。带状态时用 `P.block`：
 
 ```js
-P.block("minecraft:unpowered_repeater", { direction: 1, repeater_delay: 0 })
+P.block("minecraft:unpowered_repeater", { "minecraft:cardinal_direction": "west", repeater_delay: 0 })
 ```
+
+状态名和取值用当前基岩版的（bedrock-samples 的 `metadata/vanilladata_modules/mojang-blocks.json` 里有全部）。原版方块按游戏里的外形画，外形随状态变：中继器、比较器的 `minecraft:cardinal_direction` 是输入那一侧；活塞的 `facing_direction` 是活塞头朝向，2 南、3 北、4 东、5 西。
+
+栅栏、玻璃板、铁栏杆怎么连，楼梯怎么拐角，也是状态（`minecraft:connection_north` 等、`minecraft:corner`），要连就写上；墙用 `wall_connection_type_*` 和 `wall_post_bit`。红石粉不用写，按周围的方块自动连。
 
 `modifyBlock` 的函数里：
 
