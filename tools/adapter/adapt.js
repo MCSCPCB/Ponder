@@ -23,7 +23,8 @@
 // - renames the vanilla queries and commands Ponder calls to what the target bundle calls them
 //   (NAMES below), and stops if the bundle has none of the known names;
 // - writes hbui/ponder/blocks/vanilla_blocks.json: vanilla's textures (size, animation, the tint
-//   plains gives grass, leaves and water), each block's textures, water's and lava's and, from
+//   plains gives grass, leaves and water), each block's textures, water's and lava's, beds' and
+//   banners' and, from
 //   Scaffold's tables, the shapes of the blocks that are not a plain cube, with Scaffold's
 //   licence beside it;
 // - sets header.min_engine_version to the target version.
@@ -470,6 +471,7 @@ function terrainList(entry) {
 //     (grass, leaves), else the inventory look (carried_textures) first. A block with a face the
 //     game tints in a way not known here is left out, and Ponder falls back to its own table;
 //   liquids { block: { still, flow } }, water's and lava's textures (liquid_models.js);
+//   blockEntities, beds' and banners' textures (blockEntityTextures);
 //   shapes, the blocks Scaffold gives a shape (vanillaShapes).
 const FACE_NAMES = ["up", "down", "north", "south", "west", "east"];
 const VANILLA_TABLE = "hbui/ponder/blocks/vanilla_blocks.json";
@@ -512,9 +514,35 @@ function vanillaBlockTable(vanilla) {
     FACE_NAMES.forEach(face => use(found[face]));
     cubes[name] = FACE_NAMES.every(face => found[face] === found.up) ? found.up : found;
   });
-  const shapes = vanillaShapes(vanilla, use);
+  const shapes = vanillaShapes(vanilla, use), blockEntities = blockEntityTextures(use);
   Object.keys(textures).forEach(p => { if (!textures[p]) delete textures[p]; });
-  return { textures, cubes, liquids, shapes };
+  return { textures, cubes, liquids, blockEntities, shapes };
+}
+
+// The textures Ponder draws beds and banners with (block_entity_models.js), Bedrock's own entity
+// textures: bed [path by colour, a bed's `color`]; banner { base, illager, patterns { code: path } },
+// a banner's pole, bar and flag, its ominous look, and each pattern by the code Bedrock saves it as
+// (Geyser's BannerPattern). Fails when vanilla lacks one, as a new version would have to be looked at.
+const BED_COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "silver", "cyan", "purple", "blue", "brown", "green", "red", "black"];
+const BANNER_PATTERNS = {
+  b: "base", bl: "square_bottom_left", br: "square_bottom_right", tl: "square_top_left", tr: "square_top_right",
+  bs: "stripe_bottom", ts: "stripe_top", ls: "stripe_left", rs: "stripe_right", cs: "stripe_center", ms: "stripe_middle",
+  drs: "stripe_downright", dls: "stripe_downleft", ss: "small_stripes", cr: "cross", sc: "straight_cross",
+  bt: "triangle_bottom", tt: "triangle_top", bts: "triangles_bottom", tts: "triangles_top",
+  ld: "diagonal_left", rd: "diagonal_up_right", lud: "diagonal_up_left", rud: "diagonal_right",
+  mc: "circle", mr: "rhombus", vh: "half_vertical", hh: "half_horizontal", vhr: "half_vertical_right", hhb: "half_horizontal_bottom",
+  bo: "border", cbo: "curly_border", gra: "gradient", gru: "gradient_up", bri: "bricks", glb: "globe",
+  cre: "creeper", sku: "skull", flo: "flower", moj: "mojang", pig: "piglin", flw: "flow", gus: "guster",
+};
+function blockEntityTextures(use) {
+  const need = p => use(p) || fail("vanilla has no " + p + " (beds and banners in tools/adapter need looking at)");
+  const patterns = {};
+  Object.keys(BANNER_PATTERNS).forEach(code => { patterns[code] = need("textures/entity/banner/banner_" + BANNER_PATTERNS[code]); });
+  return {
+    bed: BED_COLORS.map(c => need("textures/entity/bed/" + c)),
+    banner: { base: need("textures/entity/banner/banner_base"), illager: need("textures/entity/banner/banner_illager"), patterns },
+    particle: need("textures/blocks/planks_oak"),
+  };
 }
 
 // The blocks Scaffold draws: shapes.blocks { block: family }; shapes.families { family: { pick,
