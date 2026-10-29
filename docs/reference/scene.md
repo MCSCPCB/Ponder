@@ -118,6 +118,8 @@ P.block("minecraft:unpowered_repeater", { "minecraft:cardinal_direction": "west"
 
 栅栏、玻璃板、铁栏杆怎么连，楼梯怎么拐角，也是状态（`minecraft:connection_north` 等、`minecraft:corner`），要连就写上；墙用 `wall_connection_type_*` 和 `wall_post_bit`。红石粉不用写，按周围的方块自动连。
 
+水和岩浆的液位是 `liquid_depth`：0 是源头，1 到 7 是流动的（越大越浅），8 及以上是往下落的。水面高度和流向按周围的方块算，不用另写。
+
 `modifyBlock` 的函数里：
 
 | 函数 | 说明 |
