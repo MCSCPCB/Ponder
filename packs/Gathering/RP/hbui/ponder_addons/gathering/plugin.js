@@ -237,12 +237,12 @@
       helper.forComponents("minecraft:moss_block")
         .addStoryBoard(mossPlate, moss, "mining");
       helper.forComponents("minecraft:tnt")
-        .addStoryBoard(tntPlate, tnt, "mining", "redstone_lamp:redstone");
+        .addStoryBoard(tntPlate, tnt, "mining", "redstone:redstone");
       // Another pack's tag and scene are named with their namespace.
       helper.forComponents("minecraft:lever")
         .addStoryBoard(leverTntPlate, leverTnt, entry => entry
-          .highlightTag("redstone_lamp:redstone")
-          .orderAfter("redstone_lamp", "inputs"));
+          .highlightTag("redstone:redstone")
+          .orderAfter("redstone", "inputs"));
     },
     registerTags(helper) {
       helper.registerTag("mining")
@@ -255,7 +255,7 @@
         .add("minecraft:iron_ore")
         .add("minecraft:moss_block")
         .add("minecraft:tnt");
-      helper.addToTag("redstone_lamp:redstone")
+      helper.addToTag("redstone:redstone")
         .add("minecraft:tnt");
     },
     registerSharedText(helper) {

@@ -30,7 +30,7 @@ my_lamp/
 
 ## 第 2 步：写 manifest
 
-两个 manifest 互相依赖，并分别依赖 Ponder 的行为包和资源包。四个 `uuid` 换成你自己生成的。
+两个 manifest 互相依赖，但不依赖 Ponder。玩家在世界里另外启用 Ponder 时思索才生效；没启用时，这些文件不起作用，也不会报错。四个 `uuid` 换成你自己生成的。
 
 `BP/manifest.json`：
 
@@ -49,7 +49,6 @@ my_lamp/
   ],
   "dependencies": [
     { "uuid": "<资源包 uuid>", "version": [1, 0, 0] },
-    { "uuid": "eae14a5a-7092-4213-a263-868bca4243e5", "version": [1, 0, 0] },
     { "module_name": "@minecraft/server", "version": "alpha" }
   ]
 }
@@ -71,13 +70,10 @@ my_lamp/
     { "type": "resources", "uuid": "<资源模块 uuid>", "version": [1, 0, 0] }
   ],
   "dependencies": [
-    { "uuid": "<行为包 uuid>", "version": [1, 0, 0] },
-    { "uuid": "73ea98eb-f333-4c8f-989c-e8936d1b4e35", "version": [1, 0, 0] }
+    { "uuid": "<行为包 uuid>", "version": [1, 0, 0] }
   ]
 }
 ```
-
-`eae14a5a-…` 是 Ponder 行为包，`73ea98eb-…` 是 Ponder 资源包。
 
 ## 第 3 步：报到
 

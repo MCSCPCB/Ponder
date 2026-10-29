@@ -4,8 +4,8 @@ import { system, world } from "@minecraft/server";
 // hbui/ in this pack's resource pack; the items are the ones that open Ponder.
 world.afterEvents.worldLoad.subscribe(() => {
   system.sendScriptEvent("ponder:register", JSON.stringify({
-    modId: "redstone_lamp",
-    script: "ponder_addons/redstone_lamp/plugin.js",
+    modId: "redstone",
+    script: "ponder_addons/redstone/plugin.js",
     items: [
       "minecraft:redstone_lamp", "minecraft:piston", "minecraft:sticky_piston", "minecraft:lever",
       "minecraft:stone_button", "minecraft:wooden_button", "minecraft:repeater", "minecraft:comparator",

@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Redstone Lamp Ponder Behavior",
-    "description": "Registers the redstone lamp Ponder scenes with Ponder.",
+    "name": "Redstone Ponder Behavior",
+    "description": "Registers the redstone Ponder scenes with Ponder.",
     "min_engine_version": [1, 21, 0],
     "uuid": "8907150a-03f9-4fe3-b1eb-eddd08ad195e",
     "version": [1, 0, 0]
@@ -19,10 +19,6 @@
   "dependencies": [
     {
       "uuid": "8efd9501-f059-4cf6-9e67-b1b74bc045ee",
-      "version": [1, 0, 0]
-    },
-    {
-      "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
       "version": [1, 0, 0]
     },
     {

@@ -1,6 +1,6 @@
 // A Ponder plugin from another pack: redstone scenes. Ponder loads this script when it opens
 // (the behavior pack registered it with ponder:register). Strings are the English defaults;
-// texts/*.lang has them under redstone_lamp.ponder.<scene>.* keys.
+// texts/*.lang has them under redstone.ponder.<scene>.* keys.
 //
 // Pistons, repeaters, comparators, levers, buttons and hoppers are all drawn as full cubes here.
 // Ponder's block renderer only knows cubes and redstone dust, so the scenes show how these blocks
@@ -295,8 +295,8 @@
   }
 
   P.addPlugin({
-    modId: "redstone_lamp",
-    name: "Redstone Lamp",
+    modId: "redstone",
+    name: "Redstone",
     registerScenes(helper) {
       helper.forComponents(LAMP)
         .addStoryBoard(lampPlate, lamp, "redstone")

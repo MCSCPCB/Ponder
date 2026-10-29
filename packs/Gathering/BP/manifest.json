@@ -22,10 +22,6 @@
       "version": [1, 0, 0]
     },
     {
-      "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
-      "version": [1, 0, 0]
-    },
-    {
       "module_name": "@minecraft/server",
       "version": "alpha"
     }

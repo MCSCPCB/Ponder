@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Redstone Lamp Ponder Resources",
-    "description": "The redstone lamp Ponder scenes (hbui/ponder_addons/redstone_lamp).",
+    "name": "Redstone Ponder Resources",
+    "description": "The redstone Ponder scenes (hbui/ponder_addons/redstone).",
     "min_engine_version": [1, 21, 0],
     "uuid": "8efd9501-f059-4cf6-9e67-b1b74bc045ee",
     "version": [1, 0, 0]
@@ -17,10 +17,6 @@
   "dependencies": [
     {
       "uuid": "8907150a-03f9-4fe3-b1eb-eddd08ad195e",
-      "version": [1, 0, 0]
-    },
-    {
-      "uuid": "73ea98eb-f333-4c8f-989c-e8936d1b4e35",
       "version": [1, 0, 0]
     }
   ]
