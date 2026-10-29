@@ -14,16 +14,22 @@
   // tools/adapter sets QUERY_ID for the target version. Ours count down from the top of the range.
   const QUERY_ID = "ponder:query-id/string";
   let nextId = 0xffffffff;
+  // Set while Ponder itself triggers, so the debug trace can tell its calls from vanilla's.
+  let ours = false;
+  function send(args) {
+    ours = true;
+    try { return window.engine.trigger.apply(window.engine, args); } finally { ours = false; }
+  }
   function subscribe(name, args, callback) {
     const engine = window.engine, n = nextId--, id = QUERY_ID.endsWith("/number") ? n : String(n);
     const handler = value => callback(value);
     engine.on(`query:subscribed/${id}`, handler);
     engine.on(`query:updated/${id}`, handler);
-    engine.trigger.apply(engine, [`query:subscribe/${name}`, id].concat(args));
+    send([`query:subscribe/${name}`, id].concat(args));
     return () => {
       engine.off(`query:subscribed/${id}`, handler);
       engine.off(`query:updated/${id}`, handler);
-      engine.trigger("query:unsubscribe", id);
+      send(["query:unsubscribe", id]);
     };
   }
 
@@ -169,11 +175,32 @@
     }, 1000);
   };
 
-  // Test aid: shows the data-driven queries vanilla itself sends, to compare with ours.
+  // Test aid (P.DEBUG). Logs the first time vanilla sends each data-driven query, and checks each
+  // query Ponder sends against vanilla's own call of it: the argument count and every argument's
+  // type, the subscription id included. A version that changes one shows up as a "mismatch" line,
+  // logged before the call goes out, so even a call the engine rejects is reported.
   function traceVanilla(engine) {
-    const trigger = engine.trigger;
+    const trigger = engine.trigger, calls = { ours: {}, vanilla: {} }, reported = {};
+    const kind = v => (v === null ? "null" : Array.isArray(v) ? "array" : typeof v);
+    function compare(query) {
+      const a = calls.ours[query], b = calls.vanilla[query];
+      if (!a || !b || reported[query]) return;
+      reported[query] = true;
+      const diffs = [];
+      if (a.length !== b.length) diffs.push(`${a.length} args, vanilla ${b.length}`);
+      for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) diffs.push(`arg${i}: ours ${a[i]}, vanilla ${b[i]}`);
+      P.log(diffs.length ? "mismatch" : "match", query, diffs.join("; "));
+    }
     engine.trigger = function (name) {
-      if (/DataDriven|dataStore/i.test(String(name))) P.log("vanilla", Array.prototype.slice.call(arguments).map(String).join(" ").slice(0, 160));
+      const args = Array.prototype.slice.call(arguments, 1), who = ours ? "ours" : "vanilla";
+      const m = /^query:subscribe\/(.+)$/.exec(String(name));
+      if (m) {
+        if (who === "vanilla" && !calls.vanilla[m[1]] && /ddui|DataDriven|DataStore/i.test(m[1])) {
+          P.log("vanilla", [name].concat(args).map(String).join(" ").slice(0, 160));
+        }
+        calls[who][m[1]] = args.map(kind);
+        compare(m[1]);
+      }
       return trigger.apply(this, arguments);
     };
   }
