@@ -25,7 +25,7 @@
     if (e.built && e.builtVersion === e.version) return e.built;
     const out = [], has = (x, y, z) => e.section.has(x, y, z);
     e.section.keys.forEach(k => {
-      const p = k.split(",").map(Number), block = world.getBlock(p[0], p[1], p[2]);
+      const p = k.split(",").map(Number), block = P.withDustJoins(world, p[0], p[1], p[2], world.getBlock(p[0], p[1], p[2]));
       if (!block) return;
       const model = P.blockModel(block);
       // Whether the neighbour on side f hides this block's face there.
@@ -84,12 +84,12 @@
     items.sort((a, b) => a.depth - b.depth);
     // About half a GUI pixel of overlap between neighbouring faces at 30 px per block.
     const blockPx = 30 * scene.scaleFactor, grow = 0.6 / blockPx, size = Math.max(16, Math.round(blockPx * P.view.cssPerGui));
-    const breaking = scene.world.breaking;
+    const breaking = scene.world.breaking, ticks = animationTicks();
     items.forEach(it => {
       if (it.draw) { it.draw(d); return; }
       // renderBreakingTexture: destroy_stage_<progress> over the block's faces.
       const stage = breaking.get(P.blockKey(it.b.p[0], it.b.p[1], it.b.p[2]));
-      if (it.b.quads) { drawQuads(d, M.translate(it.m, it.b.p[0], it.b.p[1], it.b.p[2]), it.b.quads, it.light, grow, size, stage); return; }
+      if (it.b.quads) { drawQuads(d, M.translate(it.m, it.b.p[0], it.b.p[1], it.b.p[2]), it.b.quads, it.light, grow, size, stage, it.b.model.tint, ticks); return; }
       it.b.faces.forEach(f => {
         const face = f[1];
         if (!facing(it.m, face.n)) return;
@@ -100,10 +100,13 @@
     });
   };
   const destroyStage = stage => `pack://textures/environment/destroy_stage_${stage}.png?filtering=point`;
+  // The ticks animated textures step by: 20 a second, as the game runs them.
+  const animationTicks = () => Date.now() / 50;
 
-  // An add-on model's quads under matrix m (block space), far to near. Solid ones are pushed out
-  // by `grow` blocks along their edges to close seams; two-sided ones show from behind too.
-  function drawQuads(d, m, quads, light, grow, size, stage) {
+  // A model's quads under matrix m (block space), far to near, each showing its texture's piece
+  // at `ticks` (P.quadImage). Solid ones are pushed out by `grow` blocks along their edges to
+  // close seams; two-sided ones show from behind too; a look with `tint` takes the model's.
+  function drawQuads(d, m, quads, light, grow, size, stage, tint, ticks) {
     const list = [];
     quads.forEach(q => {
       if (!q.twoSided && !facing(m, q.n)) return;
@@ -114,8 +117,8 @@
     });
     list.sort((a, b) => a.depth - b.depth);
     list.forEach(it => {
-      const r = it.q.region;
-      d.texturedQuadPart(it.q.src, it.o, it.u, it.v, r[0], r[1], r[2], r[3], filterOf(it.q.shade * light, null), size);
+      const img = P.quadImage(it.q, ticks);
+      d.texturedQuadMap(img.src, it.o, it.u, it.v, img.a, img.b, img.c, img.clip, filterOf(it.q.shade * light, it.q.look.tint ? tint : null), size);
       if (stage != null) d.texturedQuad(destroyStage(stage), it.o, it.u, it.v, null, size);
     });
   }
@@ -156,7 +159,7 @@
   function drawCube(d, m, id, px) {
     const model = P.blockModel(id), size = Math.max(16, Math.round(px * P.view.cssPerGui));
     const c = M.translate(m, -0.5, -0.5, -0.5);
-    if (model.quads) { drawQuads(d, c, model.quads, 1, 0, size, null); return; }
+    if (model.quads) { drawQuads(d, c, model.quads, 1, 0, size, null, model.tint, animationTicks()); return; }
     Object.keys(P.FACES).forEach(f => {
       const face = P.FACES[f];
       if (!facing(c, face.n)) return;

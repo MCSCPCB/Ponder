@@ -45,10 +45,15 @@
     return [f * 0.6 + (f > 0 ? 0.4 : 0.3), P.clamp(f * f * 0.7 - 0.5, 0, 1), P.clamp(f * f * 0.6 - 0.7, 0, 1)];
   };
 
+  P.wireColor = wireColor;
+  P.isTransparent = name => TRANSPARENT.test(name);
+
   // Vanilla's look, from hbui/ponder/blocks/vanilla_blocks.json, which tools/adapter writes from
-  // the game's blocks.json and terrain_texture.json: block name -> its texture file, or one per
-  // face. (pack://blocks.json gives only the topmost pack's file, which another pack can hide.)
-  let vanilla = {};
+  // the game's blocks.json, terrain_texture.json and textures, and Scaffold's shapes: textures
+  // { path: { file, w, h, frames, tick, seq } }, cubes { block: path or { face: path } }, and
+  // shapes (vanilla_models.js). (pack://blocks.json gives only the topmost pack's file, which
+  // another pack can hide.) A pack not run through tools/adapter has none of it.
+  P.vanilla = { textures: {}, cubes: {}, shapes: { blocks: {}, families: {}, rotations: {}, faces: {}, terrain: {} } };
   // A JSON file; a missing one reads as {}.
   P.readJson = url => new Promise(resolve => {
     const xhr = new XMLHttpRequest();
@@ -60,15 +65,20 @@
   // Vanilla's table once, and the block index of each add-on not read yet (block_models.js).
   let vanillaLoaded = null;
   P.loadBlockData = addons => Promise.all([
-    vanillaLoaded || (vanillaLoaded = P.readJson("/hbui/ponder/blocks/vanilla_blocks.json").then(t => { vanilla = t; })),
+    vanillaLoaded || (vanillaLoaded = P.readJson("/hbui/ponder/blocks/vanilla_blocks.json").then(t => { Object.assign(P.vanilla, t); })),
     P.loadAddonBlocks(addons),
   ]);
-  // Face -> file (from the pack's root) from vanilla's table, or null when it does not have the block.
+  const SIX = ["up", "down", "north", "south", "west", "east"];
+  // Face -> texture (P.textureOf) from vanilla's table, or null when it does not have the block.
   function tableFaces(name) {
-    const entry = vanilla[name];
+    const entry = P.vanilla.cubes[name];
     if (!entry) return null;
     const faces = {};
-    ["up", "down", "north", "south", "west", "east"].forEach(f => { faces[f] = typeof entry === "string" ? entry : entry[f]; });
+    for (const f of SIX) {
+      const e = P.vanilla.textures[typeof entry === "string" ? entry : entry[f]];
+      if (!e) return null;
+      faces[f] = P.textureOf(e);
+    }
     return faces;
   }
 
@@ -95,7 +105,7 @@
       }
       return cache.get(key);
     }
-    const addon = P.addonBlockModel(block);
+    const addon = P.addonBlockModel(block) || P.vanillaShapeModel(block);
     if (addon) return addon;
     const id = P.blockId(block), power = P.blockStates(block).redstone_signal || 0, key = id + "#" + power;
     let model = cache.get(key);
@@ -104,14 +114,20 @@
     if (!files && !TABLE[name]) P.log("texture: vanilla_blocks.json has no", name);
     const entry = TABLE[name] || name;
     const texture = face => {
-      if (files) return `pack://${files[face]}?filtering=point`;
+      if (files) return files[face].url;
       const t = typeof entry === "string" ? entry : entry[face] || entry.side || entry.up;
       return `pack://textures/blocks/${t}.png?filtering=point`;
     };
     const wire = name === "redstone_wire";
     model = { id, shape: wire ? "wire" : "cube", full: !wire, opaque: !TRANSPARENT.test(name), faces: {},
       tint: wire ? wireColor(power) : null };
-    ["up", "down", "north", "south", "west", "east"].forEach(f => { model.faces[f] = texture(f); });
+    SIX.forEach(f => { model.faces[f] = texture(f); });
+    // A face with an animation (a strip of frames: magma, sea lantern) is drawn a frame at a time.
+    if (files && !wire && SIX.some(f => files[f].frames > 1)) {
+      model.shape = "model";
+      model.quads = [];
+      SIX.forEach(f => P.blockBox(model.quads, P.Mat.id(), [0, 0, 0], [1, 1, 1], f, [0, 0, 1, 1], { tex: files[f], crop: true, dim: true, solid: model.opaque }));
+    }
     cache.set(key, model);
     return model;
   };

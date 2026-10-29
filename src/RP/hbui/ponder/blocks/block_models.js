@@ -96,20 +96,53 @@
     if (typeof m === "string") m = materials[m];
     return m || null;
   }
-  const textureUrl = (index, name) => {
-    const t = name && index.textures[name];
-    return t ? `pack://${t.file}?filtering=point${t.pack ? "&packId=" + t.pack : ""}` : null;
+  // A texture's image and what is known of it: its size and, for an animation (a strip of square
+  // frames, top to bottom), its frame count, ticks per frame and frame order. One per file.
+  const textures = new Map();
+  P.textureOf = function (entry) {
+    const url = `pack://${entry.file}?filtering=point${entry.pack ? "&packId=" + entry.pack : ""}`;
+    let t = textures.get(url);
+    if (!t) textures.set(url, (t = { url, w: entry.w, h: entry.h, frames: entry.frames || 1, tick: entry.tick || 1, seq: entry.seq || null }));
+    return t;
+  };
+  // The piece of the image a look reads, as fractions [x0, y0, x1, y1]: the frame an animation
+  // is on; else a `window`'s 16 by 16 pixels (from the top left when the image has no room for
+  // it, as Scaffold reads it); else, with `crop`, the top left 16 by 16; else all of it.
+  function tileOf(look, ticks) {
+    const t = look.tex;
+    if (t.frames > 1 && !look.window) {
+      const n = Math.floor(ticks / t.tick), f = t.seq ? t.seq[n % t.seq.length] : n % t.frames;
+      return [0, f / t.frames, 1, (f + 1) / t.frames];
+    }
+    if (look.window || look.crop) {
+      let x = look.window ? look.window[0] : 0, y = look.window ? look.window[1] : 0;
+      if (Math.max(t.h, 16) < y + 16 || Math.max(t.w, 16) < x + 16) x = y = 0;
+      return [x / t.w, y / t.h, (x + 16) / t.w, (y + 16) / t.h];
+    }
+    return [0, 0, 1, 1];
+  }
+  // Where (s, t) of a tile turned `turn` degrees clockwise lies in the tile as it is.
+  const unturned = (turn, s, t) => (turn === 90 ? [t, 1 - s] : turn === 180 ? [1 - s, 1 - t] : turn === 270 ? [1 - t, s] : [s, t]);
+  // What a quad draws at `ticks`: its image, the image fractions its corners o, u and v show, and
+  // the part of the image (fractions) it may show.
+  P.quadImage = function (q, ticks) {
+    const look = q.look, tile = tileOf(look, ticks), r = q.region;
+    const at = (s, t) => { const p = unturned(look.turn, s, t); return [tile[0] + p[0] * (tile[2] - tile[0]), tile[1] + p[1] * (tile[3] - tile[1])]; };
+    const a = at(r[0], r[1]), b = at(r[2], r[1]), c = at(r[0], r[3]);
+    const xs = [a[0], b[0], c[0], b[0] + c[0] - a[0]], ys = [a[1], b[1], c[1], b[1] + c[1] - a[1]];
+    return { src: look.tex.url, a, b, c, clip: [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)] };
   };
   const SOLID = /^(opaque|double_sided)$/, TWO_SIDED = /^(double_sided|alpha_test)$/;
   const DIRECTION = [["west", "east"], ["down", "up"], ["north", "south"]];
   const FULL = [0, 0, 1, 1];
 
   // A quad: block-space corners o, u, v under matrix m, showing `region` [u0, v0, u1, v1]
-  // (fractions of the texture) of the material's texture. `cull` is the side of the cell it lies
-  // flat against, if any, where a full neighbour hides it.
-  function quad(out, m, o, u, v, region, material, index) {
-    const src = textureUrl(index, material && material.texture);
-    if (!src) return;
+  // (fractions of the tile) of a look { tex (P.textureOf), window, turn, crop, tint, dim, solid,
+  // twoSided }: `tint` multiplies it by its model's tint, `dim` false leaves it unshaded, `solid`
+  // lets it grow over seams. `cull` is the side of the cell it lies flat against, if any, where a
+  // full neighbour hides it.
+  function quad(out, m, o, u, v, region, look) {
+    if (!look || !look.tex) return;
     const a = M.apply(m, o[0], o[1], o[2]), b = M.apply(m, u[0], u[1], u[2]), c = M.apply(m, v[0], v[1], v[2]);
     const du = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], dv = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
     const lu = Math.hypot(du[0], du[1], du[2]), lv = Math.hypot(dv[0], dv[1], dv[2]);
@@ -121,29 +154,39 @@
     const ax = [1, 2].reduce((best, i) => (Math.abs(n[i]) > Math.abs(n[best]) ? i : best), 0);
     const direction = DIRECTION[ax][n[ax] > 0 ? 1 : 0], edge = n[ax] > 0 ? 1 : 0;
     const flush = Math.abs(n[ax]) > 0.999 && Math.abs(a[ax] - edge) < 1e-4 && Math.abs(du[ax]) < 1e-4 && Math.abs(dv[ax]) < 1e-4;
-    const method = material.render_method || "opaque";
     out.push({
-      o: a, u: b, v: c, n, src, region,
+      o: a, u: b, v: c, n, look, region,
       eu: [du[0] / lu, du[1] / lu, du[2] / lu], ev: [dv[0] / lv, dv[1] / lv, dv[2] / lv],
-      shade: material.face_dimming === false ? 1 : P.SHADE[direction],
-      cull: flush ? direction : null, twoSided: TWO_SIDED.test(method), solid: SOLID.test(method),
+      shade: look.dim === false ? 1 : P.SHADE[direction],
+      cull: flush ? direction : null, twoSided: !!look.twoSided, solid: !!look.solid,
     });
   }
   // A face of the box lo..hi, wound as P.FACES[face].
-  function box(out, m, lo, hi, face, region, material, index) {
+  function box(out, m, lo, hi, face, region, look) {
     const f = P.FACES[face], at = c => [c[0] ? hi[0] : lo[0], c[1] ? hi[1] : lo[1], c[2] ? hi[2] : lo[2]];
-    quad(out, m, at(f.o), at(f.u), at(f.v), region, material, index);
+    quad(out, m, at(f.o), at(f.u), at(f.v), region, look);
+  }
+  // vanilla_models.js and blocks.js build their quads with these too.
+  P.blockQuad = quad;
+  P.blockBox = box;
+
+  // An add-on material's look: its texture from the index, and its render_method.
+  function addonLook(index, material) {
+    const entry = material && material.texture && index.textures[material.texture];
+    if (!entry) return null;
+    const method = material.render_method || "opaque";
+    return { tex: P.textureOf(entry), dim: material.face_dimming !== false, solid: SOLID.test(method), twoSided: TWO_SIDED.test(method) };
   }
 
   // minecraft:geometry.full_block, and a geometry no pack has: the unit cube.
   function fullBlock(out, m, materials, index) {
-    Object.keys(P.FACES).forEach(face => box(out, m, [0, 0, 0], [1, 1, 1], face, FULL, materialFor(materials, null, face), index));
+    Object.keys(P.FACES).forEach(face => box(out, m, [0, 0, 0], [1, 1, 1], face, FULL, addonLook(index, materialFor(materials, null, face))));
   }
   // minecraft:geometry.cross: two upright planes from corner to corner.
   function cross(out, m, materials, index) {
-    const material = materialFor(materials, null, "north");
-    quad(out, m, [0, 1, 0], [1, 1, 1], [0, 0, 0], FULL, material, index);
-    quad(out, m, [1, 1, 0], [0, 1, 1], [1, 0, 0], FULL, material, index);
+    const look = addonLook(index, materialFor(materials, null, "north"));
+    quad(out, m, [0, 1, 0], [1, 1, 1], [0, 0, 0], FULL, look);
+    quad(out, m, [1, 1, 0], [0, 1, 1], [1, 0, 0], FULL, look);
   }
 
   // Geometry files measure in pixels: x mirrored (+x is west), y up from the cell's bottom, z
@@ -172,7 +215,7 @@
       if (!size[0] || !size[1]) return;
       let u0 = f.uv[0], v0 = f.uv[1], u1 = u0 + size[0], v1 = v0 + size[1];
       if (face === "up" || face === "down") { [u0, u1] = [u1, u0]; [v0, v1] = [v1, v0]; }
-      box(out, t, lo, hi, face, [u0 / geo.width, v0 / geo.height, u1 / geo.width, v1 / geo.height], materialFor(materials, f.material_instance, face), index);
+      box(out, t, lo, hi, face, [u0 / geo.width, v0 / geo.height, u1 / geo.width, v1 / geo.height], addonLook(index, materialFor(materials, f.material_instance, face)));
     });
   }
   // A geometry's bones, each turned about its pivot within its parent. bone_visibility (true,
@@ -207,7 +250,7 @@
     else fullBlock(quads, m, materials, index);
     const full = !geo && id !== "minecraft:geometry.cross" && fillsCell(look.transformation);
     const faces = {};
-    Object.keys(P.FACES).forEach(face => { const mat = materialFor(materials, null, face); faces[face] = textureUrl(index, mat && mat.texture); });
+    Object.keys(P.FACES).forEach(face => { const look = addonLook(index, materialFor(materials, null, face)); faces[face] = look && look.tex.url; });
     const model = { id: P.blockId(block), shape: "model", quads, faces, tint: null, full, opaque: full && quads.length === 6 && quads.every(q => q.solid) };
     cache.set(key, model);
     return model;
