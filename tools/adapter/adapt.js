@@ -290,7 +290,7 @@ function adaptPack(pack, target, engine, versions, main) {
 // version layer already merged; of its images only their sizes and the colour maps are kept),
 // plains' climate from its behavior pack, and Scaffold's tables in its scaffold/.
 const SCAFFOLD = ["block_definition", "block_geometry", "block_rotation", "state_rotations", "dust_connections"];
-const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json|(entity|models\/entity|animations|animation_controllers|render_controllers)\/.+\.json|models\/mobs\.json)$|^behavior_pack\/biomes\/plains\.biome\.json$/;
+const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json|(entity|models\/entity|animations|animation_controllers|render_controllers)\/.+\.json|models\/mobs\.json)$|^behavior_pack\/(biomes\/plains\.biome\.json|entities\/.+\.json)$/;
 // blocks.json keys some blocks by an older name than their id.
 const LEGACY_NAMES = {
   grass: "grass_block", chain: "iron_chain", seaLantern: "sea_lantern", tripWire: "trip_wire", invisibleBedrock: "invisible_bedrock",
@@ -702,18 +702,33 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
 // The entity tables: vanilla_entities.json (hbui/ponder/entities/), every client entity of the
 // game, and an add-on's ponder_entities.json, its own. Each holds the entities' definitions
 // (entities { id: { textures, geometry, animations, animation_controllers, render_controllers,
-// scripts, materials } }, the names as the definition gives them) and what those names point at,
+// scripts, materials, properties } }, the names as the definition gives them, and properties { name:
+// default } from the behavior pack's entity file) and what those names point at,
 // cut to what the entity renderer reads: geometries { identifier: { width, height, bones } },
 // animations, controllers (animation controllers) and renders (render controllers) by name, and
 // textures { path: { pack, file, w, h, frames, tick, seq } } (textureEntry, `pack` as in
 // ponder_blocks.json). An add-on's names may point at vanilla's (`base`), which it does not
 // repeat. A name nothing defines is in `missing`.
-// `sources` are { files, texture(path) }: a pack's files by path, and a texture's entry or null.
-function entityTable(sources, base) {
+// Render controllers the game has and bedrock-samples leaves out (its iron_golem file holds only
+// the cracks), as the game's vanilla pack defines them; the samples' own win when they have one.
+const SAMPLES_GAPS = {
+  "controller.render.iron_golem": { geometry: "Geometry.default", materials: [{ "*": "Material.default" }], textures: ["Texture.default"] },
+};
+// `sources` are { files, texture(path) }: a pack's files by path, and a texture's entry or null;
+// `behavior` the behavior packs' files by path.
+function entityTable(sources, behavior, base) {
   const entities = {}, geometries = {}, animations = {}, controllers = {}, renders = {}, textures = {}, missing = [];
   const each = (prefix, fn) => sources.forEach(s => { for (const [name, bytes] of s.files) if (name.startsWith(prefix) && name.endsWith(".json")) fn(parseJson(bytes, name)); });
+  const versionOf = d => String(d.min_engine_version || "0").split(".").map(Number);
+  const newer = (a, b) => { for (let i = 0; i < Math.max(a.length, b.length); i++) { const x = a[i] || 0, y = b[i] || 0; if (x !== y) return x > y; } return false; };
   const raw = {};
-  each("models/", json => geometryEntries(json).forEach(g => { if (!raw[g.identifier]) raw[g.identifier] = g; }));
+  // A geometry two files define (mobs.json's 1.8 iron golem and iron_golem.geo.json's): the
+  // newer format's.
+  const formatOf = json => String(json.format_version || "0").split(".").map(Number);
+  each("models/", json => geometryEntries(json).forEach(g => {
+    g.format = formatOf(json);
+    if (!raw[g.identifier] || newer(g.format, raw[g.identifier].format)) raw[g.identifier] = g;
+  }));
   // A 1.8 geometry with a parent: the parent's bones, each replaced by the child's of the same name.
   const known = id => geometries[id] || (base && base.geometries[id]);
   const resolve = (id, seen) => {
@@ -728,9 +743,21 @@ function entityTable(sources, base) {
   each("animations/", json => Object.assign(animations, json.animations || {}));
   each("animation_controllers/", json => Object.assign(controllers, json.animation_controllers || {}));
   each("render_controllers/", json => Object.assign(renders, json.render_controllers || {}));
+  if (!base) Object.keys(SAMPLES_GAPS).forEach(id => { if (!renders[id]) renders[id] = SAMPLES_GAPS[id]; });
+  const properties = {}, health = {};
+  behavior.forEach(files => { for (const [name, bytes] of files) if (/^entities\/.+\.json$/.test(name)) {
+    const e = parseJson(bytes, name)["minecraft:entity"] || {}, d = e.description;
+    // A fresh entity's health, which query.health reads (an iron golem's cracks).
+    const h = ((e.components || {})["minecraft:health"] || {});
+    if (d && typeof (h.value ?? h.max) === "number") health[d.identifier] = { value: h.value ?? h.max, max: h.max ?? h.value };
+    // An enum's default is its name; another's given as Molang (a bee's has_nectar reads its
+    // component groups) is taken as false or 0, as a fresh entity has.
+    if (d && d.properties) properties[d.identifier] = Object.fromEntries(Object.keys(d.properties).map(k => {
+      const p = d.properties[k];
+      return [k, p.type === "enum" || typeof p.default !== "string" ? p.default : p.type === "bool" ? false : 0];
+    }));
+  } });
   // Several files can define one entity: the game uses the one with the highest min_engine_version.
-  const versionOf = d => String(d.min_engine_version || "0").split(".").map(Number);
-  const newer = (a, b) => { for (let i = 0; i < Math.max(a.length, b.length); i++) { const x = a[i] || 0, y = b[i] || 0; if (x !== y) return x > y; } return false; };
   const chosen = new Map();
   each("entity/", json => {
     const d = (json["minecraft:client_entity"] || {}).description;
@@ -752,8 +779,9 @@ function entityTable(sources, base) {
     entities[id] = {
       textures: t, geometry: d.geometry || {}, animations: d.animations || {},
       animation_controllers: d.animation_controllers || [], render_controllers: d.render_controllers || [],
-      scripts: d.scripts || {}, materials: d.materials || {},
+      scripts: d.scripts || {}, materials: d.materials || {}, properties: properties[id] || {},
     };
+    if (health[id]) entities[id].health = health[id];
     Object.values(d.geometry || {}).forEach(g => { if (!has("geometries", g)) missing.push("geometry " + g); });
     Object.values(d.animations || {}).forEach(a => { if (!has("animations", a) && !has("controllers", a)) missing.push("animation " + a); });
     (d.animation_controllers || []).forEach(entry => Object.values(typeof entry === "string" ? { entry } : entry).forEach(c => {
@@ -781,12 +809,12 @@ function entityTable(sources, base) {
 const vanillaEntityTable = vanilla => entityTable([{ files: vanilla.files, texture: p => {
   const size = vanilla.sizes.get(p);
   return size ? textureEntry(size, vanilla.flipbooks.get(p)) : null;
-} }], null);
+} }], [vanilla.files], null);
 // An add-on's, from its resource packs, its textures in the first pack that has the file.
-const addonEntityTable = (resourcePacks, base) => entityTable(resourcePacks.map(pack => ({ files: pack.files, texture: p => {
+const addonEntityTable = (resourcePacks, behaviorPacks, base) => entityTable(resourcePacks.map(pack => ({ files: pack.files, texture: p => {
   const file = textureFile(pack.files, p);
   return file ? Object.assign({ pack: pack.uuid }, textureEntry(Object.assign({ file }, imageSize(pack.files.get(file), path.extname(file).slice(1))))) : null;
-} })), base);
+} })), behaviorPacks.map(pack => pack.files), base);
 
 // ---- writing ----
 
@@ -943,7 +971,7 @@ function main() {
       }
     }
     if (resourcePacks.some(pack => [...pack.files.keys()].some(name => /^entity\/.*\.json$/.test(name)))) {
-      const entities = addonEntityTable(resourcePacks, loadVanillaEntities());
+      const entities = addonEntityTable(resourcePacks, behaviorPacks, loadVanillaEntities());
       write(ADDON_ENTITIES, entities, Object.keys(entities.entities).length + " entities, " + Object.keys(entities.geometries).length + " geometries, "
         + Object.keys(entities.animations).length + " animations, " + Object.keys(entities.textures).length + " textures"
         + (entities.missing.length ? "; not found: " + entities.missing.join(", ") : ""));
