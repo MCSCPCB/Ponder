@@ -351,6 +351,10 @@
       this.xo = this.x; this.yo = this.y; this.zo = this.z;
       this.yRotO = this.yRot; this.xRotO = this.xRot; this.yHeadRotO = this.yHeadRot;
       this.walkSpeedO = this.walkSpeed; this.oFlap = this.flap; this.oFlapSpeed = this.flapSpeed;
+      // LivingEntity.aiStep: a speed below 0.003 stops.
+      if (Math.abs(this.xd) < 0.003) this.xd = 0;
+      if (Math.abs(this.yd) < 0.003) this.yd = 0;
+      if (Math.abs(this.zd) < 0.003) this.zd = 0;
       if (!this.noGravity) this.yd -= 0.08;
       if (this.xd || this.yd || this.zd) this.move(this.xd, this.yd, this.zd);
       const friction = this.onGround ? 0.546 : 0.91;
@@ -359,6 +363,14 @@
       const walked = Math.min(Math.hypot(this.x - this.xo, this.z - this.zo) * 4, 1);
       this.walkSpeed += (walked - this.walkSpeed) * 0.4;
       this.walkPosition += this.walkSpeed;
+    }
+    // Whether its box, 0.001 in from each side, reaches a cell of that liquid ("water", "lava").
+    inLiquid(kind) {
+      const b = this.box(), lo = b[0].map(v => Math.floor(v + 0.001)), hi = b[1].map(v => Math.floor(v - 0.001));
+      for (let x = lo[0]; x <= hi[0]; x++) for (let y = lo[1]; y <= hi[1]; y++) for (let z = lo[2]; z <= hi[2]; z++) {
+        if (P.liquidKind(this.world.getBlock(x, y, z)) === kind) return true;
+      }
+      return false;
     }
     // The definition's render controllers whose condition holds. One with none (the game draws
     // a trident or a skull in code) is drawn as controller.render.default would draw it.

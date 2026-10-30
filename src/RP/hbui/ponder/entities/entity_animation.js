@@ -43,6 +43,7 @@
         case "delta_time": return this.dt;
         case "frame_alpha": return pt;
         case "anim_time": return this.animTime;
+        case "key_frame_lerp_time": return this.lerpTime;
         case "any_animation_finished": return this.finished.any;
         case "all_animations_finished": return this.finished.all;
         case "is_baby": return e.baby ? 1 : 0;
@@ -50,6 +51,13 @@
         case "mark_variant": return e.markVariant;
         case "skin_id": return e.skinId;
         case "is_on_ground": return e.onGround ? 1 : 0;
+        case "is_in_water": return e.inLiquid("water") ? 1 : 0;
+        case "is_in_lava": return e.inLiquid("lava") ? 1 : 0;
+        case "is_moving": return e.x !== e.xo || e.y !== e.yo || e.z !== e.zo ? 1 : 0;
+        case "ground_speed": return Math.hypot(e.x - e.xo, e.z - e.zo) * 20;
+        case "vertical_speed": return (e.y - e.yo) * 20;
+        case "position_delta": return [e.x - e.xo, e.y - e.yo, e.z - e.zo][args ? args[0] : 0] || 0;
+        case "time_stamp": return e.tickCount;
         case "modified_move_speed": return P.lerp(pt, e.walkSpeedO, e.walkSpeed);
         case "modified_distance_moved": case "walk_distance": return e.walkPosition - e.walkSpeed * (1 - pt);
         case "target_x_rotation": case "head_x_rotation": return P.lerp(pt, e.xRotO, e.xRot);
@@ -148,8 +156,9 @@
       return { any: list.some(f => f) ? 1 : 0, all: list.length && list.every(f => f) ? 1 : 0 };
     }
 
-    // An animation at its own time: anim_time_update, or the frame's delta time added; looping,
-    // held on the last frame, or (loop false) held there and marked finished.
+    // An animation at its own time: anim_time_update, or the frame's delta time added; looping
+    // (finished once it has played through), held on the last frame, or (loop false) held there
+    // and marked finished.
     animation(a, weight, key, pose) {
       let inst = this.instances.get(key);
       if (!inst) this.instances.set(key, (inst = { time: 0, frame: null, finished: false }));
@@ -161,8 +170,10 @@
       }
       const length = animationLength(a);
       let t = inst.time;
-      if (a.loop === true || a.loop === "true") t = length > 0 ? t % length : 0;
-      else if (t >= length) { t = length; inst.finished = true; }
+      if (a.loop === true || a.loop === "true") {
+        if (t >= length) inst.finished = true;
+        t = length > 0 ? t % length : 0;
+      } else if (t >= length) { t = length; inst.finished = true; }
       this.animTime = t;
       if (a.blend_weight != null) weight *= this.eval(a.blend_weight);
       if (!weight || !a.bones) return;
@@ -193,8 +204,10 @@
       if (Array.isArray(value)) return [0, 1, 2].map(i => this.eval(value[i], { this: cur[i] }));
       return [0, 1, 2].map(i => this.eval(value, { this: cur[i] }));
     }
-    // A channel at time t: a constant, or keyframes interpolated linearly or by Catmull-Rom.
+    // A channel at time t: a constant, or keyframes interpolated linearly or by Catmull-Rom;
+    // query.key_frame_lerp_time is how far t is from the keyframe before to the one after.
     sample(channel, t, cur) {
+      this.lerpTime = 0;
       const frames = keyframesOf(channel);
       if (!frames) return this.vector(channel, cur);
       let i = 0;
@@ -203,7 +216,7 @@
       if (!after) return this.vector(before.post, cur);
       if (!before) return this.vector(after.pre, cur);
       if (Math.abs(before.time - t) < EPSILON || before.lerp === "step") return this.vector(before.post, cur);
-      const alpha = (t - before.time) / (after.time - before.time);
+      const alpha = this.lerpTime = (t - before.time) / (after.time - before.time);
       const p1 = this.vector(before.post, cur), p2 = this.vector(after.pre, cur);
       if (before.lerp === "catmullrom" || after.lerp === "catmullrom") {
         const bp = !before.split && frames[i - 2], ap = !after.split && frames[i + 1];

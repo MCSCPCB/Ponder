@@ -14,6 +14,7 @@
   const fluidOf = block => (!block ? null : P.vanilla.liquids[nameOf(block)] ? block : P.liquidOf(block));
   // Which liquid a cell holds ("water", "lava"), or null.
   const kindOf = block => { const f = fluidOf(block); return f ? nameOf(f).replace(/^flowing_/, "") : null; };
+  P.liquidKind = kindOf;
 
   // A liquid's model has no quads of its own (liquidQuads makes them with its neighbours) and does
   // not fill its cell, so the faces round it show. `faces` are for its particles. Water's sides
