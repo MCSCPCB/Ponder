@@ -444,6 +444,17 @@
         if (e instanceof type && e.alive && area.has(Math.floor(e.x), Math.floor(e.y), Math.floor(e.z))) callback(e);
       }));
     }
+    // An entity of a type the game or an add-on defines (P.ClientEntity), at `location` facing
+    // `yRot` degrees (0 south, 90 west), set up by `setup(entity)` if given. Java's
+    // createEntity(world -> new Sheep(...)).
+    createClientEntity(type, location, yRot, setup) {
+      return this.createEntity(world => {
+        const e = new P.ClientEntity(world, type, location[0], location[1], location[2]);
+        e.yRot = e.yRotO = e.yHeadRot = e.yHeadRotO = yRot || 0;
+        if (setup) setup(e);
+        return e;
+      });
+    }
   }
 
   class SpecialInstructions {
@@ -452,6 +463,37 @@
     movePointOfInterest(location) { this.b.addInstruction(scene => scene.setPointOfInterest(location)); }
     movePointOfInterestTo(pos) { this.movePointOfInterest(util.vector.centerOf(pos[0], pos[1], pos[2])); }
     hideElement(link, direction) { this.b.addInstruction(new I.FadeOutOfScene(15, direction, link)); }
+    // A parrot at `location` in a ParrotPose (P.ParrotPose.FacePointOfInterestPose, ...),
+    // fading in from above.
+    createBirb(location, pose) {
+      const link = {}, parrot = new P.ParrotElement(location, pose);
+      this.b.addInstruction(new I.FadeIntoScene(10, "DOWN", parrot));
+      this.b.addInstruction(scene => scene.linkElement(parrot, link));
+      return link;
+    }
+    changeBirbPose(link, pose) {
+      this.b.addInstruction(scene => { const e = scene.resolve(link); if (e) e.setPose(P.makeParrotPose(pose)); });
+    }
+    rotateParrot(link, xRotation, yRotation, zRotation, duration) {
+      this.b.addInstruction(new I.AnimateElement(link, [xRotation, yRotation, zRotation], duration, (e, v) => e.setRotation(v, duration === 0), e => e.getRotation()));
+    }
+    moveParrot(link, offset, duration) {
+      this.b.addInstruction(new I.AnimateElement(link, offset, duration, (e, v) => e.setPositionOffset(v, duration === 0), e => e.getPositionOffset()));
+    }
+    // A minecart at `location` turned `angle` degrees; `type` its entity id, as Java's
+    // Minecart::new ("minecraft:minecart") or MinecartChest::new ("minecraft:chest_minecart").
+    createCart(location, angle, type) {
+      const link = {}, cart = new P.MinecartElement(location, angle, type || "minecraft:minecart");
+      this.b.addInstruction(new I.FadeIntoScene(10, "DOWN", cart));
+      this.b.addInstruction(scene => scene.linkElement(cart, link));
+      return link;
+    }
+    rotateCart(link, yRotation, duration) {
+      this.b.addInstruction(new I.AnimateElement(link, [0, yRotation, 0], duration, (e, v) => e.setRotation(v[1], duration === 0), e => e.getRotation()));
+    }
+    moveCart(link, offset, duration) {
+      this.b.addInstruction(new I.AnimateElement(link, offset, duration, (e, v) => e.setPositionOffset(v, duration === 0), e => e.getPositionOffset()));
+    }
   }
 
   // TextElementBuilder

@@ -85,6 +85,7 @@
       if (P.comfyReading) scene.forEachVisible(P.TextWindowElement, () => { this.extendedTickLength = 2; });
       if (this.extendedTickTimer === 0) {
         if (!this.identifyMode) {
+          P.ponderTicks++;
           if (this.skipCooling === 0) scene.tick();
           const lazy = this.lazyIndex.getValue();
           if (Math.abs(lazy - this.index) > 1 / 512) this.scenes[lazy < this.index ? this.index - 1 : this.index + 1].tick();

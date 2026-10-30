@@ -9,7 +9,7 @@
   // LightTexture at block light `l` (sky 0, gamma 0), relative to full light: a section is
   // drawn at light lerp(fade, 5, 15) while it fades in.
   const curve = l => { const f = l / 15, b = f / (4 - 3 * f), g = 1 - Math.pow(1 - b, 4); return 0.04 + 0.96 * P.lerp(0.5, b, g); };
-  const lightFromFade = fade => (fade === 1 ? 1 : curve(P.int(P.lerp(fade, 5, 15))) / curve(15));
+  const lightFromFade = (P.lightFromFade = fade => (fade === 1 ? 1 : curve(P.int(P.lerp(fade, 5, 15))) / curve(15)));
 
   // The section's transform: the scene's, then the fade-in offset and its animated transform.
   function sectionMatrix(scene, e, pt) {
@@ -96,9 +96,12 @@
     });
     P.particleItems(scene, pt).forEach(p => items.push(p));
     P.entityItems(scene, pt).forEach(p => items.push(p));
-    items.sort((a, b) => a.depth - b.depth);
     // About half a GUI pixel of overlap between neighbouring faces at 30 px per block.
     const blockPx = 30 * scene.scaleFactor, grow = 0.6 / blockPx, size = Math.max(16, Math.round(blockPx * P.view.cssPerGui));
+    // Scene elements drawing an entity (createBirb, createCart): renderItems(scene, sceneMatrix, pt, blockPx).
+    const base = scene.transform.matrix(pt);
+    scene.elements.forEach(e => { if (e.visible && e.renderItems) e.renderItems(scene, base, pt, blockPx).forEach(p => items.push(p)); });
+    items.sort((a, b) => a.depth - b.depth);
     const breaking = scene.world.breaking, ticks = animationTicks();
     items.forEach(it => {
       if (it.draw) { it.draw(d); return; }

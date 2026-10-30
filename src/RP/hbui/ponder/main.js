@@ -41,7 +41,7 @@
 
   P.bridge.onOpen = function (item, addons) {
     const form = P.bridge.form;
-    return Promise.all([loadAddons(addons), P.loadBlockData(addons)]).then(() => {
+    return Promise.all([loadAddons(addons), P.loadBlockData(addons), P.loadEntityData(addons)]).then(() => {
       P.registerAll();
       return P.loadStructures(P.structurePaths());
     }).then(() => {

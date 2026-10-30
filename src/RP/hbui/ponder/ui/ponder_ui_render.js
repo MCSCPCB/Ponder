@@ -4,7 +4,7 @@
 
   UI.render = function (mx, my, framePt, isPrevious) {
     const d = this.d, pt0 = isPrevious ? 0 : framePt;
-    this.mouse = [mx, my];
+    this.mouse = P.cursor = [mx, my];
     const pt = this.partialTicks(pt0);
     this.pt = pt;
     d.begin();
