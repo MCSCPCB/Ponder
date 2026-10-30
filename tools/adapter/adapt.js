@@ -30,10 +30,12 @@
 //   banners' and, from
 //   Scaffold's tables, the shapes of the blocks that are not a plain cube, with Scaffold's
 //   licence beside it;
+// - writes hbui/ponder/entities/vanilla_entities.json: every vanilla client entity's definition
+//   and the models, animations, animation controllers and render controllers it uses;
 // - sets header.min_engine_version to the target version.
 // An add-on: for each hbui/ponder_addons/<folder>/ in its resource pack, writes ponder_blocks.json
-// there, what Ponder needs to draw the add-on's own blocks. Its scripts and min_engine_version
-// stay as they are.
+// and ponder_entities.json there, what Ponder needs to draw the add-on's own blocks and entities.
+// Its scripts and min_engine_version stay as they are.
 // Every pack: 1 is added to the last digit of header.version, so the game takes it as a new
 // pack; dependencies on packs adapted in the same run follow. UUIDs stay the same.
 "use strict";
@@ -731,7 +733,8 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
 // animations, controllers (animation controllers) and renders (render controllers) by name, and
 // textures { path: { pack, file, w, h, frames, tick, seq } } (textureEntry, `pack` as in
 // ponder_blocks.json). An add-on's names may point at vanilla's (`base`), which it does not
-// repeat. A name nothing defines is in `missing`.
+// repeat unless vanilla_entities.json leaves it out (no vanilla entity names it, as
+// controller.render.piglin): that is copied in. A name nothing defines is in `missing`.
 // Render controllers the game has and bedrock-samples leaves out (its iron_golem file holds only
 // the cracks), as the game's vanilla pack defines them; the samples' own win when they have one.
 const SAMPLES_GAPS = {
@@ -741,6 +744,8 @@ const SAMPLES_GAPS = {
 // `behavior` the behavior packs' files by path.
 function entityTable(sources, behavior, base) {
   const entities = {}, geometries = {}, animations = {}, controllers = {}, renders = {}, textures = {}, missing = [];
+  const own = { geometries, animations, controllers, renders };
+  const borrow = (table, id) => { const v = base && base.all[table][id]; if (v) own[table][id] = v; return v; };
   // Sources in order: a later one's definition replaces an earlier one's of the same name.
   const each = (prefix, fn) => sources.forEach((s, i) => { for (const [name, bytes] of s.files) if (name.startsWith(prefix) && name.endsWith(".json")) fn(parseJson(bytes, name), i); });
   const versionOf = d => String(d.min_engine_version || "0").split(".").map(Number);
@@ -756,8 +761,9 @@ function entityTable(sources, behavior, base) {
     if (!had || source > had.source || newer(g.format, had.format)) raw[g.identifier] = g;
   }));
   // A 1.8 geometry with a parent: the parent's bones, a bone of the same name taking the child's
-  // settings and both one's cubes (a sheep's wool over its sheared body).
-  const known = id => geometries[id] || (base && base.geometries[id]);
+  // settings and both one's cubes (a sheep's wool over its sheared body). An add-on's own geometry
+  // wins over vanilla's of the same name.
+  const known = id => geometries[id] || (!raw[id] && base && (base.geometries[id] || borrow("geometries", id)));
   const resolve = (id, seen) => {
     if (known(id) || !raw[id]) return known(id);
     const g = raw[id], parent = g.parent && !seen.has(g.parent) ? resolve(g.parent, new Set([...seen, id])) : null;
@@ -799,11 +805,10 @@ function entityTable(sources, behavior, base) {
       chosenFrom.set(d.identifier, source);
     }
   });
-  const has = (table, id) => (table === "geometries" ? geometries : table === "animations" ? animations : table === "controllers" ? controllers : renders)[id]
-    || (base && base[table][id]);
+  const has = (table, id) => own[table][id] || (base && (base[table][id] || borrow(table, id)));
   const use = p => {
     if (!(p in textures) && !(base && base.textures[p])) {
-      const entry = sources.map(s => s.texture(p)).find(Boolean);
+      const entry = sources.map(s => s.texture(p)).find(Boolean) || (base && base.all.texture(p));
       if (entry) textures[p] = entry;
       else missing.push("texture " + p);
     }
@@ -836,10 +841,13 @@ function entityTable(sources, behavior, base) {
     e.render_controllers.forEach(entry => Object.keys(typeof entry === "string" ? { [entry]: 0 } : entry).forEach(r => named.renders.add(r)));
   });
   const only = (table, set) => { const out = {}; Object.keys(table).forEach(k => { if (set.has(k)) out[k] = table[k]; }); return out; };
-  return {
+  const table = {
     entities, geometries: only(geometries, named.geometries), animations: only(animations, named.animations),
     controllers: only(controllers, named.animations), renders: only(renders, named.renders), textures, missing: [...new Set(missing)],
   };
+  // Vanilla's whole tables, for the add-ons (`all`, not written out).
+  if (!base) Object.defineProperty(table, "all", { value: { geometries, animations, controllers, renders, texture: p => sources.map(s => s.texture(p)).find(Boolean) } });
+  return table;
 }
 // Vanilla's, from bedrock-samples, then the game's own packs over it when given. Textures come
 // from bedrock-samples.
