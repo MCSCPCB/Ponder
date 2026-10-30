@@ -5,7 +5,7 @@
     "description": "Ponder drawn in Ore UI (hbui/ponder).",
     "min_engine_version": [1, 21, 0],
     "uuid": "73ea98eb-f333-4c8f-989c-e8936d1b4e35",
-    "version": [1, 0, 3]
+    "version": [1, 0, 4]
   },
   "modules": [
     {
@@ -17,7 +17,7 @@
   "dependencies": [
     {
       "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
-      "version": [1, 0, 3]
+      "version": [1, 0, 4]
     }
   ]
 }

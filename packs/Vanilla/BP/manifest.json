@@ -5,7 +5,7 @@
     "description": "Registers the vanilla Ponder scenes with Ponder.",
     "min_engine_version": [1, 21, 0],
     "uuid": "d7f523eb-acc8-431d-9b4b-44b9ba24f69b",
-    "version": [1, 0, 3]
+    "version": [1, 0, 4]
   },
   "modules": [
     {
@@ -19,7 +19,7 @@
   "dependencies": [
     {
       "uuid": "14a30c2e-d03a-4832-adfa-76dfd07a8536",
-      "version": [1, 0, 3]
+      "version": [1, 0, 4]
     },
     {
       "module_name": "@minecraft/server",
