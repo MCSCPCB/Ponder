@@ -1,6 +1,6 @@
 # 接口参考：自定义方块、粒子与实体
 
-场景里出现你自己的方块、粒子或实体时，需要告诉 Ponder 怎么画它们。`packs/Vanilla` 里有这三样的完整例子。
+原版和附属包里定义过的方块和实体，Ponder 照游戏的定义画。游戏里没有的方块、粒子或实体，需要告诉 Ponder 怎么画它们。`packs/Vanilla` 里有这三样的完整例子。
 
 ## 方块模型
 
@@ -80,6 +80,90 @@ scene.effects.emitParticles(
 要穿过方块就重写 `move(dx, dy, dz)`，直接加到 `x`、`y`、`z` 上。要随时间换帧就在 `sprite()` 里按 `this.age` 和 `this.lifetime` 算 `u`、`v`。大小随时间变化时重写 `getQuadSize(pt)`。
 
 ## 实体
+
+游戏或附属包里定义过的实体用 `scene.effects.createClientEntity` 生成，Ponder 照它的资源包定义画。游戏里没有的实体继承 `P.PonderEntity` 自己画。
+
+### 原版和附属包的实体
+
+原版实体不用注册，写实体 id 就行：
+
+```js
+const wolf = scene.effects.createClientEntity("minecraft:wolf", [2.5, 1, 2.5], 0);
+```
+
+Ponder 按资源包 `entity/` 里的客户端实体定义画：模型、贴图、材质、动画、动画控制器、渲染控制器，以及 `scripts` 里的 `initialize`、`pre_animation`、`animate` 和 `scale`。Molang 的算法和游戏相同。
+
+附属包自己的实体也不用注册。把整个附属包（行为包和资源包）放进 `tools/input/` 跑一遍适配器，适配器会在资源包的 `hbui/ponder_addons/<文件夹>/` 下写一份 `ponder_entities.json`。里面有附属包的实体定义，它们用到的模型、动画、动画控制器和渲染控制器（可以引用原版的），以及行为包里实体属性（`description.properties`）的默认值和初始生命值。只有实体定义里提到的动画会写进去，所以场景要单独播的动画也要写进实体定义的 `animations`，不必放进 `scripts.animate`。
+
+碰撞箱对所有实体都是 0.6 × 1.8 格，可以改 `halfWidth`（半宽）和 `height`。
+
+#### 让实体动起来
+
+游戏里，实体走路、坐下、看人都由服务端决定，客户端的动画只读查询（如 `query.is_sitting`）、属性和变量来摆出样子。思索的世界里没有服务端，实体没有 AI，自己不会动。要它做什么，就由场景替服务端设置它的位置、朝向、速度，以及它的动画读的那些值。这更像是在捏动画：先打开实体定义和它的动画控制器，看它读哪些值，再在场景里设置。
+
+例如狼的 `controller.animation.wolf.sitting` 在 `query.is_sitting` 为真时切到坐下的动画：
+
+```js
+scene.idle(20);
+scene.effects.modifyEntity(wolf, e => e.setQuery("is_sitting", 1));
+```
+
+羊的 `controller.animation.sheep.move` 在 `query.is_grazing` 为真时低头吃草，吃完一遍（2 秒）回到默认状态；查询一直为真就会接着吃。只吃一遍，就在它开始后把查询改回 0：
+
+```js
+scene.effects.modifyEntity(sheep, e => e.setQuery("is_grazing", 1));
+scene.idle(2);
+scene.effects.modifyEntity(sheep, e => e.setQuery("is_grazing", 0));
+```
+
+实体每 tick 先记下当前的位置和朝向（画面在上一 tick 和这一 tick 之间插值），再加重力、按速度移动、乘阻力（在地上 0.546，在空中 0.91）。走路动画读的 `query.modified_move_speed` 和 `query.modified_distance_moved` 按它实际走过的距离算。所以要它一直走，就包一层它的 `tick`，每 tick 先给速度。朝向要在原来的 `tick` 之后改，转身才是平滑的：
+
+```js
+// 朝着自己的朝向走 ticks 个 tick，边走边向右转
+const walker = ticks => e => {
+  const tick = e.tick.bind(e);
+  e.tick = () => {
+    const walking = e.tickCount < ticks;
+    if (walking) {
+      const yaw = e.yRot * Math.PI / 180;
+      e.xd = -Math.sin(yaw) * 0.05;
+      e.zd = Math.cos(yaw) * 0.05;
+    }
+    tick();
+    if (walking) e.yRot += 1;
+  };
+};
+scene.effects.createClientEntity("minecraft:cow", [0.5, 1, 3.5], 270, walker(60));
+```
+
+史莱姆和岩浆怪的大小是 `query.variant`（1、2、4），默认的 0 画不出来，生成时要设：
+
+```js
+scene.effects.createClientEntity("minecraft:slime", [2.5, 1, 2.5], 0, e => { e.variant = 2; });
+```
+
+`P.ClientEntity` 在 `P.PonderEntity`（见下一节）之外提供：
+
+| 字段 / 方法 | 说明 |
+| --- | --- |
+| `yRot` | 身体朝向，度数：0 朝南，90 朝西，180 朝北，270 朝东 |
+| `yHeadRot` | 头的朝向，同上。`query.target_y_rotation` 是它减去身体朝向 |
+| `xRot` | 头的俯仰，度数，正数低头 |
+| `baby` | 幼年（`query.is_baby`），模型、贴图和缩放跟着变 |
+| `variant`、`markVariant`、`skinId` | `query.variant`、`query.mark_variant`、`query.skin_id`，决定颜色、花纹等 |
+| `noGravity` | 为真时不下落 |
+| `setDeltaMovement([x, y, z])` | 速度，单位是格每 tick |
+| `setQuery(名字, 值)` | 设置一个查询，名字不带 `query.`。值也可以是函数 `(实体, 参数) => 值`，每次读取时调用 |
+| `setProperty(名字, 值)` | 设置实体属性（`query.property` 读的），名字带命名空间，如 `"minecraft:has_nectar"` |
+| `setVariable(名字, 值)` | 设置 Molang 变量，名字写 `"variable.xxx"` 或 `"v.xxx"`。定义的 `pre_animation` 每帧会重算它自己的变量，盖掉你设的值 |
+| `playAnimation(名字)` | 在实体自己的动画之上再播一个动画或动画控制器，名字是定义里 `animations` 的短名或完整 id |
+| `stopAnimation(名字)` | 停掉 `playAnimation` 播的 |
+
+这些方法都返回实体本身，可以连着写。
+
+实体自己会算的查询：`life_time`、`anim_time`、`delta_time`、`frame_alpha`、`time_stamp`、`key_frame_lerp_time`、`any_animation_finished`、`all_animations_finished`、`is_on_ground`、`is_in_water`、`is_in_lava`、`is_moving`、`ground_speed`、`vertical_speed`、`position_delta`、`modified_move_speed`、`modified_distance_moved`、`target_x_rotation`、`target_y_rotation`、`body_y_rotation`、`health`、`max_health`、`property`，以及上表字段对应的那几个。其他查询都是 0（`is_alive` 和 `model_scale` 是 1），要用就 `setQuery`。`setQuery` 设过的查询优先于自己算的。
+
+### 自己画的实体
 
 继承 `P.PonderEntity`，实现 `tick()` 和 `render(场景矩阵, 插值, 每方块像素)`。`render` 返回 `{ depth, draw(d) }` 的数组：`depth` 是图形中心变换后的 z，和方块一起从小到大绘制；`draw` 收到画布后画上去。
 

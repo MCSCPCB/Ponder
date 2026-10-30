@@ -124,7 +124,7 @@ P.block("minecraft:unpowered_repeater", { "minecraft:cardinal_direction": "west"
 `P.block` 的第三个参数写状态以外的东西：`liquid` 是含水方块里的水，`nbt` 是方块实体数据。结构文件里的含水方块和方块实体会自动读进来，不用另写。
 
 ```js
-P.block("minecraft:stone_block_slab", { "minecraft:vertical_half": "bottom" }, { liquid: P.block("minecraft:water", { liquid_depth: 0 }) })
+P.block("minecraft:smooth_stone_slab", { "minecraft:vertical_half": "bottom" }, { liquid: P.block("minecraft:water", { liquid_depth: 0 }) })
 P.block("minecraft:bed", { direction: 2, head_piece_bit: true }, { nbt: { id: "Bed", color: 11 } })
 ```
 
@@ -258,12 +258,21 @@ scene.effects.modifyEntity(item, entity => entity.discard());
 | 方法 | 说明 |
 | --- | --- |
 | `createItemEntity(位置, 初速度, 物品)` | 生成掉落物，物品是 id 或 `{ id, count }`，返回 link |
+| `createClientEntity(实体 id, 位置, 朝向, 设置函数)` | 生成一个原版或附属包的实体（`P.ClientEntity`），返回 link。朝向是度数，0 朝南、90 朝西；设置函数可省略，收到实体后可以改它 |
 | `createEntity(工厂)` | 生成自定义实体，工厂接收世界，返回实体 |
 | `modifyEntity(link, 回调)` | 修改一个实体 |
 | `modifyEntities(类型, 回调)` | 修改该类型的所有实体 |
 | `modifyEntitiesInside(类型, 选区, 回调)` | 只修改选区内的 |
 
 掉落物的类型是 `P.ItemEntity`。掉落物有重力和碰撞，落到世界底部（y ≤ -0.5）或存在超过 6000 tick 会自行消失。
+
+```js
+const sheep = scene.effects.createClientEntity("minecraft:sheep", [2.5, 1, 2.5], 0);
+scene.idle(20);
+scene.effects.modifyEntity(sheep, e => { e.yRot = 90; });   // 转身朝西
+```
+
+实体按游戏里的模型、动画和渲染控制器画，自己不会动（没有 AI）。怎么让它走、转头、坐下，见[自定义方块、粒子与实体](custom-content.md)的“原版和附属包的实体”一节。
 
 ## scene.special
 
@@ -272,3 +281,26 @@ scene.effects.modifyEntity(item, entity => entity.discard());
 | `movePointOfInterest(位置)` | 把镜头的注视点移到该位置 |
 | `movePointOfInterestTo([x, y, z])` | 同上，参数是方块坐标 |
 | `hideElement(link, 方向)` | 让一个元素滑出 |
+| `createBirb(位置, 姿态)` | 从上方淡入一只鹦鹉，返回 link。颜色在红蓝、绿、黄蓝、灰里随机 |
+| `changeBirbPose(link, 姿态)` | 换鹦鹉的姿态 |
+| `moveParrot(link, 偏移, tick)` | 在这些 tick 里把鹦鹉移动偏移量 |
+| `rotateParrot(link, x, y, z, tick)` | 在这些 tick 里转动鹦鹉（x 是头的俯仰，y 是身体朝向） |
+| `createCart(位置, 角度, 实体 id)` | 从上方淡入一辆矿车，返回 link。实体 id 如 `"minecraft:minecart"`、`"minecraft:chest_minecart"`（对应 Java 的 `Minecart::new`、`MinecartChest::new`），装着的方块照 Java 画在车里 |
+| `rotateCart(link, 角度, tick)` | 在这些 tick 里转动矿车 |
+| `moveCart(link, 偏移, tick)` | 在这些 tick 里移动矿车 |
+
+鹦鹉的姿态（`P.ParrotPose.xxx`，直接写类名）：
+
+| 姿态 | 说明 |
+| --- | --- |
+| `FacePointOfInterestPose` | 头和身体转向镜头的注视点 |
+| `FaceCursorPose` | 转向鼠标 |
+| `DancePose` | 跳舞，原地慢慢转圈 |
+| `FlappyPose` | 移动时扇翅膀 |
+
+```js
+const birb = scene.special.createBirb(util.vector.topOf(2, 1, 2), P.ParrotPose.FacePointOfInterestPose);
+scene.idle(20);
+scene.special.changeBirbPose(birb, P.ParrotPose.FlappyPose);
+scene.special.moveParrot(birb, [0, 1, 0], 20);
+```
