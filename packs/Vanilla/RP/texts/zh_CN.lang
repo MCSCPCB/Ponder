@@ -33,3 +33,7 @@ vanilla.ponder.tnt.text_1=打火石、火或红石信号都能点燃 TNT。它�
 vanilla.ponder.tnt.text_2=爆炸会破坏周围的方块，只有一部分会作为掉落物掉出来。
 vanilla.ponder.lever_tnt.header=用红石点燃 TNT
 vanilla.ponder.lever_tnt.text_1=拉杆或其他任何传到 TNT 的信号也能点燃它。
+vanilla.ponder.entities.header=实体、床和旗帜
+vanilla.ponder.entities.text_1=生物按基岩版的模型、动画和渲染控制器画出来。
+vanilla.ponder.entities.text_2=床和旗帜的颜色、图案取自方块实体数据。
+vanilla.ponder.entities.text_3=含水方块里画着水；水贴着玻璃或树叶的那一面用 water_overlay。

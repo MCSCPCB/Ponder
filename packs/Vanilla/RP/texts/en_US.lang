@@ -33,3 +33,7 @@ vanilla.ponder.tnt.text_1=Flint and steel, fire or a redstone signal lights TNT.
 vanilla.ponder.tnt.text_2=The blast breaks the blocks around it, and only some of them drop as items
 vanilla.ponder.lever_tnt.header=Lighting TNT with Redstone
 vanilla.ponder.lever_tnt.text_1=A lever, or any other signal reaching the TNT, lights it as well
+vanilla.ponder.entities.header=Entities, Beds and Banners
+vanilla.ponder.entities.text_1=Mobs are drawn from their Bedrock models, animations and render controllers
+vanilla.ponder.entities.text_2=Beds and banners take their colour and patterns from their block entity data
+vanilla.ponder.entities.text_3=Water fills waterlogged blocks; its side against glass or leaves shows water_overlay

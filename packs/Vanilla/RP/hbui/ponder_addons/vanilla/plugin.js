@@ -594,7 +594,80 @@
   });
 })();
 
-  // One plugin for both groups: each method asks every part, in order (redstone's tag first, so
+(function () {
+  const P = window.Ponder;
+
+  // A test of what Ponder draws besides plain blocks: mobs, a parrot and a minecart, a bed, a
+  // banner, a waterlogged slab, and water against glass and leaves.
+  const entityPlate = {
+    size: { x: 7, y: 3, z: 7 },
+    fill(world) {
+      for (let x = 0; x < 7; x++) for (let z = 0; z < 7; z++)
+        world.setBlock(x, 0, z, (x + z) % 2 === 0 ? "minecraft:snow" : "minecraft:light_gray_terracotta");
+      world.setBlock(1, 1, 1, P.block("minecraft:bed", { direction: 2, head_piece_bit: true }, { nbt: { id: "Bed", color: 11 } }));
+      world.setBlock(1, 1, 2, P.block("minecraft:bed", { direction: 2, head_piece_bit: false }, { nbt: { id: "Bed", color: 11 } }));
+      world.setBlock(5, 1, 1, P.block("minecraft:standing_banner", { ground_sign_direction: 0 },
+        { nbt: { id: "Banner", Base: 15, Patterns: [{ Color: 1, Pattern: "cre" }], Type: 0 } }));
+      world.setBlock(1, 1, 5, P.block("minecraft:smooth_stone_slab", { "minecraft:vertical_half": "bottom" }, { liquid: P.block("minecraft:water", { liquid_depth: 0 }) }));
+      world.setBlock(2, 1, 5, P.block("minecraft:water", { liquid_depth: 0 }));
+      world.setBlock(3, 1, 5, "minecraft:glass");
+      world.setBlock(2, 1, 4, "minecraft:oak_leaves");
+    },
+  };
+
+  // A mob walking straight ahead for `ticks` ticks, its own tick setting its speed first.
+  const walker = ticks => e => {
+    const tick = e.tick.bind(e);
+    e.tick = () => { if (e.tickCount < ticks) e.xd = 0.05; tick(); };
+  };
+
+  function entities(scene, util) {
+    scene.title("entities", "Entities, Beds and Banners");
+    scene.configureBasePlate(0, 0, 7);
+    scene.showBasePlate();
+    scene.idle(10);
+    scene.world.showSection(util.select.fromTo(0, 1, 0, 6, 2, 6), "DOWN");
+    scene.idle(10);
+    const birb = scene.special.createBirb(util.vector.topOf(3, 1, 5), P.ParrotPose.FacePointOfInterestPose);
+    scene.special.createCart(util.vector.topOf(5, 0, 5), 90, "minecraft:chest_minecart");
+    scene.effects.createClientEntity("minecraft:sheep", [3.5, 1, 3], 0);
+    scene.effects.createClientEntity("minecraft:cat", [5.5, 1, 3], 0);
+    scene.effects.createClientEntity("minecraft:cow", [0.5, 1, 6], 270, walker(60));
+    scene.idle(10);
+    scene.overlay.showText(80)
+      .text("Mobs are drawn from their Bedrock models, animations and render controllers")
+      .pointAt(util.vector.centerOf(3, 1, 3))
+      .placeNearTarget()
+      .attachKeyFrame();
+    scene.idle(90);
+    scene.special.changeBirbPose(birb, P.ParrotPose.FlappyPose);
+    scene.special.moveParrot(birb, [0, 1, 0], 20);
+    scene.idle(30);
+    scene.overlay.showText(80)
+      .text("Beds and banners take their colour and patterns from their block entity data")
+      .pointAt(util.vector.centerOf(1, 1, 1))
+      .placeNearTarget()
+      .attachKeyFrame();
+    scene.idle(40);
+    scene.world.modifyBlockEntityNBT(util.select.position(5, 1, 1), "Banner", nbt => { nbt.Patterns.push({ Color: 11, Pattern: "bo" }); });
+    scene.idle(50);
+    scene.overlay.showText(80)
+      .text("Water fills waterlogged blocks; its side against glass or leaves shows water_overlay")
+      .pointAt(util.vector.centerOf(2, 1, 5))
+      .placeNearTarget()
+      .attachKeyFrame();
+    scene.idle(90);
+    scene.markAsFinished();
+  }
+
+  parts.push({
+    registerScenes(helper) {
+      helper.forComponents("minecraft:lead").addStoryBoard(entityPlate, entities);
+    },
+  });
+})();
+
+  // One plugin for all groups: each method asks every part, in order (redstone's tag first, so
   // mining can add TNT to it).
   const plugin = { modId: "vanilla", name: "Minecraft" };
   ["registerScenes", "registerTags", "registerSharedText", "indexExclusions"].forEach(method => {
