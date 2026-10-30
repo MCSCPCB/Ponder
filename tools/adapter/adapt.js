@@ -8,7 +8,10 @@
 //      full release no newer than <version>), which has vanilla's resource pack with its
 //      textures; and in scaffold/ the shape tables of Scaffold (github.com/EvilSlimeLabs/Scaffold:
 //      block_definition, block_geometry, block_rotation, state_rotations and dust_connections
-//      .json from scaffold/lookups/) with its LICENSE.
+//      .json from scaffold/lookups/) with its LICENSE. Optionally, in resource_packs/ the game's
+//      own vanilla packs (vanilla, vanilla_1.14, ... from the game's data/resource_packs, their
+//      entity, models, animations, animation_controllers and render_controllers folders), whose
+//      entity data bedrock-samples merges file by file and partly loses.
 //   3. node tools/adapter/adapt.js <version>
 //   4. Take the results from tools/output/<version>/.
 //
@@ -322,7 +325,27 @@ function vanillaPack(folder) {
     file, files, sizes, scaffold, license: fs.readFileSync(license, "utf8"), blocks, terrain,
     flipbooks: flipbookTable(parseJson(files.get("textures/flipbook_textures.json"), "vanilla textures/flipbook_textures.json")),
     tints: textureTints(plainsColors(files), terrain),
+    layers: vanillaLayers(path.join(folder, "resource_packs")),
   };
+}
+
+// The game's own vanilla packs, when resource_packs/ holds them (copied from the game's
+// data/resource_packs: vanilla, vanilla_1.14, ...): each one's entity data by path, oldest first.
+// bedrock-samples merges them file by file and so loses what only an older pack defines (a
+// ghast's scale, a vex's moves); the game merges them by identifier, the newer pack winning.
+const LAYER_FOLDERS = ["entity", "models", "animations", "animation_controllers", "render_controllers"];
+function vanillaLayers(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const versionOf = name => (name === "vanilla" ? [0] : name.slice("vanilla_".length).split(".").map(Number));
+  const order = (a, b) => { const x = versionOf(a), y = versionOf(b); for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
+  return fs.readdirSync(dir).filter(name => /^vanilla(_\d+(\.\d+)*)?$/.test(name)).sort(order).map(name => {
+    const files = new Map();
+    LAYER_FOLDERS.forEach(sub => {
+      const at = path.join(dir, name, sub);
+      if (fs.existsSync(at)) readDir(at).forEach((bytes, rel) => { if (rel.endsWith(".json")) files.set(sub + "/" + rel, bytes); });
+    });
+    return files;
+  });
 }
 
 // ---- plains' colours ----
@@ -718,25 +741,32 @@ const SAMPLES_GAPS = {
 // `behavior` the behavior packs' files by path.
 function entityTable(sources, behavior, base) {
   const entities = {}, geometries = {}, animations = {}, controllers = {}, renders = {}, textures = {}, missing = [];
-  const each = (prefix, fn) => sources.forEach(s => { for (const [name, bytes] of s.files) if (name.startsWith(prefix) && name.endsWith(".json")) fn(parseJson(bytes, name)); });
+  // Sources in order: a later one's definition replaces an earlier one's of the same name.
+  const each = (prefix, fn) => sources.forEach((s, i) => { for (const [name, bytes] of s.files) if (name.startsWith(prefix) && name.endsWith(".json")) fn(parseJson(bytes, name), i); });
   const versionOf = d => String(d.min_engine_version || "0").split(".").map(Number);
   const newer = (a, b) => { for (let i = 0; i < Math.max(a.length, b.length); i++) { const x = a[i] || 0, y = b[i] || 0; if (x !== y) return x > y; } return false; };
   const raw = {};
-  // A geometry two files define (mobs.json's 1.8 iron golem and iron_golem.geo.json's): the
-  // newer format's.
+  // A geometry two files of one source define (mobs.json's 1.8 iron golem and
+  // iron_golem.geo.json's): the newer format's.
   const formatOf = json => String(json.format_version || "0").split(".").map(Number);
-  each("models/", json => geometryEntries(json).forEach(g => {
+  each("models/", (json, source) => geometryEntries(json).forEach(g => {
     g.format = formatOf(json);
-    if (!raw[g.identifier] || newer(g.format, raw[g.identifier].format)) raw[g.identifier] = g;
+    g.source = source;
+    const had = raw[g.identifier];
+    if (!had || source > had.source || newer(g.format, had.format)) raw[g.identifier] = g;
   }));
-  // A 1.8 geometry with a parent: the parent's bones, each replaced by the child's of the same name.
+  // A 1.8 geometry with a parent: the parent's bones, a bone of the same name taking the child's
+  // settings and both one's cubes (a sheep's wool over its sheared body).
   const known = id => geometries[id] || (base && base.geometries[id]);
   const resolve = (id, seen) => {
     if (known(id) || !raw[id]) return known(id);
     const g = raw[id], parent = g.parent && !seen.has(g.parent) ? resolve(g.parent, new Set([...seen, id])) : null;
     if (g.parent && !parent) missing.push("geometry " + g.parent);
-    const own = new Set(g.bones.map(b => b.name));
-    const bones = parent ? parent.bones.filter(b => !own.has(b.name)).concat(g.bones) : g.bones;
+    const byName = new Map(g.bones.map(b => [b.name, b]));
+    const bones = parent ? parent.bones.map(b => {
+      const own = byName.get(b.name);
+      return own ? Object.assign({}, b, own, { cubes: (b.cubes || []).concat(own.cubes || []) }) : b;
+    }).concat(g.bones.filter(b => !parent.bones.some(p => p.name === b.name))) : g.bones;
     return (geometries[id] = { width: g.width || (parent && parent.width) || 64, height: g.height || (parent && parent.height) || 64, bones });
   };
   Object.keys(raw).forEach(id => resolve(id, new Set()));
@@ -757,11 +787,17 @@ function entityTable(sources, behavior, base) {
       return [k, p.type === "enum" || typeof p.default !== "string" ? p.default : p.type === "bool" ? false : 0];
     }));
   } });
-  // Several files can define one entity: the game uses the one with the highest min_engine_version.
-  const chosen = new Map();
-  each("entity/", json => {
+  // Several files can define one entity: the game uses the one with the highest
+  // min_engine_version, and of those the latest source's.
+  const chosen = new Map(), chosenFrom = new Map();
+  each("entity/", (json, source) => {
     const d = (json["minecraft:client_entity"] || {}).description;
-    if (d && d.identifier && (!chosen.has(d.identifier) || newer(versionOf(d), versionOf(chosen.get(d.identifier))))) chosen.set(d.identifier, d);
+    if (!d || !d.identifier) return;
+    const had = chosen.get(d.identifier);
+    if (!had || newer(versionOf(d), versionOf(had)) || (!newer(versionOf(had), versionOf(d)) && source > chosenFrom.get(d.identifier))) {
+      chosen.set(d.identifier, d);
+      chosenFrom.set(d.identifier, source);
+    }
   });
   const has = (table, id) => (table === "geometries" ? geometries : table === "animations" ? animations : table === "controllers" ? controllers : renders)[id]
     || (base && base[table][id]);
@@ -805,11 +841,15 @@ function entityTable(sources, behavior, base) {
     controllers: only(controllers, named.animations), renders: only(renders, named.renders), textures, missing: [...new Set(missing)],
   };
 }
-// Vanilla's, from bedrock-samples.
-const vanillaEntityTable = vanilla => entityTable([{ files: vanilla.files, texture: p => {
-  const size = vanilla.sizes.get(p);
-  return size ? textureEntry(size, vanilla.flipbooks.get(p)) : null;
-} }], [vanilla.files], null);
+// Vanilla's, from bedrock-samples, then the game's own packs over it when given. Textures come
+// from bedrock-samples.
+const vanillaEntityTable = vanilla => {
+  const texture = p => {
+    const size = vanilla.sizes.get(p);
+    return size ? textureEntry(size, vanilla.flipbooks.get(p)) : null;
+  };
+  return entityTable([vanilla.files].concat(vanilla.layers).map(files => ({ files, texture })), [vanilla.files], null);
+};
 // An add-on's, from its resource packs, its textures in the first pack that has the file.
 const addonEntityTable = (resourcePacks, behaviorPacks, base) => entityTable(resourcePacks.map(pack => ({ files: pack.files, texture: p => {
   const file = textureFile(pack.files, p);
