@@ -2,6 +2,9 @@
 /_stash
 /.github
 /node_modules
-/tools/version
+/tools/data/bedrock/*/data/gui
+/tools/data/bedrock/*/data/*.apk
+/tools/data/bedrock/*/data/*.zip
+/tools/data/bedrock/*/scaffold
 /tools/input
 /tools/output

@@ -1,4 +1,8 @@
 ponder.ui.hold_to_ponder=按住 [%1$s] 开始思索
+ponder.ui.touch_ponder=长按开始思索
+ponder.ui.controller=方向键：选择 · A/×：确认 · B/○：返回
+ponder.ui.controller_identify=摇杆：识别 · 方向键：按钮 · A/×：确认 · Y/△：思索
+ponder.ui.touch_identify=轻触方块查看 · 长按思索 · 点识别按钮返回
 ponder.ui.subject=情景主题
 ponder.ui.pondering=思索……
 ponder.ui.pondering_tag=思索……
@@ -23,3 +27,6 @@ key.ponder.ponder=思索
 
 ponder.command.ponder=打开思索
 ponder.command.scene=场景 id，或 "index"
+ponder.ui.settings=客户端设置
+ponder.tag.not_registered=未注册
+key.categories.ponder=思索

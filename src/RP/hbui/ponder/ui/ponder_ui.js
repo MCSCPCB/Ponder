@@ -2,17 +2,14 @@
 // drawing in ponder_ui_render.js.
 (function () {
   const P = window.Ponder;
-  // Java's default keys for the shortcuts: Q drop, A left, E inventory, D right, S back.
-  const KEYS = { identify: "q", left: "a", right: "d", replay: "s" };
-  P.comfyReading = false; // PonderConfig.client().comfyReading, kept for the session
 
   class PonderUI extends P.Screen {
     constructor(item, referredToByTag) {
       super();
       this.item = item;
       this.scenes = P.compileScenes(item);
-      this.tags = [];
-      P.listedTagsByNamespace().forEach(list => list.forEach(t => { if (t.items.indexOf(item) >= 0 || t.mainItem === item) this.tags.push(t); }));
+      this.preparations = new Map();
+      this.tags = P.getTags(item);
       this.index = 0;
       this.lazyIndex = P.linear().startWithValue(0);
       this.fadeIn = P.linear().startWithValue(0).chase(1, 0.1, P.Chaser.EXP);
@@ -27,6 +24,20 @@
       this.extendedTickLength = this.extendedTickTimer = 0;
     }
     activeScene() { return this.scenes[this.index]; }
+    prepare() {
+      const scene = this.activeScene();
+      let pending = this.preparations.get(scene);
+      if (!pending) {
+        const assets = P.entityPreparation(scene.entityTypes);
+        pending = { jobs: scene.prepare.concat(assets.jobs), next: 0,
+          nodes: Math.min(1024, this.d.used + assets.faces * 2), layers: Math.min(512, this.d.layers.length + assets.faces) };
+        this.preparations.set(scene, pending);
+      }
+      // At most four asset jobs and sixteen entries per DOM pool per rendered frame. The
+      // bounds reserve room for split faces without growing a large storyboard eagerly.
+      for (let i = 0; i < 4 && pending.next < pending.jobs.length; i++) pending.jobs[pending.next++]();
+      this.d.reserve(pending.nodes, pending.layers);
+    }
     init() {
       super.init();
       const W = this.width, H = this.height, add = b => { this.widgets.push(b); return b; };
@@ -39,20 +50,23 @@
       let bX = P.int((W - 20) / 2) - (70 + 2 * spacing);
       const pX = P.int(W / 2) - 110;
       this.progressBar = add(new P.PonderProgressBar(this, pX, bY + 24, W - 2 * pX, 1));
-      this.scan = add(new P.PonderButton(bX, bY).withShortcut(KEYS.identify).showing(P.Icons.IDENTIFY).enableFade(5).withCallback(() => {
+      this.scan = add(new P.PonderButton(bX, bY).withShortcut(P.key("identify")).showing(P.Icons.IDENTIFY).enableFade(5).withCallback(() => {
         this.identifyMode = !this.identifyMode;
         if (!this.identifyMode) this.activeScene().forEach(P.WorldSectionElement, e => { e.selectedBlock = null; });
-        else this.partialTicksPaused = this.pt;
+        else {
+          this.partialTicksPaused = this.pt;
+          if (P.input.mode === "gamepad" || P.input.mode === "keyboard") { P.input.pointer = [W / 2, H / 2]; P.input.useCursor = true; }
+        }
       }));
-      this.slowMode = add(new P.PonderButton(W - 20 - 31, bY).showing(P.Icons.SLOW_MODE).enableFade(5).withCallback(() => { P.comfyReading = !P.comfyReading; }));
+      this.slowMode = add(new P.PonderButton(W - 20 - 31, bY).showing(P.Icons.SLOW_MODE).enableFade(5).withCallback(() => { P.settings.comfyReading = !P.settings.comfyReading; P.saveSettings(); }));
       bX += 50 + spacing;
-      this.left = add(new P.PonderButton(bX, bY).withShortcut(KEYS.left).showing(P.Icons.LEFT).enableFade(5).withCallback(() => this.scroll(false)));
+      this.left = add(new P.PonderButton(bX, bY).withShortcut(P.key("left")).showing(P.Icons.LEFT).enableFade(5).withCallback(() => this.scroll(false)));
       bX += 20 + spacing;
-      this.closeButton = add(new P.PonderButton(bX, bY).withShortcut("e").showing(P.Icons.CLOSE).enableFade(5).withCallback(() => P.screens.close()));
+      this.closeButton = add(new P.PonderButton(bX, bY).withShortcut(P.key("close")).showing(P.Icons.CLOSE).enableFade(5).withCallback(() => P.screens.close()));
       bX += 20 + spacing;
-      this.right = add(new P.PonderButton(bX, bY).withShortcut(KEYS.right).showing(P.Icons.RIGHT).enableFade(5).withCallback(() => this.scroll(true)));
+      this.right = add(new P.PonderButton(bX, bY).withShortcut(P.key("right")).showing(P.Icons.RIGHT).enableFade(5).withCallback(() => this.scroll(true)));
       bX += 50 + spacing;
-      this.replayButton = add(new P.PonderButton(bX, bY).withShortcut(KEYS.replay).showing(P.Icons.REPLAY).enableFade(5).withCallback(() => this.replay()));
+      this.replayButton = add(new P.PonderButton(bX, bY).withShortcut(P.key("replay")).showing(P.Icons.REPLAY).enableFade(5).withCallback(() => this.replay()));
       this.mouse = [0, 0];
       this.pt = 0;
     }
@@ -82,7 +96,7 @@
       this.progressBar.tick();
       const scene = this.activeScene();
       this.extendedTickLength = 0;
-      if (P.comfyReading) scene.forEachVisible(P.TextWindowElement, () => { this.extendedTickLength = 2; });
+      if (P.settings.comfyReading) scene.forEachVisible(P.TextWindowElement, () => { this.extendedTickLength = 2; });
       if (this.extendedTickTimer === 0) {
         if (!this.identifyMode) {
           P.ponderTicks++;
@@ -134,6 +148,12 @@
       return true;
     }
     mouseScrolled(dy) { return this.scroll(dy < 0); }
+    mouseClicked(mx, my, button) {
+      if (super.mouseClicked(mx, my, button)) return true;
+      this.mouse = [mx, my];
+      this.updateIdentifiedItem(this.activeScene());
+      return false;
+    }
   }
   P.PonderUI = PonderUI;
 })();

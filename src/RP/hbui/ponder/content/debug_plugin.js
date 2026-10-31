@@ -23,28 +23,28 @@
     scene.title("debug_coords", "Coordinate Space");
     scene.showBasePlate();
     scene.idle(10);
-    scene.world.showSection(util.select.layersFrom(1), "DOWN");
+    scene.world().showSection(util.select().layersFrom(1), "DOWN");
 
-    const xAxis = util.select.fromTo(2, 1, 1, 4, 1, 1);
-    const yAxis = util.select.fromTo(1, 2, 1, 1, 4, 1);
-    const zAxis = util.select.fromTo(1, 1, 2, 1, 1, 4);
+    const xAxis = util.select().fromTo(2, 1, 1, 4, 1, 1);
+    const yAxis = util.select().fromTo(1, 2, 1, 1, 4, 1);
+    const zAxis = util.select().fromTo(1, 1, 2, 1, 1, 4);
 
     scene.idle(10);
-    scene.overlay.showOutlineWithText(xAxis, 20)
+    scene.overlay().showOutlineWithText(xAxis, 20)
       .colored(P.Palette.RED)
       .text("Das X axis");
     scene.idle(20);
-    scene.overlay.showOutlineWithText(yAxis, 20)
+    scene.overlay().showOutlineWithText(yAxis, 20)
       .colored(P.Palette.GREEN)
       .text("Das Y axis");
     scene.idle(20);
-    scene.overlay.showOutlineWithText(zAxis, 20)
+    scene.overlay().showOutlineWithText(zAxis, 20)
       .colored(P.Palette.BLUE)
       .text("Das Z axis");
   }
 
   P.addPlugin({
-    modId: "ponder",
+    getModId() { return "ponder"; },
     registerScenes(helper) {
       helper.addStoryBoard("minecraft:spyglass", scene1, coordinateScene).highlightAllTags();
     },

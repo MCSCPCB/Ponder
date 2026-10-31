@@ -3,7 +3,7 @@
   const P = window.Ponder;
 
   P.addPlugin({
-    modId: "ponder",
+    getModId() { return "ponder"; },
     name: "Ponder",
     registerSharedText(helper) {
       helper.registerSharedText("sneak_and", "Sneak +");

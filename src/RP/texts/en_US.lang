@@ -1,4 +1,8 @@
 ponder.ui.hold_to_ponder=Hold [%1$s] to Ponder
+ponder.ui.touch_ponder=Touch and hold to Ponder
+ponder.ui.controller=Directions: select · A/×: confirm · B/○: back
+ponder.ui.controller_identify=Stick: identify · Directions: buttons · A/×: confirm · Y/△: Ponder
+ponder.ui.touch_identify=Touch a block · Hold to Ponder · Tap Identify to return
 ponder.ui.subject=Subject of this scene
 ponder.ui.pondering=Pondering about...
 ponder.ui.pondering_tag=Pondering about...
@@ -17,10 +21,16 @@ ponder.ui.welcome=Welcome to Ponder
 ponder.ui.categories=Available Categories for %1$s
 ponder.ui.index_description=Click one of the icons below to learn about its associated Items and Blocks
 ponder.ui.index_title=Ponder Index
-ponder.ponder.shared.sneak_and=Sneak +
-ponder.ponder.shared.ctrl_and=Ctrl +
 key.ponder.ponder=Ponder
 key.categories.ponder=Ponder
 
 ponder.command.ponder=Open Ponder
 ponder.command.scene=A scene id, or "index"
+ponder.ui.settings=Client Settings
+ponder.tag.not_registered=Not registered
+ponder.ponder.debug_coords.header=Coordinate Space
+ponder.ponder.debug_coords.text_1=Das X axis
+ponder.ponder.debug_coords.text_2=Das Y axis
+ponder.ponder.debug_coords.text_3=Das Z axis
+ponder.ponder.shared.ctrl_and=Ctrl +
+ponder.ponder.shared.sneak_and=Sneak +

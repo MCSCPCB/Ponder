@@ -133,21 +133,29 @@
   // `type` is the minecart's entity id ("minecraft:minecart", "minecraft:chest_minecart"), as
   // Java's constructor (Minecart::new, MinecartChest::new).
   class MinecartElement extends P.AnimatedSceneElement {
-    constructor(location, rotation, type) {
+    constructor(location, rotation, factory) {
       super();
       this.initialRotation = rotation;
       this.location = [location[0], location[1] + 1 / 16, location[2]];
-      this.type = type;
+      if (typeof factory !== "function") throw new TypeError("createCart requires a MinecartConstructor");
+      this.factory = factory;
       this.rotation = P.angular().startWithValue(rotation);
       this.entity = null;
     }
     reset(scene) {
       super.reset(scene);
-      const e = this.entity;
-      if (e) { e.setPos(0, 0, 0); e.xo = e.yo = e.zo = 0; }
+      this.entity = null;
       this.rotation.startWithValue(this.initialRotation);
     }
-    create(world) { this.entity = new P.ClientEntity(world, this.type, 0, 0, 0); this.entity.noGravity = true; }
+    create(world) { this.entity = this.factory(world, 0, 0, 0); this.entity.noGravity = true; }
+    prepare() {
+      // The carried block uses the same renderer as its visible frame, without creating or
+      // advancing the minecart. Only texture requests leave this preparation draw.
+      const d = { texturedQuad: P.preloadTexture, texturedQuadMap: P.preloadTexture };
+      Object.values(CONTENTS).forEach(contents => {
+        for (const sign of [1, -1]) P.drawBlockCube(d, M.rotY(M.rotX(M.id(), sign * 35), sign === 1 ? 45 : 225), contents[0], 16);
+      });
+    }
     tick(scene) {
       super.tick(scene);
       if (!this.entity) this.create(scene.world);
@@ -177,7 +185,7 @@
       w = M.rotY(M.rotY(w, this.rotation.getValue(pt)), 180);
       const s = e.scaleOf(pt), model = M.scale(w, s[0] / 16, s[1] / 16, s[2] / 16);
       const out = P.clientEntityItems(e, M.mul(f.m, model), model, pt, blockPx, f.light);
-      const contents = CONTENTS[this.type];
+      const contents = e.displayBlock ? [e.displayBlock, e.displayOffset == null ? 8 : e.displayOffset] : CONTENTS[e.type];
       if (contents) {
         let b = M.translate(w, 0, 0.375, 0);
         b = M.rotY(M.translate(M.scale(b, 0.75, 0.75, 0.75), -0.5, (contents[1] - 8) / 16, 0.5), 90);

@@ -3,15 +3,13 @@
 //   1. Put the packs in tools/input/ as .zip, .mcpack or .mcaddon: Ponder itself (src/BP and
 //      src/RP) and the add-ons with Ponder scenes, each add-on whole (behavior and resource pack).
 //   2. Into tools/version/<version>/ put the game's gui folder, so that
-//      tools/version/<version>/gui/dist/hbui/gameplay.html exists; Mojang's
-//      bedrock-samples-v<release>-full.zip (github.com/Mojang/bedrock-samples/releases, the newest
-//      full release no newer than <version>), which has vanilla's resource pack with its
-//      textures; and in scaffold/ the shape tables of Scaffold (github.com/EvilSlimeLabs/Scaffold:
+//      tools/version/<version>/gui/dist/hbui/gameplay.html exists; and in scaffold/ the shape
+//      tables of Scaffold (github.com/EvilSlimeLabs/Scaffold:
 //      block_definition, block_geometry, block_rotation, state_rotations and dust_connections
-//      .json from scaffold/lookups/) with its LICENSE. Optionally, in resource_packs/ the game's
-//      own vanilla packs (vanilla, vanilla_1.14, ... from the game's data/resource_packs, their
-//      entity, models, animations, animation_controllers and render_controllers folders), whose
-//      entity data bedrock-samples merges file by file and partly loses.
+//      .json from scaffold/lookups/) with its LICENSE. Keep one current Android APK (or that
+//      APK renamed to .zip) in tools/version/common/. Its vanilla resource and behavior packs
+//      supply every target: only layers no newer than <version> are read, including JSON and
+//      images in __brarchive/*.brarchive. Ore UI always comes from the target's own gui folder.
 //   3. node tools/adapter/adapt.js <version>
 //   4. Take the results from tools/output/<version>/.
 //
@@ -31,7 +29,8 @@
 //   Scaffold's tables, the shapes of the blocks that are not a plain cube, with Scaffold's
 //   licence beside it;
 // - writes hbui/ponder/entities/vanilla_entities.json: every vanilla client entity's definition
-//   and the models, animations, animation controllers and render controllers it uses;
+//   and the models, animations, animation controllers and render controllers it uses, with
+//   material alpha prepared in hbui/ponder/assets/entity_textures/;
 // - sets header.min_engine_version to the target version.
 // An add-on: for each hbui/ponder_addons/<folder>/ in its resource pack, writes ponder_blocks.json
 // and ponder_entities.json there, what Ponder needs to draw the add-on's own blocks and entities.
@@ -42,6 +41,9 @@
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
+const crypto = require("crypto");
+const { isDeepStrictEqual } = require("util");
+const { itemData } = require("./item-data.js");
 
 const TOOLS = path.resolve(__dirname, "..");
 
@@ -56,18 +58,24 @@ const NAMES = [
   { use: "form close button press", names: ["dataStoreCloseButtonPress"] },
   { use: "translation", names: ["coreTranslateCommandGroup"] },
   { use: "sounds", names: ["soundCommandGroup"] },
+  { use: "GUI scale", names: ["core.device.display"] },
+  { use: "controller press", names: ["engine:gamepad:onPress"] },
+  { use: "controller release", names: ["engine:gamepad:onRelease"] },
+  { use: "controller repeat", names: ["engine:gamepad:onLongPress"] },
+  { use: "controller sticks", names: ["engine:gamepad:onJoystickMovement"] },
   { use: "item icons", names: ["geo-item://"], unquoted: true },
   { use: "pack files", names: ["pack://"], unquoted: true },
   // Not a name: how a query subscription's id goes to the engine. Vanilla's query driver hashes
   // the query and its arguments to a uint32 and passes either that number or its string; bridge.js
-  // reads the marker to know which. 1.26.60 passes the number and rejects a string.
+  // reads the marker to know which. The supplied 1.26.51 and 1.26.60 bundles pass the number.
   { use: "query subscription id", names: ["ponder:query-id/string", "ponder:query-id/number"], detect: queryIdKind },
 ];
 
 // In the driver: `l=o.toString();return null!==(r=a(l,()=>({value:t(e,n,o)})))…`, where o is the
-// hash and l its string; the third argument of t is what reaches query:subscribe.
+// hash and l its string; the third argument of t is what reaches query:subscribe. Some builds
+// wrap the callback in parentheses: `a(l,(()=>({value:t(e,n,o)})))`.
 function queryIdKind(bundle) {
-  const m = /(\w)=(\w)\.toString\(\);return null!==\(\w=\w\(\1,\(\)=>\(\{value:\w\(\w,\w,(\w)\)\}\)\)\)/.exec(bundle);
+  const m = /([\w$]+)=([\w$]+)\.toString\(\);return null!==\([\w$]+=[\w$]+\(\1,\(?\(\)=>\(\{value:[\w$]+\([\w$]+,[\w$]+,([\w$]+)\)\}\)\)?\)\)/.exec(bundle);
   if (!m) return null;
   return m[3] === m[2] ? "ponder:query-id/number" : m[3] === m[1] ? "ponder:query-id/string" : null;
 }
@@ -289,30 +297,33 @@ function adaptPack(pack, target, engine, versions, main) {
   return report;
 }
 
-// ---- vanilla's blocks, from bedrock-samples ----
+// ---- vanilla's blocks and entities, from the shared APK ----
 
-// The resource pack in the version folder's bedrock-samples-v<release>-full.zip (one pack, every
-// version layer already merged; of its images only their sizes and the colour maps are kept),
-// plains' climate from its behavior pack, and Scaffold's tables in its scaffold/.
+// APK resources are shared; Ore UI and Scaffold's tables stay in each version's folder.
 const SCAFFOLD = ["block_definition", "block_geometry", "block_rotation", "state_rotations", "dust_connections"];
-const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json|(entity|models\/entity|animations|animation_controllers|render_controllers)\/.+\.json|models\/mobs\.json)$|^behavior_pack\/(biomes\/plains\.biome\.json|entities\/.+\.json)$/;
+const RESOURCE_FILES = /^(blocks\.json|textures\/(terrain_texture|item_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json|(entity|items|attachables|models|animations|animation_controllers|render_controllers)\/.+\.json|materials\/.+\.material)$/;
+const BEHAVIOR_FILES = /^(biomes\/plains\.biome\.json|entities\/.+\.json)$/;
+const RESOURCE_FOLDERS = ["entity", "items", "models", "animations", "animation_controllers", "render_controllers", "attachables", "materials", "biomes", "textures"];
+const BEHAVIOR_FOLDERS = ["entities", "biomes"];
 // blocks.json keys some blocks by an older name than their id.
 const LEGACY_NAMES = {
   grass: "grass_block", chain: "iron_chain", seaLantern: "sea_lantern", tripWire: "trip_wire", invisibleBedrock: "invisible_bedrock",
   movingBlock: "moving_block", pistonArmCollision: "piston_arm_collision", stickyPistonArmCollision: "sticky_piston_arm_collision",
 };
-function vanillaPack(folder) {
-  const zips = fs.readdirSync(folder).filter(name => /^bedrock-samples-v[\d.]+-full\.zip$/.test(name)).sort();
-  if (!zips.length) fail("no bedrock-samples-v<release>-full.zip in " + path.relative(TOOLS, folder) + " (download it from github.com/Mojang/bedrock-samples/releases)");
-  const file = path.join(folder, zips[zips.length - 1]), files = new Map(), sizes = new Map();
-  // Files by their path in their pack (biomes/plains.biome.json is the behavior pack's).
-  readZip(file, name => RESOURCES.test(name)).forEach((bytes, name) => {
-    const rel = name.slice(name.indexOf("/") + 1), image = /^(.+)\.(png|tga)$/.exec(rel);
-    if (!image || /^textures\/colormap\//.test(rel)) files.set(rel, bytes);
-    if (image && (image[2] === "png" || !sizes.has(image[1]))) sizes.set(image[1], Object.assign({ file: rel }, imageSize(bytes, image[2])));
-  });
-  if (!files.has("blocks.json")) fail(path.basename(file) + " has no resource_pack/blocks.json");
-  const blocks = parseJson(files.get("blocks.json"), "vanilla blocks.json");
+function commonApk(dir) {
+  const candidates = fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true })
+    .filter(entry => entry.isFile() && /\.(apk|zip)$/i.test(entry.name)).map(entry => entry.name).sort() : [];
+  if (candidates.length !== 1) throw new Error("keep exactly one current Minecraft APK (.apk or .zip) in " + dir + "; found " + candidates.length);
+  return path.join(dir, candidates[0]);
+}
+
+function vanillaPack(folder, version) {
+  const file = commonApk(path.join(TOOLS, "version", "common"));
+  const merged = mergeVanillaLayers(vanillaLayers(file, version));
+  const { files, blocks, terrain } = merged;
+  for (const name of ["blocks.json", "textures/terrain_texture.json", "textures/flipbook_textures.json", "biomes/plains.biome.json", "biomes/plains.client_biome.json"]) {
+    if (!files.has(name)) fail(path.basename(file) + " has no " + name + " in the layers for " + version);
+  }
   Object.keys(LEGACY_NAMES).forEach(name => { if (blocks[name]) blocks[LEGACY_NAMES[name]] = blocks[name]; });
   const scaffold = {};
   SCAFFOLD.forEach(name => {
@@ -322,32 +333,117 @@ function vanillaPack(folder) {
   });
   const license = path.join(folder, "scaffold", "LICENSE");
   if (!fs.existsSync(license)) fail("missing " + path.relative(TOOLS, license) + " (Scaffold's LICENSE)");
-  const terrain = parseJson(files.get("textures/terrain_texture.json"), "vanilla textures/terrain_texture.json").texture_data;
   return {
-    file, files, sizes, scaffold, license: fs.readFileSync(license, "utf8"), blocks, terrain,
-    flipbooks: flipbookTable(parseJson(files.get("textures/flipbook_textures.json"), "vanilla textures/flipbook_textures.json")),
-    tints: textureTints(plainsColors(files), terrain),
-    layers: vanillaLayers(path.join(folder, "resource_packs")),
+    ...merged, file, scaffold, license: fs.readFileSync(license, "utf8"),
+    tints: textureTints(plainsColors(files), terrain), colors: plainsColors(files),
   };
 }
 
-// The game's own vanilla packs, when resource_packs/ holds them (copied from the game's
-// data/resource_packs: vanilla, vanilla_1.14, ...): each one's entity data by path, oldest first.
-// bedrock-samples merges them file by file and so loses what only an older pack defines (a
-// ghast's scale, a vex's moves); the game merges them by identifier, the newer pack winning.
-const LAYER_FOLDERS = ["entity", "models", "animations", "animation_controllers", "render_controllers"];
-function vanillaLayers(dir) {
-  if (!fs.existsSync(dir)) return [];
-  const versionOf = name => (name === "vanilla" ? [0] : name.slice("vanilla_".length).split(".").map(Number));
-  const order = (a, b) => { const x = versionOf(a), y = versionOf(b); for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
-  return fs.readdirSync(dir).filter(name => /^vanilla(_\d+(\.\d+)*)?$/.test(name)).sort(order).map(name => {
-    const files = new Map();
-    LAYER_FOLDERS.forEach(sub => {
-      const at = path.join(dir, name, sub);
-      if (fs.existsSync(at)) readDir(at).forEach((bytes, rel) => { if (rel.endsWith(".json")) files.set(sub + "/" + rel, bytes); });
-    });
-    return files;
+// Bedrock archive v1, as stored in Android's __brarchive/<folder>.brarchive. A 16-byte
+// header precedes 256-byte entries: name length, a 247-byte name area, uint32 offset and
+// uint32 length. Offsets are relative to the data after the entry table. Keep the files in
+// memory; an archive can contain JSON or ordinary PNG/TGA image bytes.
+function readBrArchive(data, name) {
+  const invalid = reason => { throw new Error(name + ": " + reason); };
+  if (data.length < 16 || data.subarray(0, 8).toString("hex") !== "7d2725b1a0527026") invalid("invalid Bedrock archive header");
+  if (data.readUInt32LE(12) !== 1) invalid("unsupported Bedrock archive version " + data.readUInt32LE(12));
+  const count = data.readUInt32LE(8), start = 16 + count * 256;
+  if (start > data.length) invalid("truncated entry table");
+  const files = new Map();
+  for (let i = 0; i < count; i++) {
+    const at = 16 + i * 256, length = data[at];
+    if (!length || length > 247) invalid("invalid entry name length");
+    const file = data.toString("utf8", at + 1, at + 1 + length).replace(/\\/g, "/");
+    if (file.startsWith("/") || file.includes(":") || file.includes("\0") || file.split("/").some(p => !p || p === "." || p === "..")) invalid("invalid entry path");
+    const offset = data.readUInt32LE(at + 248), size = data.readUInt32LE(at + 252);
+    if (start + offset + size > data.length) invalid("truncated contents for " + file);
+    if (files.has(file)) invalid("duplicate entry " + file);
+    files.set(file, data.subarray(start + offset, start + offset + size));
+  }
+  return files;
+}
+
+function compareVersions(a, b) {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const difference = (a[i] || 0) - (b[i] || 0);
+    if (difference) return difference;
+  }
+  return 0;
+}
+const layerVersion = name => name === "vanilla" ? [0] : name.slice("vanilla_".length).split(".").map(Number);
+
+// Retain only real pack paths (not subdirs/ metadata), and discard newer layers before
+// decompressing. Entity definitions stay in separate layers: merging files by path would
+// lose older identifiers that a later file of the same name no longer defines.
+function vanillaLayers(file, version) {
+  const target = version.split(/[.-]/).map(Number);
+  engineVersion(version);
+  const roots = { resource_packs: new Map(), behavior_packs: new Map() };
+  const locate = name => {
+    const m = /^assets\/(?:assets\/)?(resource_packs|behavior_packs)\/(vanilla(?:_\d+(?:\.\d+)*)?)\/(.+)$/.exec(name);
+    if (!m || compareVersions(layerVersion(m[2]), target) > 0) return null;
+    const resource = m[1] === "resource_packs", keep = resource ? RESOURCE_FILES : BEHAVIOR_FILES;
+    const archived = /^__brarchive\/(.+)\.brarchive$/.exec(m[3]);
+    if (archived ? !(resource ? RESOURCE_FOLDERS : BEHAVIOR_FOLDERS).includes(archived[1].split("/")[0]) : !keep.test(m[3])) return null;
+    return { kind: m[1], layer: m[2], name: m[3], folder: archived && archived[1], keep };
+  };
+  readZip(file, name => !!locate(name)).forEach((bytes, name) => {
+    const entry = locate(name), layers = roots[entry.kind];
+    if (!layers.has(entry.layer)) layers.set(entry.layer, []);
+    layers.get(entry.layer).push({ ...entry, bytes });
   });
+  const expand = layers => [...layers.keys()].sort((a, b) => compareVersions(layerVersion(a), layerVersion(b))).map(name => {
+    const files = new Map(), entries = layers.get(name);
+    entries.filter(e => e.folder).sort((a, b) => a.name.localeCompare(b.name)).forEach(e => {
+      readBrArchive(e.bytes, name + "/" + e.name).forEach((bytes, relative) => {
+        const full = e.folder + "/" + relative;
+        if (e.keep.test(full)) files.set(full, bytes);
+      });
+    });
+    // Loose files override the archive's copy within the same version layer, regardless
+    // of their order in the APK's ZIP directory.
+    entries.filter(e => !e.folder).forEach(e => files.set(e.name, e.bytes));
+    return { name, files };
+  });
+  return { resources: expand(roots.resource_packs), behaviors: expand(roots.behavior_packs) };
+}
+
+// blocks.json can update only a block's sound, or one face's texture. Preserve the
+// remaining fields from earlier layers; arrays and scalar values replace their old value.
+function mergeJsonFields(target, source) {
+  const object = value => value && typeof value === "object" && !Array.isArray(value);
+  Object.keys(source).forEach(key => {
+    target[key] = object(source[key]) ? mergeJsonFields(object(target[key]) ? target[key] : {}, source[key]) : source[key];
+  });
+  return target;
+}
+
+function mergeVanillaLayers({ resources, behaviors }) {
+  const files = new Map(), sizes = new Map(), blocks = {}, terrain = {}, flipbooks = new Map();
+  resources.forEach(layer => {
+    const layerSizes = new Map();
+    layer.files.forEach((bytes, name) => {
+      const image = /^(.+)\.(png|tga)$/.exec(name);
+      if (!image || name.startsWith("textures/colormap/")) files.set(name, bytes);
+      if (image && (image[2] === "png" || !layerSizes.has(image[1]))) {
+        layerSizes.set(image[1], { file: name, ...imageSize(bytes, image[2]) });
+      }
+      if (name === "blocks.json") mergeJsonFields(blocks, parseJson(bytes, layer.name + "/" + name));
+      if (name === "textures/terrain_texture.json") mergeJsonFields(terrain, parseJson(bytes, layer.name + "/" + name).texture_data || {});
+      if (name === "textures/flipbook_textures.json") flipbookTable(parseJson(bytes, layer.name + "/" + name)).forEach((entry, texture) => flipbooks.set(texture, entry));
+    });
+    // Newer layers win, even when an image switches between PNG and TGA.
+    layerSizes.forEach((size, texture) => sizes.set(texture, size));
+  });
+  behaviors.forEach(layer => {
+    const climate = layer.files.get("biomes/plains.biome.json");
+    if (climate) files.set("biomes/plains.biome.json", climate);
+  });
+  return {
+    files, sizes, blocks, terrain, flipbooks,
+    layers: resources.map(layer => layer.files), behaviorLayers: behaviors.map(layer => layer.files),
+    layerNames: resources.map(layer => layer.name), behaviorLayerNames: behaviors.map(layer => layer.name),
+  };
 }
 
 // ---- plains' colours ----
@@ -381,34 +477,283 @@ function colorMapAt(png, name, temperature, downfall) {
   const x = Math.floor((1 - t) * 255), y = Math.floor((1 - d) * 255), at = (y * image.width + x) * image.channels;
   return [0, 1, 2].map(c => Math.round(image.pixels[at + c] / 255 * 1000) / 1000);
 }
-// An 8-bit RGB or RGBA PNG's pixels, unfiltered.
+// PNG pixels as straight RGBA, including palette transparency and Adam7 passes. Keep RGB
+// under transparent pixels: entity materials can use alpha as a mask instead of opacity.
 function decodePng(bytes, name) {
-  const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20), depth = bytes[24], type = bytes[25];
-  if (depth !== 8 || (type !== 2 && type !== 6)) fail(name + " is not an 8-bit RGB or RGBA PNG");
-  const channels = type === 6 ? 4 : 3, stride = width * channels, data = [];
-  for (let p = 8; p < bytes.length;) {
+  const invalid = message => { throw new Error(name + ": " + message); };
+  if (bytes.length < 33 || bytes.subarray(0, 8).toString("hex") !== "89504e470d0a1a0a") invalid("invalid PNG header");
+  const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20), depth = bytes[24], type = bytes[25], interlace = bytes[28];
+  const samples = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[type];
+  if (!width || !height || !samples || ![1, 2, 4, 8, 16].includes(depth) || (type === 3 && depth === 16)
+    || (type !== 0 && type !== 3 && depth < 8) || bytes[26] || bytes[27] || interlace > 1) invalid("unsupported PNG format");
+  const data = [];
+  let palette = null, transparency = null;
+  for (let p = 8; p + 12 <= bytes.length;) {
     const length = bytes.readUInt32BE(p);
-    if (bytes.toString("latin1", p + 4, p + 8) === "IDAT") data.push(bytes.subarray(p + 8, p + 8 + length));
+    if (p + length + 12 > bytes.length) invalid("truncated PNG chunk");
+    const kind = bytes.toString("latin1", p + 4, p + 8), chunk = bytes.subarray(p + 8, p + 8 + length);
+    if (kind === "IDAT") data.push(chunk);
+    if (kind === "PLTE") palette = chunk;
+    if (kind === "tRNS") transparency = chunk;
     p += 12 + length;
   }
-  const raw = zlib.inflateSync(Buffer.concat(data)), pixels = Buffer.alloc(height * stride);
-  for (let y = 0; y < height; y++) {
-    const filter = raw[y * (stride + 1)], row = y * stride;
-    for (let i = 0; i < stride; i++) {
-      const left = i >= channels ? pixels[row + i - channels] : 0, up = y ? pixels[row - stride + i] : 0;
-      const corner = y && i >= channels ? pixels[row - stride + i - channels] : 0;
-      let add = 0;
-      if (filter === 1) add = left;
-      else if (filter === 2) add = up;
-      else if (filter === 3) add = (left + up) >> 1;
-      else if (filter === 4) {
-        const guess = left + up - corner, a = Math.abs(guess - left), b = Math.abs(guess - up), c = Math.abs(guess - corner);
-        add = a <= b && a <= c ? left : b <= c ? up : corner;
+  const raw = zlib.inflateSync(Buffer.concat(data)), pixels = Buffer.alloc(width * height * 4);
+  const passes = interlace ? [[0, 0, 8, 8], [4, 0, 8, 8], [0, 4, 4, 8], [2, 0, 4, 4], [0, 2, 2, 4], [1, 0, 2, 2], [0, 1, 1, 2]] : [[0, 0, 1, 1]];
+  const step = Math.ceil(samples * depth / 8), byte = v => depth === 16 ? v >> 8 : Math.round(v * 255 / ((1 << depth) - 1));
+  let offset = 0;
+  for (const [x0, y0, dx, dy] of passes) {
+    const w = Math.ceil((width - x0) / dx), h = Math.ceil((height - y0) / dy);
+    if (w <= 0 || h <= 0) continue;
+    const stride = Math.ceil(w * samples * depth / 8);
+    let previous = Buffer.alloc(stride);
+    for (let y = 0; y < h; y++) {
+      if (offset + stride + 1 > raw.length) invalid("truncated PNG pixels");
+      const filter = raw[offset++], row = Buffer.alloc(stride);
+      if (filter > 4) invalid("invalid PNG row filter");
+      for (let i = 0; i < stride; i++) {
+        const left = i >= step ? row[i - step] : 0, up = previous[i], corner = i >= step ? previous[i - step] : 0;
+        let add = 0;
+        if (filter === 1) add = left;
+        else if (filter === 2) add = up;
+        else if (filter === 3) add = (left + up) >> 1;
+        else if (filter === 4) {
+          const guess = left + up - corner, a = Math.abs(guess - left), b = Math.abs(guess - up), c = Math.abs(guess - corner);
+          add = a <= b && a <= c ? left : b <= c ? up : corner;
+        }
+        row[i] = raw[offset++] + add;
       }
-      pixels[row + i] = raw[y * (stride + 1) + 1 + i] + add;
+      const sample = i => depth === 16 ? row.readUInt16BE(i * 2) : (row[Math.floor(i * depth / 8)] >> (8 - depth - i * depth % 8)) & ((1 << depth) - 1);
+      for (let x = 0; x < w; x++) {
+        const v = Array.from({ length: samples }, (_, c) => sample(x * samples + c)), at = ((y0 + y * dy) * width + x0 + x * dx) * 4;
+        let rgba;
+        if (type === 3) {
+          const p = v[0] * 3;
+          if (!palette || p + 3 > palette.length) invalid("invalid PNG palette index");
+          rgba = [palette[p], palette[p + 1], palette[p + 2], transparency && v[0] < transparency.length ? transparency[v[0]] : 255];
+        } else if (type === 0 || type === 4) {
+          const g = byte(v[0]), a = type === 4 ? byte(v[1]) : transparency && v[0] === transparency.readUInt16BE(0) ? 0 : 255;
+          rgba = [g, g, g, a];
+        } else {
+          const a = type === 6 ? byte(v[3]) : transparency && v.every((n, i) => n === transparency.readUInt16BE(i * 2)) ? 0 : 255;
+          rgba = [byte(v[0]), byte(v[1]), byte(v[2]), a];
+        }
+        pixels.set(rgba, at);
+      }
+      previous = row;
     }
   }
-  return { width, height, channels, pixels };
+  if (offset !== raw.length) invalid("unexpected PNG pixel data");
+  return { width, height, channels: 4, pixels };
+}
+
+// Bedrock's true-colour TGA files, raw or RLE, with either vertical and horizontal origin.
+function decodeTga(bytes, name) {
+  const invalid = message => { throw new Error(name + ": " + message); };
+  if (bytes.length < 18) invalid("invalid TGA header");
+  const width = bytes.readUInt16LE(12), height = bytes.readUInt16LE(14), type = bytes[2], bits = bytes[16], flags = bytes[17];
+  if (!width || !height || bytes[1] || ![2, 10].includes(type) || ![24, 32].includes(bits)) invalid("unsupported TGA format");
+  const step = bits / 8, pixels = Buffer.alloc(width * height * 4);
+  let offset = 18 + bytes[0], count = 0;
+  const put = at => {
+    if (at + step > bytes.length || count >= width * height) invalid("truncated or oversized TGA pixels");
+    const x = count % width, y = Math.floor(count / width), to = ((flags & 32 ? y : height - 1 - y) * width + (flags & 16 ? width - 1 - x : x)) * 4;
+    pixels.set([bytes[at + 2], bytes[at + 1], bytes[at], step === 4 ? bytes[at + 3] : 255], to);
+    count++;
+  };
+  while (count < width * height) {
+    if (offset >= bytes.length) invalid("truncated TGA pixels");
+    const packet = type === 10 ? bytes[offset++] : 0, length = (packet & 127) + 1;
+    for (let i = 0; i < length; i++) { put(offset); if (!(packet & 128)) offset += step; }
+    if (packet & 128) offset += step;
+  }
+  return { width, height, channels: 4, pixels };
+}
+function encodePng({ width, height, pixels }) {
+  const chunk = (type, data) => {
+    const out = Buffer.alloc(data.length + 12);
+    out.writeUInt32BE(data.length); out.write(type, 4); data.copy(out, 8);
+    out.writeUInt32BE(zlib.crc32(out.subarray(4, -4)), out.length - 4);
+    return out;
+  };
+  const header = Buffer.alloc(13), raw = Buffer.alloc((width * 4 + 1) * height);
+  header.writeUInt32BE(width); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 6;
+  for (let y = 0; y < height; y++) pixels.copy(raw, y * (width * 4 + 1) + 1, y * width * 4, (y + 1) * width * 4);
+  return Buffer.concat([Buffer.from("89504e470d0a1a0a", "hex"), chunk("IHDR", header), chunk("IDAT", zlib.deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]);
+}
+
+// Material inheritance applies removals after additions, including named skinning variants.
+// Keep shader semantics in the table instead of guessing them from the material's name.
+function entityMaterials(sources, base) {
+  const definitions = {}, resolved = {};
+  sources.forEach(source => source.files.forEach((bytes, name) => {
+    if (!/^materials\/.+\.material$/.test(name)) return;
+    const entries = parseJson(bytes, name).materials || {};
+    Object.keys(entries).forEach(key => {
+      if (key === "version") return;
+      const [id, parent] = key.split(":");
+      definitions[id] = { parent, value: entries[key] };
+    });
+  }));
+  const merge = (parent, value) => {
+    const out = Object.assign({}, parent, value);
+    for (const key of ["defines", "states"]) out[key] = Array.from(new Set((value[key] || parent[key] || []).concat(value["+" + key] || [])))
+      .filter(entry => !(value["-" + key] || []).includes(entry));
+    return out;
+  };
+  const resolve = (id, seen) => {
+    if (resolved[id]) return resolved[id];
+    const entry = definitions[id];
+    if (!entry) return base && base[id] || {};
+    if (seen.has(id)) throw new Error("Cyclic entity material: " + id);
+    return (resolved[id] = merge(entry.parent ? resolve(entry.parent, new Set([...seen, id])) : {}, entry.value));
+  };
+  Object.keys(definitions).forEach(id => {
+    const material = resolve(id, new Set());
+    (material.variants || []).forEach(variant => Object.keys(variant).forEach(name => { resolved[id + "." + name] = merge(material, variant[name]); }));
+  });
+  return resolved;
+}
+
+// Normalize material alpha before Gameface premultiplies the image. A CSS colour matrix that
+// multiplies alpha by 255 also multiplies RGB by that unbounded result in Bedrock's shader.
+// Opaque materials keep every RGB pixel, cutouts use the entity shader's 0.5 threshold, and
+// blended materials continue to use the original image. Equal images share one output file.
+function entityTextureImages(table, read) {
+  const files = new Map(), used = new Map();
+  const modesOf = material => {
+    const flags = material.defines || [], states = material.states || [];
+    if (states.includes("DisableColorWrite")) return [];
+    const blend = states.includes("Blending") && material.blendSrc !== "One", test = flags.includes("ALPHA_TEST");
+    const alpha = blend ? test ? "blendCutout" : "blend" : test ? "cutout" : "opaque";
+    const prefix = flags.includes("USE_EMISSIVE") ? flags.includes("USE_ONLY_EMISSIVE") ? "emissiveOnly_" : "emissive_" : flags.includes("USE_COLOR_MASK") ? "mask_" : "";
+    return prefix ? [alpha, prefix + alpha, prefix + alpha + "Layer"] : [alpha];
+  };
+  Object.values(table.entities || {}).concat(Object.values(table.attachables || {})).forEach(def => {
+    const modes = Object.values(def.materials || {}).flatMap(name => modesOf((table.materials || {})[name] || { defines: ["ALPHA_TEST"] }));
+    if (!Object.keys(def.materials || {}).length) modes.push("cutout");
+    Object.values(def.textures || {}).forEach(id => {
+      if (!used.has(id)) used.set(id, new Set());
+      modes.forEach(mode => used.get(id).add(mode));
+    });
+  });
+  Object.entries(table.textures).forEach(([id, entry]) => {
+    const bytes = read(entry);
+    if (!bytes) throw new Error("entity texture not found: " + entry.file);
+    const image = entry.file.endsWith(".tga") ? decodeTga(bytes, entry.file) : decodePng(bytes, entry.file);
+    entry.coverage = { blend: imageCoverage(image) };
+    const modes = used.get(id) || new Set(["opaque", "cutout"].concat(Object.values(table.entities || {}).length ? [] : Object.values(table.materials || {}).flatMap(modesOf)));
+    for (const mode of modes) {
+      if (mode === "blend") continue;
+      const split = mode.indexOf("_") >= 0, layer = mode.endsWith("Layer"), alphaMode = mode.replace(/^.*_/, "").replace(/Layer$/, "");
+      const mask = mode.startsWith("mask_"), emissive = mode.startsWith("emissive_"), only = mode.startsWith("emissiveOnly_");
+      const pixels = Buffer.from(image.pixels);
+      for (let i = 0; i < pixels.length; i += 4) {
+        const a = image.pixels[i + 3], visible = only ? a > 0 && a < 255 : emissive ? a + pixels[i] + pixels[i + 1] + pixels[i + 2] > 0 : mask ? a > 0 : a >= 128;
+        pixels[i + 3] = /cutout/i.test(alphaMode) && !visible ? 0 : alphaMode.startsWith("blend") ? a : 255;
+        if (split) for (let c = 0; c < 3; c++) pixels[i + c] = Math.round(pixels[i + c] * (layer ? a : 255 - a) / 255);
+      }
+      entry.coverage[mode] = imageCoverage({ ...image, pixels });
+      if (pixels.equals(image.pixels)) continue;
+      const png = encodePng({ ...image, pixels }), hash = crypto.createHash("sha256").update(png).digest("hex");
+      const file = "hbui/ponder/assets/entity_textures/" + hash + ".png";
+      files.set(file, png); entry[mode] = "/" + file;
+    }
+  });
+  return files;
+}
+// Nonzero alpha runs, joined vertically. The renderer can omit empty UV regions without
+// reading image pixels in Ore UI or discarding the reverse faces of a cutout model.
+function imageCoverage({ width, height, pixels }) {
+  const out = [], previous = new Map();
+  for (let y = 0; y < height; y++) {
+    const row = new Map();
+    let start = -1;
+    for (let x = 0; x <= width; x++) {
+      const visible = x < width && pixels[(y * width + x) * 4 + 3] > 0;
+      if (visible && start < 0) start = x;
+      if (!visible && start >= 0) {
+        const key = start + "," + x, rect = previous.get(key);
+        if (rect) rect[3] = (y + 1) / height;
+        else out.push([start / width, y / height, x / width, (y + 1) / height]);
+        row.set(key, rect || out[out.length - 1]); start = -1;
+      }
+    }
+    previous.clear(); row.forEach((rect, key) => previous.set(key, rect));
+  }
+  return out;
+}
+// Armor trim palettes are texture lookups in the native renderer. Bake those lookups once;
+// a storyboard selects the pattern and material without generating images in Ore UI.
+function equipmentImages(table, vanilla) {
+  const files = new Map(), source = new Map();
+  vanilla.layers.forEach(layer => layer.forEach((bytes, name) => source.set(name, bytes)));
+  const equipment = table.equipment = { trims: {}, shield: {} };
+  const read = file => decodePng(source.get(file), file);
+  const paletteFile = "textures/trims/color_palettes/trim_palette.png";
+  if (source.has(paletteFile)) {
+    const key = read(paletteFile), palettes = [...source.keys()].filter(p => /^textures\/trims\/color_palettes\/(?!trim_palette)[a-z_]+\.png$/.test(p));
+    for (const file of source.keys()) {
+      const match = /^textures\/trims\/([a-z_]+)\.png$/.exec(file);
+      if (!match) continue;
+      const image = read(file), variants = equipment.trims[match[1]] = {};
+      for (const palette of palettes) {
+        const colors = read(palette), replacements = new Map();
+        for (let i = 0; i < Math.min(key.pixels.length, colors.pixels.length); i += 4)
+          replacements.set(key.pixels.readUInt32BE(i) >>> 8, colors.pixels.subarray(i, i + 3));
+        const pixels = Buffer.from(image.pixels);
+        for (let i = 0; i < pixels.length; i += 4) {
+          const color = replacements.get(pixels.readUInt32BE(i) >>> 8);
+          if (color) color.copy(pixels, i);
+        }
+        const result = { ...image, pixels }, png = encodePng(result), hash = crypto.createHash("sha256").update(png).digest("hex");
+        const output = "hbui/ponder/assets/entity_textures/" + hash + ".png";
+        files.set(output, png);
+        variants[path.basename(palette, ".png")] = { url: "/" + output, w: image.width, h: image.height, coverage: { blend: imageCoverage(result) } };
+      }
+    }
+  }
+  for (const file of source.keys()) {
+    const match = /^textures\/entity\/shield_patterns\/([a-z_]+)\.png$/.exec(file);
+    if (match) {
+      const image = read(file);
+      equipment.shield[match[1]] = { file, w: image.width, h: image.height, coverage: { blend: imageCoverage(image) } };
+    }
+  }
+  table.missing = table.missing.filter(name => name !== "texture atlas.shield");
+  return files;
+}
+// AO is masked by the texture's silhouette. Ore UI reads both PNG and TGA from the pack
+// stack; inspect alpha for the AO pass without making another copy of the original image.
+function blockTextureData(table, read) {
+  const prepare = entry => {
+    const bytes = read(entry);
+    if (!bytes) throw new Error("block texture not found: " + entry.file);
+    const tga = entry.file.endsWith(".tga"), image = tga ? decodeTga(bytes, entry.file) : decodePng(bytes, entry.file);
+    entry.ao = true;
+    for (let i = 3; i < image.pixels.length; i += 4) if (image.pixels[i] !== 0 && image.pixels[i] !== 255) { entry.ao = false; break; }
+    if (entry.under) prepare(entry.under);
+  };
+  Object.values(table.textures).forEach(prepare);
+  Object.values(table.items || {}).forEach(item => { if (item.texture) prepare(item.texture); });
+}
+// ItemModelGenerator's spans: only the exposed edges of opaque sprite pixels need a side.
+// Runs share a face, so a 16x16 icon is not expanded into 256 separate little boxes.
+function itemEdges(image) {
+  const { width: w, height: h, pixels } = image, edges = [];
+  const solid = (x, y) => x >= 0 && x < w && y >= 0 && y < h && pixels[(y * w + x) * 4 + 3] > 0;
+  for (const [name, dx, dy] of [["up", 0, -1], ["down", 0, 1], ["left", -1, 0], ["right", 1, 0]]) {
+    const vertical = dx !== 0, rows = vertical ? w : h, columns = vertical ? h : w;
+    for (let row = 0; row < rows; row++) {
+      let start = -1;
+      for (let col = 0; col <= columns; col++) {
+        const x = vertical ? row : col, y = vertical ? col : row;
+        const edge = col < columns && solid(x, y) && !solid(x + dx, y + dy);
+        if (edge && start < 0) start = col;
+        if (!edge && start >= 0) { edges.push([name, row, start, col]); start = -1; }
+      }
+    }
+  }
+  return edges;
 }
 // The textures the game tints and with what (BlockColors, in Bedrock's names). An `overlay`
 // tints only where the image's alpha is set (grass_side); the rest of it is the image the game
@@ -542,7 +887,68 @@ function vanillaBlockTable(vanilla) {
   });
   const shapes = vanillaShapes(vanilla, use), blockEntities = blockEntityTextures(use);
   Object.keys(textures).forEach(p => { if (!textures[p]) delete textures[p]; });
-  return { textures, cubes, liquids, blockEntities, shapes };
+  const registry = vanillaRegistry(), items = vanillaItemModels(vanilla, registry);
+  const client = JSON.parse(fs.readFileSync(path.join(TOOLS, "data/java-1.21.1/client.json"), "utf8"));
+  return { textures, cubes, liquids, blockEntities, shapes, registry, items, client, itemData: itemData(registry) };
+}
+
+function vanillaItemModels(vanilla, registry) {
+  const atlas = {}, definitions = {}, files = new Map();
+  vanilla.layers.forEach(layer => layer.forEach((bytes, name) => {
+    files.set(name, bytes);
+    if (name === "textures/item_texture.json") Object.assign(atlas, parseJson(bytes, name).texture_data || {});
+    if (/^items\/.*\.json$/.test(name)) {
+      const item = parseJson(bytes, name)["minecraft:item"];
+      if (item) definitions[item.description.identifier] = item.components || {};
+    }
+  }));
+  const models = {}, prepared = new Map(), paths = new Map();
+  const texturePath = value => typeof value === "string" ? value : value && value.path;
+  Object.values(atlas).forEach(entry => [].concat(entry.textures || []).forEach(value => {
+    const p = texturePath(value); if (p) paths.set(p.split("/").pop(), p);
+  }));
+  const aliases = { book: "book_normal", writable_book: "book_writable", written_book: "book_written", enchanted_book: "book_enchanted",
+    bow: "bow_standby", crossbow: "crossbow_standby", empty_map: "map_empty", filled_map: "map_filled", clock: "clock_item", compass: "compass_item",
+    lodestone_compass: "lodestonecompass_item", minecart: "minecart_normal", glass_bottle: "potion_bottle_empty", potion: "potion_bottle_drinkable",
+    splash_potion: "potion_bottle_splash", lingering_potion: "potion_bottle_lingering", redstone: "redstone_dust", slime_ball: "slimeball",
+    fermented_spider_eye: "spider_eye_fermented", glistering_melon_slice: "melon_speckled", ink_sac: "dye_powder_black", cocoa_beans: "dye_powder_brown",
+    lapis_lazuli: "dye_powder_blue", bone_meal: "dye_powder_white", glow_ink_sac: "dye_powder_glow", oak_sign: "sign", dark_oak_sign: "sign_darkoak",
+    tropical_fish_bucket: "bucket_tropical", firework_star: "fireworks_charge", tropical_fish_spawn_egg: "spawn_egg_tropicalfish", zombie_pigman_spawn_egg: "spawn_egg_zombified_piglin" };
+  Object.keys(registry.items).forEach(id => {
+    const name = id.slice(10), serialized = registry.items[id].replace(/^item\.|\.name$/g, "");
+    const definition = definitions[id] || definitions["minecraft:" + serialized] || {}, icon = definition["minecraft:icon"];
+    let key = typeof icon === "string" ? icon : icon && (icon.texture || icon.textures && icon.textures.default);
+    if (!key) key = aliases[name] || name.replace(/^wooden_/, "wood_").replace(/^golden_/, "gold_").replace(/^(.*)_spawn_egg$/, "spawn_egg_$1")
+      .replace(/^zombie_pigman$/, "zombified_piglin").replace(/^(.*)_bundle$/, "bundle_$1").replace(/^(.*)_harness$/, "harness_$1")
+      .replace(/^(.*)_minecart$/, "minecart_$1").replace(/^(.*)_bucket$/, "bucket_$1");
+    if (/_dye$/.test(name)) key = "dye_powder_" + name.slice(0, -4).replace("light_gray", "silver") + (/^(black|blue|brown|white)_dye$/.test(name) ? "_new" : "");
+    const entry = atlas[key] || atlas[serialized], list = entry && entry.textures;
+    const texture = texturePath(Array.isArray(list) ? list[0] : list) || paths.get(key) || paths.get(name)
+      || paths.get("sign_" + name.replace(/_sign$/, "")) || paths.get(name.replace(/^(.*)_hanging_sign$/, "sign_$1_hanging"))
+      || paths.get(name.replace(/^(.*)_boat$/, "boat_$1").replace("dark_oak", "darkoak"));
+    const file = texture && textureFile(files, texture);
+    const model = models[id] = { rarity: definition["minecraft:rarity"] || "common" };
+    if (!file) return;
+    if (!prepared.has(file)) {
+      const image = file.endsWith(".tga") ? decodeTga(files.get(file), file) : decodePng(files.get(file), file);
+      prepared.set(file, { w: image.width, h: image.height, edges: itemEdges(image), texture: textureEntry({ file, width: image.width, height: image.height }) });
+    }
+    Object.assign(model, prepared.get(file));
+  });
+  return models;
+}
+
+// The official 1.26.50 data release supplies the 1.26.51 baseline's property domains and item
+// identities. Resource packs contain images and models, but not the runtime state registry.
+function vanillaRegistry() {
+  const folder = path.join(TOOLS, "data/bedrock-samples/1.26.50.4");
+  const blocks = JSON.parse(fs.readFileSync(path.join(folder, "mojang-blocks.json"), "utf8"));
+  const items = JSON.parse(fs.readFileSync(path.join(folder, "mojang-items.json"), "utf8"));
+  const properties = {}, types = {}, names = {}, ids = {};
+  blocks.block_properties.forEach(p => { properties[p.name] = p.values.map(v => v.value); });
+  blocks.data_items.forEach(b => { types[b.name] = b.properties.map(p => p.name); names[b.name] = b.serialization_id + ".name"; });
+  items.data_items.forEach(i => { ids[i.name] = i.serialization_id + ".name"; });
+  return { properties, blocks: types, names, items: ids };
 }
 
 // The textures Ponder draws beds and banners with (block_entity_models.js), Bedrock's own entity
@@ -567,6 +973,14 @@ function blockEntityTextures(use) {
   return {
     bed: BED_COLORS.map(c => need("textures/entity/bed/" + c)),
     banner: { base: need("textures/entity/banner/banner_base"), illager: need("textures/entity/banner/banner_illager"), patterns },
+    chest: { normal: need("textures/entity/chest/normal"), double: need("textures/entity/chest/double_normal"), trapped: need("textures/entity/chest/trapped"), trappedDouble: need("textures/entity/chest/trapped_double"), ender: need("textures/entity/chest/ender") },
+    book: need("textures/entity/enchanting_table_book"), bell: need("textures/entity/bell/bell"), beam: need("textures/entity/beacon_beam"),
+    portal: { sky: need("textures/environment/end_sky"), portal: need("textures/entity/end_portal") },
+    conduit: { base: need("textures/blocks/conduit_base"), cage: need("textures/blocks/conduit_cage"), open: need("textures/blocks/conduit_open"), closed: need("textures/blocks/conduit_closed"), horizontal: need("textures/blocks/conduit_wind_horizontal"), vertical: need("textures/blocks/conduit_wind_vertical") },
+    shulker: ["undyed"].concat(BED_COLORS).map(color => need("textures/entity/shulker/shulker_" + color)),
+    pot: { base: need("textures/blocks/decorated_pot_base"), side: need("textures/blocks/decorated_pot_side"), patterns: Object.fromEntries(
+      ["angler", "archer", "arms_up", "blade", "brewer", "burn", "danger", "explorer", "friend", "heart", "heartbreak", "howl", "miner", "mourner", "plenty", "prize", "sheaf", "shelter", "skull", "snort", "flow", "guster", "scrape"]
+        .map(name => ["minecraft:" + name + "_pottery_sherd", need("textures/blocks/" + name + "_pottery_pattern")])) },
     particle: need("textures/blocks/planks_oak"),
   };
 }
@@ -578,17 +992,22 @@ function blockEntityTextures(use) {
 // [texture path or null] }, the placed look in blocks.json and terrain_texture.json, as Scaffold
 // reads them; shapes.dust, the rules redstone dust joins by. A form's cubes keep Scaffold's
 // frame, blocks from the cell's low corner as a .geo.json has it. Scaffold draws a plain cube
-// 0.95 across so a ghost block lets the one behind show; here it fills its cell again. A face
-// with no area, which Scaffold does not draw, is left out, and so is one whose texture the pack
-// does not have. Water and lava are not Scaffold's: Ponder draws them from `liquids`.
+// 0.95 across so a ghost block lets the one behind show; here it fills its cell again. Slabs
+// use the same inset footprint and move 0.025 toward the cell's centre; restore their half of
+// the cell too. A face with no area, which Scaffold does not draw, is left out, and so is one
+// whose texture the pack does not have. Water and lava are not Scaffold's: Ponder draws them
+// from `liquids`.
 const RULES = ["pick", "data", "turn_by", "texture_by"];
 const LIQUIDS = /^(flowing_)?(water|lava)$/;
 function vanillaShapes(vanilla, use) {
   const s = vanilla.scaffold, geometry = s.block_geometry.families, standard = s.state_rotations.states;
   const shapes = { blocks: {}, families: {}, rotations: {}, faces: {}, terrain: {} };
-  const trim = form => ({ center: form.center, cubes: form.cubes.map(c => {
+  const trim = (form, family, name) => ({ center: family === "slab" ? [0.5, name === "top" ? 0.75 : 0.25, 0.5] : form.center, cubes: form.cubes.map(c => {
     const ghost = form.cubes.length === 1 && c.size.every(v => v === 0.95) && c.offset.every(v => v === 0.025);
-    const cube = { size: ghost ? [1, 1, 1] : c.size, offset: ghost ? [0, 0, 0] : c.offset, faces: {} };
+    const slab = family === "slab";
+    const cube = { size: slab ? [1, 0.5, 1] : ghost ? [1, 1, 1] : c.size,
+      offset: slab ? [0, name === "top" ? 0.5 : 0, 0] : ghost ? [0, 0, 0] : c.offset, faces: {} };
+    if (family === "chest") cube.offset = [name === "default" ? 1 / 16 : c.offset[0], c.offset[1], 1 / 16];
     if (c.rotation && c.rotation.some(Boolean)) cube.rotation = c.rotation;
     FACE_NAMES.forEach(face => {
       const f = c.faces[face];
@@ -603,7 +1022,7 @@ function vanillaShapes(vanilla, use) {
     if (family === "ignore" || shapes.families[family] || !geometry[family]) return;
     const entry = geometry[family], kept = { forms: {} };
     RULES.forEach(r => { if (entry[r]) kept[r] = entry[r]; });
-    Object.keys(entry.forms).forEach(f => { kept.forms[f] = trim(entry.forms[f]); });
+    Object.keys(entry.forms).forEach(f => { kept.forms[f] = trim(entry.forms[f], family, f); });
     shapes.families[family] = kept;
     const turns = s.block_rotation.families[family];
     if (turns) shapes.rotations[family] = typeof turns === "string" ? standard[turns] : turns;
@@ -671,7 +1090,32 @@ function geometryEntries(json) {
 // vanilla_blocks.json. Only blocks that say how they look, and only the geometries and textures
 // they use.
 function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
-  const index = { blocks: {}, geometries: {}, textures: {} }, missing = [];
+  const index = { blocks: {}, items: {}, geometries: {}, textures: {}, tints: vanilla.colors || {} }, missing = [];
+  const vanillaItems = {};
+  (vanilla.layers || []).forEach(layer => {
+    const bytes = layer.get("textures/item_texture.json");
+    if (bytes) Object.assign(vanillaItems, parseJson(bytes, "textures/item_texture.json").texture_data || {});
+  });
+  behaviorPacks.forEach(pack => pack.files.forEach((bytes, name) => {
+    if (!/^items\/.*\.json$/.test(name)) return;
+    const item = parseJson(bytes, name)["minecraft:item"];
+    if (!item || !item.description) return;
+    const components = item.components || {}, display = components["minecraft:display_name"], icon = components["minecraft:icon"];
+    const model = index.items[item.description.identifier] = { name: display && display.value || "item." + item.description.identifier + ".name", rarity: components["minecraft:rarity"] || "common" };
+    const damage = components["minecraft:damage"];
+    if (damage != null) model.attackDamage = typeof damage === "number" ? damage : damage.value;
+    model.maxStackSize = components["minecraft:max_stack_size"] || 64;
+    const key = typeof icon === "string" ? icon : icon && (icon.texture || icon.textures && icon.textures.default);
+    if (!key) return;
+    const atlas = resourcePacks.map(pack => pack.files.get("textures/item_texture.json")).filter(Boolean).map(bytes => parseJson(bytes, "textures/item_texture.json").texture_data || {});
+    const entry = atlas.map(t => t[key]).find(Boolean) || vanillaItems[key], p = entry && terrainPath(entry);
+    if (!p) { missing.push("item texture " + key); return; }
+    const sources = resourcePacks.concat((vanilla.layers || []).slice().reverse().map(files => ({ files })));
+    const resource = sources.map(pack => ({ pack, file: textureFile(pack.files, p) })).find(p => p.file);
+    if (!resource) { missing.push("item texture " + p); return; }
+    const image = resource.file.endsWith(".tga") ? decodeTga(resource.pack.files.get(resource.file), resource.file) : decodePng(resource.pack.files.get(resource.file), resource.file);
+    Object.assign(model, { w: image.width, h: image.height, edges: itemEdges(image), texture: Object.assign(resource.pack.uuid ? { pack: resource.pack.uuid } : {}, textureEntry({ file: resource.file, width: image.width, height: image.height })) });
+  }));
   const geometries = new Set(), textures = new Set();
   const uses = look => {
     if (look.geometry) geometries.add(typeof look.geometry === "string" ? look.geometry : look.geometry.identifier);
@@ -698,8 +1142,8 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
       if (geometries.has(g.identifier) && !index.geometries[g.identifier]) index.geometries[g.identifier] = { width: g.width || 16, height: g.height || 16, bones: g.bones };
     });
   }));
-  // A texture name is looked up in each resource pack's terrain_texture.json, then vanilla's. Each
-  // keeps its size, and its animation from that pack's flipbook_textures.json.
+  // Resolve the winning terrain declaration first, then its image path through the entire
+  // resource stack. A declaration may name a vanilla file under a different terrain key.
   const terrains = resourcePacks.map(pack => {
     const bytes = pack.files.get("textures/terrain_texture.json");
     return bytes ? parseJson(bytes, pack.name + " textures/terrain_texture.json").texture_data || {} : {};
@@ -709,16 +1153,21 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
     return bytes ? flipbookTable(parseJson(bytes, pack.name + " textures/flipbook_textures.json")) : new Map();
   });
   textures.forEach(name => {
-    for (let i = 0; i < resourcePacks.length; i++) {
-      const file = terrainFile(resourcePacks[i].files, terrains[i], name);
-      if (!file) continue;
-      const size = Object.assign({ file }, imageSize(resourcePacks[i].files.get(file), path.extname(file).slice(1)));
-      index.textures[name] = Object.assign({ pack: resourcePacks[i].uuid }, textureEntry(size, flipbooks[i].get(file.replace(/\.(png|tga)$/, ""))));
-      return;
+    const declaration = terrains.find(t => Object.prototype.hasOwnProperty.call(t, name));
+    const p = terrainPath(declaration ? declaration[name] : vanilla.terrain[name]);
+    if (p) {
+      for (let i = 0; i < resourcePacks.length; i++) {
+        const file = textureFile(resourcePacks[i].files, p);
+        if (!file) continue;
+        const size = Object.assign({ file }, imageSize(resourcePacks[i].files.get(file), path.extname(file).slice(1)));
+        const animation = flipbooks.map(f => f.get(p)).find(Boolean) || vanilla.flipbooks.get(p);
+        index.textures[name] = Object.assign({ pack: resourcePacks[i].uuid }, textureEntry(size, animation));
+        return;
+      }
+      const size = vanilla.sizes.get(p);
+      if (size) { index.textures[name] = textureEntry(size, vanilla.flipbooks.get(p)); return; }
     }
-    const p = terrainPath(vanilla.terrain[name]), size = p && vanilla.sizes.get(p);
-    if (size) index.textures[name] = textureEntry(size, vanilla.flipbooks.get(p));
-    else missing.push("texture " + name);
+    missing.push("texture " + name);
   });
   geometries.forEach(id => { if (!BUILT_IN_GEOMETRY.has(id) && !index.geometries[id]) missing.push("geometry " + id); });
   return { index, missing };
@@ -731,20 +1180,17 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
 // default } from the behavior pack's entity file) and what those names point at,
 // cut to what the entity renderer reads: geometries { identifier: { width, height, bones } },
 // animations, controllers (animation controllers) and renders (render controllers) by name, and
-// textures { path: { pack, file, w, h, frames, tick, seq } } (textureEntry, `pack` as in
-// ponder_blocks.json). An add-on's names may point at vanilla's (`base`), which it does not
+// textures { path: { pack, file, w, h, frames, tick, seq, opaque, cutout } } (textureEntry,
+// `pack` as in ponder_blocks.json, opaque/cutout the prepared image URLs when needed).
+// An add-on's names may point at vanilla's (`base`), which it does not
 // repeat unless vanilla_entities.json leaves it out (no vanilla entity names it, as
 // controller.render.piglin): that is copied in. A name nothing defines is in `missing`.
-// Render controllers the game has and bedrock-samples leaves out (its iron_golem file holds only
-// the cracks), as the game's vanilla pack defines them; the samples' own win when they have one.
-const SAMPLES_GAPS = {
-  "controller.render.iron_golem": { geometry: "Geometry.default", materials: [{ "*": "Material.default" }], textures: ["Texture.default"] },
-};
 // `sources` are { files, texture(path) }: a pack's files by path, and a texture's entry or null;
 // `behavior` the behavior packs' files by path.
 function entityTable(sources, behavior, base) {
-  const entities = {}, geometries = {}, animations = {}, controllers = {}, renders = {}, textures = {}, missing = [];
+  const entities = {}, attachables = {}, geometries = {}, animations = {}, controllers = {}, renders = {}, textures = {}, missing = [];
   const own = { geometries, animations, controllers, renders };
+  const materials = entityMaterials(sources, base && base.materials);
   const borrow = (table, id) => { const v = base && base.all[table][id]; if (v) own[table][id] = v; return v; };
   // Sources in order: a later one's definition replaces an earlier one's of the same name.
   const each = (prefix, fn) => sources.forEach((s, i) => { for (const [name, bytes] of s.files) if (name.startsWith(prefix) && name.endsWith(".json")) fn(parseJson(bytes, name), i); });
@@ -771,7 +1217,7 @@ function entityTable(sources, behavior, base) {
     const byName = new Map(g.bones.map(b => [b.name, b]));
     const bones = parent ? parent.bones.map(b => {
       const own = byName.get(b.name);
-      return own ? Object.assign({}, b, own, { cubes: (b.cubes || []).concat(own.cubes || []) }) : b;
+      return own ? Object.assign({}, b, own, { cubes: (own.reset ? [] : b.cubes || []).concat(own.cubes || []) }) : b;
     }).concat(g.bones.filter(b => !parent.bones.some(p => p.name === b.name))) : g.bones;
     return (geometries[id] = { width: g.width || (parent && parent.width) || 64, height: g.height || (parent && parent.height) || 64, bones });
   };
@@ -779,10 +1225,21 @@ function entityTable(sources, behavior, base) {
   each("animations/", json => Object.assign(animations, json.animations || {}));
   each("animation_controllers/", json => Object.assign(controllers, json.animation_controllers || {}));
   each("render_controllers/", json => Object.assign(renders, json.render_controllers || {}));
-  if (!base) Object.keys(SAMPLES_GAPS).forEach(id => { if (!renders[id]) renders[id] = SAMPLES_GAPS[id]; });
-  const properties = {}, health = {};
+  const properties = {}, health = {}, collision = {}, variants = {}, dimensions = {};
   behavior.forEach(files => { for (const [name, bytes] of files) if (/^entities\/.+\.json$/.test(name)) {
     const e = parseJson(bytes, name)["minecraft:entity"] || {}, d = e.description;
+    if (d) {
+      const c = (e.components || {})["minecraft:collision_box"];
+      if (c) collision[d.identifier] = c;
+      const sizes = {}, scale = (e.components || {})["minecraft:scale"], dimension = { scale: scale ? scale.value : 1 };
+      Object.values(e.component_groups || {}).forEach(group => {
+        const v = group["minecraft:variant"], box = group["minecraft:collision_box"];
+        if (v && box) sizes[v.value] = box;
+        if (group["minecraft:is_baby"]) dimension.baby = { scale: (group["minecraft:scale"] || scale || { value: 1 }).value, collision: box || c };
+      });
+      if (Object.keys(sizes).length) variants[d.identifier] = sizes;
+      dimensions[d.identifier] = dimension;
+    }
     // A fresh entity's health, which query.health reads (an iron golem's cracks).
     const h = ((e.components || {})["minecraft:health"] || {});
     if (d && typeof (h.value ?? h.max) === "number") health[d.identifier] = { value: h.value ?? h.max, max: h.max ?? h.value };
@@ -814,15 +1271,26 @@ function entityTable(sources, behavior, base) {
     }
     return p;
   };
-  chosen.forEach((d, id) => {
+  const equipment = new Map();
+  each("attachables/", json => {
+    const d = (json["minecraft:attachable"] || {}).description;
+    if (d && d.identifier) equipment.set(d.identifier, d);
+  });
+  const define = (d, id, target) => {
     const t = {};
-    Object.keys(d.textures || {}).forEach(k => { t[k] = use(d.textures[k]); });
-    entities[id] = {
+    // Model-less attachables use the ordinary item mesh and its item atlas.
+    if (target !== attachables || Object.keys(d.geometry || {}).length)
+      Object.keys(d.textures || {}).forEach(k => { t[k] = use(d.textures[k]); });
+    target[id] = {
       textures: t, geometry: d.geometry || {}, animations: d.animations || {},
       animation_controllers: d.animation_controllers || [], render_controllers: d.render_controllers || [],
       scripts: d.scripts || {}, materials: d.materials || {}, properties: properties[id] || {},
     };
-    if (health[id]) entities[id].health = health[id];
+    if (d.item) target[id].item = d.item;
+    if (health[id]) target[id].health = health[id];
+    if (collision[id]) target[id].collision = collision[id];
+    if (variants[id]) target[id].variantCollisions = variants[id];
+    if (dimensions[id]) target[id].dimensions = dimensions[id];
     Object.values(d.geometry || {}).forEach(g => { if (!has("geometries", g)) missing.push("geometry " + g); });
     Object.values(d.animations || {}).forEach(a => { if (!has("animations", a) && !has("controllers", a)) missing.push("animation " + a); });
     (d.animation_controllers || []).forEach(entry => Object.values(typeof entry === "string" ? { entry } : entry).forEach(c => {
@@ -831,10 +1299,12 @@ function entityTable(sources, behavior, base) {
     (d.render_controllers || []).forEach(entry => Object.keys(typeof entry === "string" ? { [entry]: 0 } : entry).forEach(r => {
       if (!has("renders", r)) missing.push("render controller " + r);
     }));
-  });
+  };
+  chosen.forEach((d, id) => define(d, id, entities));
+  equipment.forEach((d, id) => define(d, id, attachables));
   // Only what an entity names.
   const named = { geometries: new Set(), animations: new Set(), renders: new Set() };
-  Object.values(entities).forEach(e => {
+  Object.values(entities).concat(Object.values(attachables)).forEach(e => {
     Object.values(e.geometry).forEach(g => named.geometries.add(g));
     Object.values(e.animations).forEach(a => named.animations.add(a));
     e.animation_controllers.forEach(entry => Object.values(typeof entry === "string" ? { entry } : entry).forEach(c => named.animations.add(c)));
@@ -842,21 +1312,57 @@ function entityTable(sources, behavior, base) {
   });
   const only = (table, set) => { const out = {}; Object.keys(table).forEach(k => { if (set.has(k)) out[k] = table[k]; }); return out; };
   const table = {
-    entities, geometries: only(geometries, named.geometries), animations: only(animations, named.animations),
-    controllers: only(controllers, named.animations), renders: only(renders, named.renders), textures, missing: [...new Set(missing)],
+    entities, attachables, geometries: only(geometries, named.geometries), animations: only(animations, named.animations),
+    controllers: only(controllers, named.animations), renders: only(renders, named.renders), textures, materials, missing: [...new Set(missing)],
   };
   // Vanilla's whole tables, for the add-ons (`all`, not written out).
   if (!base) Object.defineProperty(table, "all", { value: { geometries, animations, controllers, renders, texture: p => sources.map(s => s.texture(p)).find(Boolean) } });
   return table;
 }
-// Vanilla's, from bedrock-samples, then the game's own packs over it when given. Textures come
-// from bedrock-samples.
+// Vanilla's resource and behavior layers from the shared APK, restricted to the target.
 const vanillaEntityTable = vanilla => {
   const texture = p => {
     const size = vanilla.sizes.get(p);
     return size ? textureEntry(size, vanilla.flipbooks.get(p)) : null;
   };
-  return entityTable([vanilla.files].concat(vanilla.layers).map(files => ({ files, texture })), [vanilla.files], null);
+  const table = entityTable(vanilla.layers.map(files => ({ files, texture })), vanilla.behaviorLayers, null);
+  // BoatModel/ChestBoatModel are code models. Their Bedrock textures use the same layout;
+  // include every wood's skin because the client definition names only some of them.
+  for (const type of ["boat", "chest_boat"]) {
+    const entity = table.entities["minecraft:" + type];
+    if (!entity) continue;
+    entity.renderer = "boat";
+    entity.geometry = {};
+    entity.materials = { default: "boat" };
+    const woods = ["oak", "spruce", "birch", "jungle", "acacia", "darkoak", "mangrove", "bamboo", "cherry", "paleoak"];
+    woods.forEach((wood, i) => {
+      const file = type === "chest_boat" ? "chest_boat_" + (wood === "paleoak" ? "pale_oak" : wood)
+        : i < 6 ? "boat_" + wood : wood === "bamboo" ? "bamboo_raft" : (wood === "paleoak" ? "pale_oak" : wood) + "_boat";
+      const id = "textures/entity/boat/" + file, entry = texture(id);
+      if (entry) { entity.textures[wood] = id; table.textures[id] = entry; }
+    });
+    table.missing = table.missing.filter(name => name !== "geometry geometry." + type);
+  }
+  // The current geometries omit bind rotations that their unchanged vanilla cubes still use.
+  // Restore only matching adult bones; an authored replacement keeps its own pose.
+  const shape = b => ({ pivot: b.pivot, cubes: (b.cubes || []).map(c => ({ origin: c.origin, size: c.size,
+    pivot: c.pivot || null, rotation: c.rotation || [0, 0, 0], inflate: c.inflate || 0 })) });
+  for (const [file, id] of [["cat", "geometry.cat"], ["ocelot", "geometry.ocelot.v1.8"], ["polar_bear", "geometry.polarbear"]]) {
+    const model = table.geometries[id];
+    if (!model) continue;
+    vanilla.layers.forEach(files => {
+      const bytes = files.get("models/entity/" + file + ".geo.json");
+      if (!bytes) return;
+      const source = geometryEntries(parseJson(bytes, file + ".geo.json")).find(g => g.identifier === id);
+      if (!source) return;
+      model.bones.forEach(b => {
+        if (b.rotation || b.bind_pose_rotation) return;
+        const rest = source.bones.find(r => r.name === b.name && r.bind_pose_rotation);
+        if (rest && isDeepStrictEqual(shape(rest), shape(b))) b.bind_pose_rotation = rest.bind_pose_rotation.slice();
+      });
+    });
+  }
+  return table;
 };
 // An add-on's, from its resource packs, its textures in the first pack that has the file.
 const addonEntityTable = (resourcePacks, behaviorPacks, base) => entityTable(resourcePacks.map(pack => ({ files: pack.files, texture: p => {
@@ -978,24 +1484,42 @@ function main() {
   let vanilla = null;
   const loadVanilla = () => {
     if (vanilla) return vanilla;
-    vanilla = vanillaPack(folder);
-    console.log("vanilla blocks from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/") + " and " + path.relative(TOOLS, path.join(folder, "scaffold")).split(path.sep).join("/"));
+    vanilla = vanillaPack(folder, version);
+    console.log("vanilla resources from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/"));
+    console.log("resource layers for " + version + ": " + vanilla.layerNames.join(", "));
+    console.log("behavior layers for " + version + ": " + vanilla.behaviorLayerNames.join(", "));
+    console.log("gui and scaffold from " + path.relative(TOOLS, folder).split(path.sep).join("/"));
     return vanilla;
   };
-  let vanillaEntities = null;
-  const loadVanillaEntities = () => vanillaEntities || (vanillaEntities = vanillaEntityTable(loadVanilla()));
+  const vanillaImage = entry => {
+    const layers = loadVanilla().layers;
+    for (let i = layers.length - 1; i >= 0; i--) if (layers[i].has(entry.file)) return layers[i].get(entry.file);
+    return null;
+  };
+  let vanillaEntities = null, vanillaImages = null;
+  const loadVanillaEntities = () => {
+    if (!vanillaEntities) {
+      vanillaEntities = vanillaEntityTable(loadVanilla());
+      vanillaImages = entityTextureImages(vanillaEntities, vanillaImage);
+      equipmentImages(vanillaEntities, loadVanilla()).forEach((bytes, file) => vanillaImages.set(file, bytes));
+    }
+    return vanillaEntities;
+  };
   for (const group of groups) {
     const resourcePacks = group.packs.filter(isResourcePack), behaviorPacks = group.packs.filter(pack => !isResourcePack(pack));
     if (group.main) {
       const table = vanillaBlockTable(loadVanilla());
+      blockTextureData(table, vanillaImage);
       const entityTable = loadVanillaEntities();
       resourcePacks.filter(pack => pack.files.has("hbui/gameplay.html")).forEach(pack => {
         pack.files.set(VANILLA_TABLE, Buffer.from(JSON.stringify(table)));
         pack.files.set(VANILLA_LICENSE, Buffer.from(SHAPES_NOTICE + vanilla.license));
         pack.files.set(ENTITY_TABLE, Buffer.from(JSON.stringify(entityTable)));
+        vanillaImages.forEach((bytes, file) => pack.files.set(file, bytes));
         pack.report.changes.push(ENTITY_TABLE + ": " + Object.keys(entityTable.entities).length + " entities, "
           + Object.keys(entityTable.geometries).length + " geometries, " + Object.keys(entityTable.animations).length + " animations, "
-          + Object.keys(entityTable.textures).length + " textures" + (entityTable.missing.length ? "; not found: " + entityTable.missing.join(", ") : ""));
+          + Object.keys(entityTable.textures).length + " textures, " + vanillaImages.size + " material images"
+          + (entityTable.missing.length ? "; not found: " + entityTable.missing.join(", ") : ""));
         pack.report.changes.push(VANILLA_TABLE + ": " + Object.keys(table.textures).length + " textures ("
           + Object.values(table.textures).filter(t => t.tint).length + " tinted as in plains), " + Object.keys(table.cubes).length + " cube blocks, "
           + Object.keys(table.liquids).length + " liquids, "
@@ -1011,21 +1535,27 @@ function main() {
       pack.files.set(name, Buffer.from(JSON.stringify(table)));
       pack.report.changes.push(name + ": " + report);
     }));
-    if (behaviorPacks.some(pack => blockFiles(pack).length)) {
+    if (behaviorPacks.some(pack => blockFiles(pack).length || [...pack.files.keys()].some(name => /^items\/.*\.json$/.test(name)))) {
       const { index, missing } = addonBlockIndex(behaviorPacks, resourcePacks, loadVanilla());
-      if (Object.keys(index.blocks).length) {
+      if (Object.keys(index.blocks).length || Object.keys(index.items).length) {
+        blockTextureData(index, entry => entry.pack
+          ? resourcePacks.find(pack => pack.uuid === entry.pack).files.get(entry.file) : vanillaImage(entry));
         write(ADDON_INDEX, index, Object.keys(index.blocks).length + " blocks, " + Object.keys(index.geometries).length + " geometries, " + Object.keys(index.textures).length + " textures");
         if (missing.length) targets[0].report.changes.push("not found: " + missing.join(", "));
       }
     }
     if (resourcePacks.some(pack => [...pack.files.keys()].some(name => /^entity\/.*\.json$/.test(name)))) {
       const entities = addonEntityTable(resourcePacks, behaviorPacks, loadVanillaEntities());
+      const images = entityTextureImages(entities, entry => entry.pack
+        ? resourcePacks.find(pack => pack.uuid === entry.pack).files.get(entry.file) : vanillaImage(entry));
+      targets.forEach(pack => images.forEach((bytes, file) => pack.files.set(file, bytes)));
       write(ADDON_ENTITIES, entities, Object.keys(entities.entities).length + " entities, " + Object.keys(entities.geometries).length + " geometries, "
-        + Object.keys(entities.animations).length + " animations, " + Object.keys(entities.textures).length + " textures"
+        + Object.keys(entities.animations).length + " animations, " + Object.keys(entities.textures).length + " textures, " + images.size + " material images"
         + (entities.missing.length ? "; not found: " + entities.missing.join(", ") : ""));
     }
   }
 
+  groups.forEach(group => group.packs.forEach(require("./structures.js").adaptStructures));
   const written = writeOutput(groups, path.basename(folder));
   groups.forEach(group => group.packs.forEach(pack => {
     console.log(pack.report.name);
@@ -1034,4 +1564,6 @@ function main() {
   console.log("wrote " + written.join(", "));
 }
 
-main();
+if (require.main === module) main();
+module.exports = { queryIdKind, readBrArchive, commonApk, vanillaLayers, mergeVanillaLayers, vanillaShapes, vanillaEntityTable, addonEntityTable, addonBlockIndex,
+  decodePng, decodeTga, encodePng, entityMaterials, entityTextureImages, equipmentImages, blockTextureData, itemEdges, readZip, zip };

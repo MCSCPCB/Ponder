@@ -3,6 +3,28 @@ widgets.png and logo.png are copied unchanged from Ponder
 water_overlay.png is this project's own: one flat colour, as Java Edition's water_overlay is,
 which Bedrock Edition does not have.
 
+glint_entity.png and glint_item.png are derived from Minecraft Java Edition 1.21.1's
+assets/minecraft/textures/misc/enchanted_glint_entity.png and enchanted_glint_item.png.
+Their RGB is squared for additive compositing, matching GL_SRC_COLOR, GL_ONE.
+Client archive SHA-1: 30c73b1c5da787909b2f73340419fdf13b9def88.
+end_gateway_beam.png is copied unchanged from the same archive's
+assets/minecraft/textures/entity/end_gateway_beam.png. Rebuild these assets with
+node tools/adapter/generate-assets.js.
+items/*.png are the same client's item layers without an identical Bedrock image.
+Layers also present in Bedrock use pack:// references, and empty layers are omitted.
+Particle sprites with identical Bedrock pixels use the native sheets directly.
+particles/*.png contains only the remaining Java sprites, including bubble pops,
+critical hits, damage indicators and nautilus particles.
+Rebuild the remaining item layers and client data with
+node tools/adapter/generate-client-data.js (Java 21 or newer).
+These Minecraft textures belong to Mojang Studios; the MIT notices below do not
+apply to them.
+
+The Bedrock item stack limits and data-driven item components in vanilla_blocks.json
+are derived from PrismarineJS/minecraft-data, data/bedrock/1.26.51/items.json,
+commit bd8b5c6048e5af9694374b83f25f5b4aade619cc. Its README declares the MIT licence.
+The pinned source and upstream notice are in tools/data/bedrock-1.26.51/.
+
 MIT License
 
 Copyright (c) 2022 The Create Team

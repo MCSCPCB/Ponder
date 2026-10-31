@@ -38,7 +38,7 @@
   class PonderIndexScreen extends P.Screen {
     init() {
       super.init();
-      this.items = P.indexedItems().sort(byLocation);
+      this.items = P.indexedItems().filter(P.isItem).sort(byLocation);
       const W = this.width, H = this.height, cx = P.int(W / 2), cy = P.int(H / 2);
       const targetW = P.clamp(W - 180, 250, 400), targetH = P.clamp(H - 140, 150, 300);
       this.maxScreenArea = { x: cx - P.int(targetW / 2), y: cy - P.int(targetH / 2), w: targetW, h: targetH };
@@ -55,7 +55,7 @@
     }
     setupPage() {
       const state = this.pagination, cx = P.int(this.width / 2), cy = P.int(this.height / 2);
-      this.widgets = this.widgets.filter(w => w === this.backTrack || w === this.prevPage || w === this.nextPage);
+      this.widgets = this.widgets.filter(w => w === this.backTrack || w === this.settingsButton || w === this.exitButton || w === this.prevPage || w === this.nextPage);
       this.pageItems = [];
       const rows = P.clamp(Math.ceil(state.currentPageCount() / this.maxItemsPerRow), 1, this.maxItemRows);
       const layout = P.centeredHorizontal(state.currentPageCount(), rows, 28, 28, 8);
@@ -64,7 +64,7 @@
         const id = this.items[iOverall];
         const b = new P.PonderButton(cx + layout.x + 4, cy + layout.y + 4).showingItem(id).withCallback((mx, my) => {
           this.centerScalingOn(mx, my);
-          P.screens.transitionTo(new P.PonderUI(id));
+          P.showScenes(id);
         });
         this.pageItems.push(b);
         this.widgets.push(b);
@@ -73,8 +73,7 @@
     }
     initBackTrackIcon(b) { b.showing(P.Icons.IDENTIFY); }
     isEquivalentTo(other) { return other instanceof PonderIndexScreen; }
-    tick() { super.tick(); P.ticks++; }
-    render(mx, my, pt) {
+    render(mx, my, pt, previous) {
       const d = this.d, cx = P.int(this.width / 2), cy = P.int(this.height / 2);
       d.begin();
       this.renderBackTrack(d, mx, my, pt);
@@ -94,7 +93,7 @@
       this.renderBackTrackCaption(d);
       let hovered = null;
       this.pageItems.forEach(b => { if (b.item && b.isMouseOver(mx, my)) hovered = b.item; });
-      if (hovered) P.tooltip(d, mx, my, [[P.itemName(hovered), P.color(0xffffffff, true)]], 9999);
+      if (hovered) P.itemTooltip(d, mx, my, hovered, pt, previous);
       d.end();
     }
   }
@@ -113,7 +112,7 @@
       this.prevPage.updateGradientFromState();
     }
     setupPage() {
-      this.widgets = this.widgets.filter(w => w === this.backTrack || w === this.prevPage || w === this.nextPage);
+      this.widgets = this.widgets.filter(w => w === this.backTrack || w === this.settingsButton || w === this.exitButton || w === this.prevPage || w === this.nextPage);
       this.entries = [];
       const xOffset = P.int(this.width * 0.5);
       let yOffset = 140;
@@ -128,14 +127,13 @@
           this.widgets.push(b);
           layout.next();
         });
-        const mod = P.plugins.find(p => p.modId === entry[0]);
+        const mod = P.plugins.find(p => p.getModId() === entry[0]);
         this.entries.push({ name: (mod && mod.name) || entry[0], count: tags.length, area: layout.area, y: yOffset });
         yOffset += 68;
       });
     }
     initBackTrackIcon(b) { b.showing(P.Icons.IDENTIFY); }
-    tick() { super.tick(); P.ticks++; }
-    render(mx, my, pt) {
+    render(mx, my, pt, previous) {
       const d = this.d, W = this.width, cx = W / 2;
       d.begin();
       this.renderBackTrack(d, mx, my, pt);

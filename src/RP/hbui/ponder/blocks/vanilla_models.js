@@ -20,10 +20,11 @@
   });
   // The form drawn: the first of "<mounting>-<value>", "<value>", "<mounting>" and "default" the
   // family has, the mounting from the first `pick` rule that matches, the value from `data`.
-  function formOf(family, states) {
+  function formOf(family, states, nbt) {
     const pick = (family.pick || []).filter(r => matches(states, r.when))[0];
     const mount = pick ? pick.form : "default", data = family.data || {};
     let value = "0";
+    if (data.entity && nbt && data.entity in nbt) value = plain(nbt[data.entity]);
     (data.number || []).forEach(s => { if (s in states) value = String(parseInt(plain(states[s]), 10)); });
     const joined = (data.join || []).filter(s => s in states).map(s => plain(states[s]));
     if (joined.length) value = joined.join("-");
@@ -96,7 +97,7 @@
     if (familyName === "ignore") return { id, shape: "model", quads: [], faces: {}, tint: null, full: false, opaque: false };
     const family = shapes().families[familyName];
     if (!family) return null;
-    const states = P.blockStates(block), formName = formOf(family, states), form = family.forms[formName];
+    const states = P.blockStates(block), formName = formOf(family, states, P.blockNbt(block)), form = family.forms[formName];
     const turn = turnOf(family, states), table = shapes().rotations[familyName];
     const angles = turn != null && table ? table[formName + ":" + turn] || table[turn] || null : null;
     const turned = !!angles && angles.some(Boolean), index = textureIndexOf(family, states);
@@ -105,11 +106,12 @@
     // Minecraft's angles about the form's centre, as the bone Scaffold writes would turn.
     const m = turned ? bone(M.id(), [1 - form.center[0], form.center[1], form.center[2]], [angles[0], -angles[1], -angles[2]]) : M.id();
     const tint = id === "minecraft:redstone_wire" ? P.wireColor(states.redstone_signal || 0) : null;
-    const quads = [];
+    const quads = [], boxes = [];
     form.cubes.forEach(c => {
       const o = c.offset, s = c.size;
       const lo = [1 - o[0] - s[0], o[1], o[2]], hi = [1 - o[0], o[1] + s[1], o[2] + s[2]];
       const t = c.rotation ? bone(m, [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2], c.rotation) : m;
+      boxes.push({ lo, hi, matrix: t });
       Object.keys(c.faces).forEach(face => {
         const f = c.faces[face], tex = f.texture || null, p = facePath(name, face, tex, index), entry = p && P.vanilla.textures[p];
         if (!entry) return;
@@ -123,7 +125,7 @@
     const whole = !!only && isWhole(only) && (!angles || angles.every(a => a % 90 === 0));
     const first = quads[0] ? quads[0].look.tex.url : null, faces = {};
     FACES.forEach(f => { const p = facePath(name, f, null, index), e = p && P.vanilla.textures[p]; faces[f] = e ? P.textureOf(e).url : first; });
-    return { id, shape: "model", quads, faces, tint, full: whole, opaque: whole && !P.isTransparent(name) };
+    return { id, shape: "model", quads, boxes, faces, tint, full: whole, opaque: whole && !P.isTransparent(name) };
   }
 
   // Redstone dust's joins. Bedrock keeps none before 26.60 (redstone_<side> after), so they are

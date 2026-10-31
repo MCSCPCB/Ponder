@@ -6,8 +6,8 @@
 
 ## 准备
 
-- Minecraft 基岩版 1.26.51。
-- 启用了 Ponder 的行为包和资源包（`src/BP`、`src/RP`）的世界。
+- Minecraft 基岩版 1.26.60.4。项目源码以 1.26.51 为开发基准。
+- 启用了适配器产出的 Ponder 行为包、资源包和测试版 API 的世界；构建方式见[构建与资料](../README.md#构建与资料)。
 - 起一个插件命名空间 `modId`，全小写，只用字母、数字和下划线。本教程用 `my_lamp`。
 
 ## 第 1 步：建目录
@@ -116,21 +116,21 @@ world.afterEvents.worldLoad.subscribe(() => {
     scene.showBasePlate();
     scene.idle(10);
 
-    scene.world.showSection(util.select.position(2, 1, 2), "DOWN");
+    scene.world().showSection(util.select().position(2, 1, 2), "DOWN");
     scene.idle(10);
-    scene.overlay.showText(60)
+    scene.overlay().showText(60)
       .text("A Redstone Lamp stays dark on its own")
-      .pointAt(util.vector.centerOf(2, 1, 2))
+      .pointAt(util.vector().centerOf(2, 1, 2))
       .placeNearTarget()
       .attachKeyFrame();
     scene.idle(70);
 
-    scene.world.showSection(util.select.position(1, 1, 2), "EAST");
+    scene.world().showSection(util.select().position(1, 1, 2), "EAST");
     scene.idle(10);
-    scene.world.setBlock([2, 1, 2], "minecraft:lit_redstone_lamp");
-    scene.overlay.showText(60)
+    scene.world().setBlock([2, 1, 2], "minecraft:lit_redstone_lamp");
+    scene.overlay().showText(60)
       .text("Any redstone signal next to it lights it up")
-      .pointAt(util.vector.centerOf(2, 1, 2))
+      .pointAt(util.vector().centerOf(2, 1, 2))
       .placeNearTarget()
       .attachKeyFrame();
     scene.idle(70);
@@ -139,7 +139,7 @@ world.afterEvents.worldLoad.subscribe(() => {
   }
 
   P.addPlugin({
-    modId: "my_lamp",
+    getModId() { return "my_lamp"; },
     name: "My Lamp",
     registerScenes(helper) {
       helper.addStoryBoard("minecraft:redstone_lamp", schematic, lamp);
@@ -156,7 +156,7 @@ world.afterEvents.worldLoad.subscribe(() => {
 
 ## 第 5 步：翻译
 
-`.text()` 和 `title()` 里写的是英文默认，Ponder 先按翻译键查找，找不到才用它。键按 `.text()` 的调用顺序编号：
+`.text()` 和 `title()` 里保留场景的英文原文，实际显示从语言文件读取；缺少翻译时显示键本身。作者需要维护 `en_US.lang` 和其他语言文件，适配器不生成翻译。键按 `.text()` 的调用顺序编号：
 
 `RP/texts/zh_CN.lang`：
 
@@ -166,17 +166,17 @@ my_lamp.ponder.lamp.text_1=红石灯自己不会发光
 my_lamp.ponder.lamp.text_2=旁边有任何红石信号都会把它点亮
 ```
 
-`en_US.lang` 照同样的键写英文。`languages.json` 写 `["en_US", "zh_CN"]`。
+`en_US.lang` 按同样的键写英文。`languages.json` 写 `["en_US", "zh_CN"]`。
 
 ## 第 6 步：试一下
 
-1. 把 `BP` 和 `RP` 分别放进 `development_behavior_packs` 和 `development_resource_packs`。
-2. 在已启用 Ponder 的世界里同时启用这两个包。
+1. 运行 `node tools/adapter/adapt.js 1.26.60.4 src my_lamp`，生成目标版本的数据和安装包。
+2. 导入 `tools/output/1.26.60.4/` 中的 Ponder 与 My Lamp 包，在世界里同时启用它们。
 3. 进入世界，拿着红石灯使用，或者输入 `/ponder:ponder minecraft:redstone_lamp`。
 
 如果界面里没有你的场景，先检查：
 
-- 报到的 `modId` 和 `P.addPlugin` 的 `modId` 是否一致。
+- 报到的 `modId` 和 `P.addPlugin` 的 `getModId()` 是否一致。
 - `script` 路径是否从 `hbui/` 之后写起。
 - 资源包根目录有没有 `content.zipe`。
 

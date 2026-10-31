@@ -2,15 +2,29 @@
 (function () {
   const P = window.Ponder;
 
+  let nextLink = 0;
+  class ElementLink {
+    constructor(type) { this.type = type; this.id = ++nextLink; }
+    getId() { return this.id; }
+    cast(element) {
+      if (element != null && !(element instanceof this.type)) throw new TypeError("ElementLink type mismatch");
+      return element;
+    }
+  }
+  P.ElementLink = ElementLink;
+
   class PonderScene {
     constructor(world, id, tags) {
       this.world = world;
       this.id = id;
+      this.location = id;
       this.title = "";
       this.tags = tags || [];
       this.elements = [];
       this.linked = new Map();
       this.schedule = [];
+      this.entityTypes = [];
+      this.prepare = [];
       this.activeSchedule = [];
       this.keyframeTimes = [];
       this.basePlateOffsetX = this.basePlateOffsetZ = 0;
@@ -41,7 +55,8 @@
       this.keyframeTimes = [];
       this.transform = new P.SceneTransform(this);
       this.finished = false;
-      this.pointOfInterest = this.chasingPoi = [0, 4, 0];
+      this.chasingPoi = [0, 4, 0];
+      this.baseWorldSection.reset(this);
       this.baseWorldSection.setEmpty();
       this.baseWorldSection.forceApplyFade(1);
       this.addElement(this.baseWorldSection);
@@ -73,18 +88,61 @@
       if (this.activeSchedule.length === 0) this.finished = true;
     }
     seekToTime(time) {
-      while (this.currentTime < time && !this.finished) this.tick();
+      if (time < this.currentTime) throw new RangeError("Cannot seek backwards without restarting the scene");
+      while (this.currentTime < time && !this.finished) { this.tick(); this.forEach(e => e.whileSkipping(this)); }
       this.forEach(P.WorldSectionElement, e => e.queueRedraw());
     }
     addToSceneTime(t) { if (!this.stoppedCounting) this.totalTime += t; }
     stopCounting() { this.stoppedCounting = true; }
     markKeyframe(offset) { if (!this.stoppedCounting) this.keyframeTimes.push(this.totalTime + offset); }
     setPointOfInterest(poi) { this.chasingPoi = poi; }
-    resolve(link) { return this.linked.get(link) || null; }
-    linkElement(e, link) { this.linked.set(link, e); }
+    resolve(link) { return link.cast(this.linked.get(link.getId()) || null); }
+    resolveOptional(link) {
+      const value = this.resolve(link);
+      return { isPresent: () => value != null, isEmpty: () => value == null,
+        ifPresent: fn => { if (value != null) fn(value); }, orElse: other => value == null ? other : value,
+        get: () => { if (value == null) throw new Error("No linked element"); return value; } };
+    }
+    runWith(link, callback) { callback(this.resolve(link)); }
+    applyTo(link, fn) { return fn(this.resolve(link)); }
+    linkElement(e, link) { this.linked.set(link.getId(), link.cast(e)); }
     addElement(e) { if (this.elements.indexOf(e) < 0) this.elements.push(e); }
-    forEach(type, fn) { this.elements.forEach(e => { if (e instanceof type) fn(e); }); }
-    forEachVisible(type, fn) { this.elements.forEach(e => { if (e instanceof type && e.visible) fn(e); }); }
+    forEach(type, fn) { if (!fn) this.elements.forEach(type); else this.elements.forEach(e => { if (e instanceof type) fn(e); }); }
+    forEachVisible(type, fn) { this.elements.forEach(e => { if (e instanceof type && e.isVisible()) fn(e); }); }
+    forEachWorldEntity(type, fn) { this.world.entityList().forEach(e => { if (e instanceof type) fn(e); }); }
+    builder() { return new P.SceneBuilder(this); }
+    getSceneBuildingUtil() { return P.sceneUtil(this.world.size); }
+    getWorld() { return this.world; }
+    getTransform() { return this.transform; }
+    getOutliner() { return this.outliner; }
+    getId() { return this.id; }
+    getLocation() { return this.location; }
+    getBaseWorldSection() { return this.baseWorldSection; }
+    getPointOfInterest() { return this.pointOfInterest; }
+    getBasePlateOffsetX() { return this.basePlateOffsetX; }
+    getBasePlateOffsetZ() { return this.basePlateOffsetZ; }
+    getBasePlateSize() { return this.basePlateSize; }
+    getScaleFactor() { return this.scaleFactor; }
+    getYOffset() { return this.yOffset; }
+    getTotalTime() { return this.totalTime; }
+    getCurrentTime() { return this.currentTime; }
+    getNamespace() { return this.namespace; }
+    getTitle() { return this.title; }
+    getString(key, ...params) {
+      const full = this.id.replace(":", ".ponder.") + "." + key;
+      return P.format(P.localize(full, (this.registeredText || P.registeredText).get(full)), ...params);
+    }
+    getTags() { return this.tags.map(P.tag); }
+    getElements() { return new Set(this.elements); }
+    getOrderingEntries() { return this.ordering; }
+    getBounds() { return this.world.getBounds(); }
+    shouldHidePlatformShadow() { return this.hidePlatformShadow; }
+    setNextUpEnabled(enabled) { this.nextUpEnabled = enabled; }
+    isNextUpEnabled() { return this.nextUpEnabled; }
+    getKeyframeCount() { return this.keyframeTimes.length; }
+    getKeyframeTime(index) { return this.keyframeTimes[index]; }
+    isFinished() { return this.finished; }
+    setFinished(finished) { this.finished = finished; }
   }
   P.PonderScene = PonderScene;
 
@@ -166,7 +224,7 @@
       this.element.visible = true;
       this.element.setFade(0);
       this.element.fadeVec = P.fadeVecOf(this.fadeInFrom) || [0, 0, 0];
-      if (this.link) scene.linked.set(this.link, this.element);
+      if (this.link) scene.linkElement(this.element, this.link);
     }
     tick(scene) {
       super.tick(scene);

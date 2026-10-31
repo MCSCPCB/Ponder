@@ -5,7 +5,6 @@
 // without any looks like a new one (BLANK).
 (function () {
   const P = window.Ponder, M = P.Mat;
-  const S = 64; // both models' texture size (LayerDefinition.create(mesh, 64, 64))
 
   // What a new bed's and banner's block entity holds: a red bed, a white banner.
   const BLANK = { bed: { id: "Bed", color: 14 }, standing_banner: { id: "Banner", Base: 15, Patterns: [], Type: 0 } };
@@ -21,6 +20,7 @@
   // DyeColor.getTextureDiffuseColor, white to black.
   const DYES = [0xF9FFFE, 0xF9801D, 0xC74EBD, 0x3AB3DA, 0xFED83D, 0x80C71F, 0xF38BAA, 0x474F52,
     0x9D9D97, 0x169C9C, 0x8932B8, 0x3C44AA, 0x835432, 0x5E7C16, 0xB02E26, 0x1D1D21].map(c => [(c >> 16) / 255, ((c >> 8) & 255) / 255, (c & 255) / 255]);
+  P.dyeColors = DYES;
 
   // ModelPart.Cube: the box at (x, y, z) of size (w, h, d) pixels, under matrix m. Its faces'
   // texture rectangles [u0, v0, u1, v1] are `rects`, else a box's laid out from `uv` (texOffs);
@@ -36,7 +36,7 @@
     };
     Object.keys(CORNERS).forEach(f => {
       if (!r[f]) return;
-      const [a, b, c, e] = r[f].map(n => n / S);
+      const [a, b, c, e] = r[f].map((n, i) => n / (i % 2 ? look.tex.h : look.tex.w));
       P.blockPolygon(out, m, CORNERS[f].map(i => pts[i]), [[c, b], [a, b], [a, e], [c, e]], look, false);
     });
   }
@@ -46,6 +46,8 @@
     const deg = 180 / Math.PI;
     return M.scale(M.rotX(M.rotY(M.rotZ(M.translate(m, x / 16, y / 16, z / 16), zRot * deg), yRot * deg), xRot * deg), 1 / 16, 1 / 16, 1 / 16);
   };
+  P.modelCube = cube;
+  P.modelPart = part;
   const look = (tex, color) => ({ tex, color: color || null, dim: true, solid: true });
   const planks = () => P.textureOf(P.vanilla.textures[P.vanilla.blockEntities.particle]).url;
   const sixFaces = url => { const f = {}; Object.keys(P.FACES).forEach(k => { f[k] = url; }); return f; };

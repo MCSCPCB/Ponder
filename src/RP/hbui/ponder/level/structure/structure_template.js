@@ -22,6 +22,8 @@
     return { size: { x: sx, y: sy, z: sz }, blocks };
   }
 
+  P.structureFromTag = fromTag;
+
   function load(path) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();

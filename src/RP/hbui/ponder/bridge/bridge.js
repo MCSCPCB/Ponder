@@ -1,5 +1,5 @@
 // Talks to the server's data-driven form the way the vanilla bundle does (read from its
-// 1.26.40 build): queries go over window.engine ("query:subscribe/<name>" -> "query:updated/<id>"),
+// 1.26.51 build): queries go over window.engine ("query:subscribe/<name>" -> "query:updated/<id>"),
 // button presses through window.__commands__. The form the behavior pack opens carries the
 // marker "ponder:<item id>#<stamp>;"; while it is up, Ponder covers it and vanilla's #root is
 // hidden. The stamp is new for every form, so one opened right after another for the same item
@@ -12,9 +12,9 @@
   const GROUP = "vanillaCoreDataStoreSetCommandGroup";
   const bridge = (P.bridge = { screenId: "", definition: "", tree: null, data: {}, form: null, item: null, onOpen: null, onClose: null });
 
-  // Vanilla ids are uint32 hashes, passed as strings up to 1.26.51 and as numbers from 1.26.60;
-  // tools/adapter sets QUERY_ID for the target version. Ours count down from the top of the range.
-  const QUERY_ID = "ponder:query-id/string";
+  // Vanilla ids are uint32 hashes. The 1.26.51 baseline passes numbers; tools/adapter detects
+  // the target driver's type and sets QUERY_ID. Ours count down from the top of the range.
+  const QUERY_ID = "ponder:query-id/number";
   let nextId = 0xffffffff;
   // Set while Ponder itself triggers, so the debug trace can tell its calls from vanilla's.
   let ours = false;
@@ -33,6 +33,16 @@
       engine.off(`query:updated/${id}`, handler);
       send(["query:unsubscribe", id]);
     };
+  }
+
+  // The display query's base + modifier is vanilla's GuiScaleProvider scale.
+  function watchClient() {
+    subscribe("core.device.display", [], value => {
+      if (!value || !(value.guiScaleBase > 0)) return;
+      P.guiScale = value.guiScaleBase + (value.guiScaleModifier || 0) + (value.guiAccessibilityScaling ? 1 : 0);
+      P.updateView();
+      if (P.screens.current) P.screens.current.init();
+    });
   }
 
   // Every string in the definition tree, with dynamicAttribs (a JSON string per node) unpacked.
@@ -111,34 +121,32 @@
 
   // bridge.form is the form on screen, "<item id>#<stamp>", and `closed` the last one Ponder
   // closed itself: a closed form's data can stay as it was (1.26.60), so that one is not read as
-  // open again. `gaveUp` is set when Ponder shows nothing for the form, which is then vanilla's.
-  let closed = null, gaveUp = false;
+  // open again. A form with no scene is closed through the same native binding.
+  let closed = null;
   function poll() {
     let form = find(MARKER);
+    if (!form && !bridge.form) setVanillaHidden(false);
     if (form === closed) form = null;
     if (form === bridge.form) return;
-    if (bridge.form && !gaveUp && bridge.onClose) bridge.onClose();
+    if (bridge.form && bridge.onClose) bridge.onClose();
     bridge.form = form;
     bridge.item = form && form.slice(0, form.lastIndexOf("#"));
-    gaveUp = false;
     setVanillaHidden(!!form);
     if (!form) return;
-    const giveBack = () => {
+    const dismiss = () => {
       if (bridge.form !== form) return;
-      gaveUp = true;
-      if (bridge.onClose) bridge.onClose();
-      setVanillaHidden(false);
+      bridge.close();
     };
-    // onOpen resolves to false when there is nothing to show, and the vanilla form comes back,
-    // as it does when opening fails.
-    new Promise(resolve => resolve(bridge.onOpen(bridge.item, findAddons()))).then(shown => { if (!shown) giveBack(); },
-      e => { P.log("open failed:", e && e.message); giveBack(); });
+    new Promise(resolve => resolve(bridge.onOpen(bridge.item, findAddons()))).then(shown => { if (!shown) dismiss(); },
+      e => { P.log("open failed:", e && e.message); dismiss(); });
   }
 
   // Presses the vanilla button showing `label`: the innermost element with that text gets the
   // pointer and mouse events a press makes, bubbling to whatever handler the button has.
   function pressByLabel(label) {
-    const all = document.getElementById("root").getElementsByTagName("*");
+    const root = document.getElementById("root");
+    if (!root) return;
+    const all = root.getElementsByTagName("*");
     let target = null;
     for (let i = 0; i < all.length; i++) {
       const el = all[i], text = el.textContent || el.getAttribute("text") || "";
@@ -197,7 +205,7 @@
     // The form takes a moment to go; vanilla's #root stays hidden meanwhile so it does not flash,
     // and shows again if the form is still there (the close did not take).
     setVanillaHidden(true);
-    setTimeout(() => { if (!bridge.form) setVanillaHidden(false); }, 500);
+    setTimeout(() => { if (!bridge.form && find(MARKER) !== closed) setVanillaHidden(false); }, 500);
   };
 
   // Test aid (P.DEBUG). Logs the first time vanilla sends each data-driven query, and checks each
@@ -233,8 +241,18 @@
   bridge.start = function () {
     const engine = window.engine;
     if (engine && engine.on) {
+      // Native events use the same dispatcher as queries. While our form is covered, only
+      // Ponder handles controller input; the invisible vanilla button must not receive A/B.
+      const trigger = engine.trigger;
+      engine.trigger = function (name) {
+        const event = /^engine:gamepad:(onPress|onLongPress|onRelease|onJoystickMovement)$/.exec(name);
+        if (bridge.form && P.screens.current && event) { P.input.gamepad(event[1], Array.prototype.slice.call(arguments, 1)); return; }
+        if (bridge.form && P.screens.current && name === "core:touchdevice:back") { P.input.back(); return; }
+        return trigger.apply(this, arguments);
+      };
       if (P.DEBUG) traceVanilla(engine);
       watchScreen();
+      watchClient();
     } else P.log("no window.engine; marker found from the DOM only");
     setInterval(poll, 100);
   };

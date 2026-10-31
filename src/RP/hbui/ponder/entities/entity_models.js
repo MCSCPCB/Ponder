@@ -8,8 +8,8 @@
   // The tables tools/adapter writes: vanilla's (hbui/ponder/entities/vanilla_entities.json) and
   // each add-on's (hbui/ponder_addons/<folder>/ponder_entities.json), merged by name, an
   // add-on's over vanilla's.
-  const TABLES = ["entities", "geometries", "animations", "controllers", "renders", "textures"];
-  P.entityData = { entities: {}, geometries: {}, animations: {}, controllers: {}, renders: {}, textures: {} };
+  const TABLES = ["entities", "attachables", "geometries", "animations", "controllers", "renders", "textures", "materials", "equipment"];
+  P.entityData = { entities: {}, attachables: {}, geometries: {}, animations: {}, controllers: {}, renders: {}, textures: {}, materials: {}, equipment: {} };
   const merge = t => TABLES.forEach(k => Object.assign(P.entityData[k], t[k] || {}));
   let vanillaLoaded = null;
   const addonsLoaded = new Set();
@@ -21,29 +21,63 @@
     })));
   };
 
-  // Vanilla's entity materials as Ponder draws them: "opaque" ignores the texture's alpha (there
-  // it is a mask: a sheep's wool, a spider's eyes), "cutout" hides only clear pixels, "blend"
-  // mixes by alpha, "none" draws nothing; `cull` leaves out faces turned away. Any other
-  // material is cutout and not culled, as most of vanilla's are (entity_alphatest).
-  const MATERIALS = {};
-  const set = (names, look) => names.split(" ").forEach(n => { MATERIALS[n] = look; });
-  set("entity entity_static entity_emissive agent blaze_body camera chicken chicken_cold cow cow_cold creeper dolphin fox leash_knot llama "
-    + "llama_spit mooshroom panda pig pig_v3 polar_bear rabbit silverfish snow_golem snow_golem_pumpkin squid glow_squid turtle bell chest "
-    + "piston_arm player shield trident enchanting_table_book boat", { mode: "opaque", cull: true });
-  set("sheep wolf entity_change_color entity_nocull", { mode: "opaque", cull: false });
-  set("ender_dragon entity_emissive_alpha_one_sided", { mode: "cutout", cull: true });
-  set("slime_outer guardian_ghost entity_alphablend entity_alphablend_nocolor", { mode: "blend", cull: true });
-  set("charged_creeper wither_boss_armor experience_orb entity_beam_additive player_spectator breeze_wind sulfur_cube_outer "
-    + "warden_bioluminescent_layer", { mode: "blend", cull: false });
-  set("entity_dissolve_layer0", { mode: "none", cull: true });
-  const CUTOUT = { mode: "cutout", cull: false };
-  const materialOf = name => MATERIALS[String(name).split(".")[0]] || CUTOUT;
+  // The adapter resolves the game's material inheritance and skinning variants. Alpha masks
+  // remain separate images so the UI never tries to recover RGB from premultiplied alpha.
+  const materialOf = name => {
+    const material = P.entityData.materials[name] || P.entityData.materials[String(name).split(".")[0]];
+    const flags = material ? material.defines || [] : ["ALPHA_TEST"], states = material ? material.states || [] : ["DisableCulling"];
+    const mask = flags.includes("USE_COLOR_MASK"), emissive = flags.includes("USE_EMISSIVE"), only = flags.includes("USE_ONLY_EMISSIVE");
+    const sourceOne = material && material.blendSrc === "One", additive = material && material.blendDst === "One";
+    const blend = states.includes("Blending") && !sourceOne, test = flags.includes("ALPHA_TEST");
+    const mode = states.includes("DisableColorWrite") ? "none" : blend ? "blend" : test ? "cutout" : "opaque";
+    const alpha = blend ? test ? "blendCutout" : "blend" : test ? "cutout" : "opaque";
+    const image = (emissive ? only ? "emissiveOnly_" : "emissive_" : mask ? "mask_" : "") + alpha;
+    return { mode, image, alpha, mask, emissive, only, additive, overlay: flags.includes("USE_OVERLAY"), glint: flags.includes("GLINT"), cull: !states.includes("DisableCulling") };
+  };
 
-  // A colour matrix filter: rgb times `c`, and alpha as the material wants it. An opaque one is
-  // drawn as a cutout too (alpha times 255): only the clear pixels, which faces rarely show, differ.
-  const filterOf = (c, mode, alpha) => {
-    const a = mode === "blend" ? alpha.toFixed(3) + ", 0" : "255, 0";
-    return `coh-color-matrix(${c[0].toFixed(3)}, 0, 0, 0, 0, 0, ${c[1].toFixed(3)}, 0, 0, 0, 0, 0, ${c[2].toFixed(3)}, 0, 0, 0, 0, 0, ${a})`;
+  // Prepare only types named by the storyboard. Each job reads definitions, never an entity
+  // factory, setup callback or animation query. Variants share geometry and image caches.
+  P.entityPreparation = function (types) {
+    const jobs = [], seen = new Set();
+    let faces = 0;
+    types.forEach(type => {
+      const def = P.entityData.entities[type] || P.entityData.attachables[type];
+      if (!def) return;
+      const geometries = Object.values(def.geometry), controllers = def.render_controllers.length
+        ? [].concat(...def.render_controllers.map(r => typeof r === "string" ? [r] : Object.keys(r))) : [DEFAULT_RENDER];
+      const count = Math.max(def.renderer === "boat" ? 78 : 0, ...geometries.map(id => {
+        const g = P.entityData.geometries[id];
+        return g ? g.bones.reduce((n, b) => n + (b.cubes || []).length * 6, 0) : 0;
+      }));
+      const layers = controllers.reduce((n, id) => n + ((P.entityData.renders[id] || {}).textures || []).length, 0);
+      faces += count * Math.max(1, layers) * (Object.values(def.materials).some(name => { const look = materialOf(name); return look.mask || look.emissive; }) ? 2 : 1);
+      if (seen.has(type)) return;
+      seen.add(type);
+      geometries.forEach(id => jobs.push(() => P.entityGeometry(id)));
+      controllers.forEach(id => jobs.push(() => controllerContext(type, def, id)));
+      const modes = new Set();
+      Object.values(def.materials).forEach(name => {
+        const look = materialOf(name);
+        modes.add(look.image);
+        if (look.mask) modes.add(look.alpha);
+        if (look.mask || look.emissive) modes.add(look.image + "Layer");
+      });
+      if (!modes.size) modes.add("cutout");
+      if (controllers.some(id => ((P.entityData.renders[id] || {}).textures || []).length > 1)) modes.add("blend");
+      Object.values(def.textures).forEach(id => {
+        const entry = P.entityData.textures[id];
+        if (entry) modes.forEach(mode => { if (mode !== "none") jobs.push(() => P.preloadTexture(P.textureOf(entry, mode).url)); });
+      });
+    });
+    return { jobs, faces };
+  };
+
+  // RGB shading and a bounded blend opacity. Opaque/cutout alpha is prepared in the image by
+  // the adapter: Gameface multiplies RGB by the matrix's output alpha without clamping it.
+  const filterOf = (c, mode, alpha, offset) => {
+    const a = mode === "blend" ? Math.max(0, Math.min(1, alpha)).toFixed(3) : "1";
+    const o = (offset || [0, 0, 0]).map(v => v.toFixed(3));
+    return `coh-color-matrix(${c[0].toFixed(3)}, 0, 0, 0, ${o[0]}, 0, ${c[1].toFixed(3)}, 0, 0, ${o[1]}, 0, 0, ${c[2].toFixed(3)}, 0, ${o[2]}, 0, 0, 0, ${a}, 0)`;
   };
 
   // ---- geometry ----
@@ -64,41 +98,6 @@
     south: [f => [f.f[0], f.t[1], f.t[2]], f => [f.t[0], f.t[1], f.t[2]], f => [f.f[0], f.f[1], f.t[2]], f => [f.t[0], f.f[1], f.t[2]], [0, 0, 1]],
     north: [f => [f.t[0], f.t[1], f.f[2]], f => [f.f[0], f.t[1], f.f[2]], f => [f.t[0], f.f[1], f.f[2]], f => [f.f[0], f.f[1], f.f[2]], [0, 0, -1]],
   };
-  // Box UV: where each face's piece starts and how far it runs (negative: flipped), for a box of
-  // size s (whole pixels), mirrored by swapping east and west and flipping each across.
-  function boxUv(s, mirror) {
-    const list = {
-      east: [0, s[2], s[2], s[1]], west: [s[2] + s[0], s[2], s[2], s[1]], up: [s[2] + s[0], s[2], -s[0], -s[2]],
-      down: [s[2] + s[0] * 2, 0, -s[0], s[2]], south: [s[2] * 2 + s[0], s[2], s[0], s[1]], north: [s[2], s[2], s[0], s[1]],
-    };
-    if (mirror) {
-      Object.values(list).forEach(f => { f[0] += f[2]; f[2] = -f[2]; });
-      const e = list.east; list.east = list.west; list.west = e;
-    }
-    return list;
-  }
-  // A face's own size in pixels, the uv_size a face without one takes.
-  const FACE_SIZE = { east: s => [s[2], s[1]], west: s => [s[2], s[1]], up: s => [s[0], s[2]], down: s => [s[0], s[2]], south: s => [s[0], s[1]], north: s => [s[0], s[1]] };
-  // Pixel corners [u0, v0, u1, v1] of each face the cube shows, and the turn of each. A cube
-  // without uv is box UV from 0, 0.
-  function cubeUv(c, mirror) {
-    const out = {};
-    if (Array.isArray(c.uv) || !c.uv) {
-      const at = c.uv || [0, 0], s = c.size.map(v => Math.floor(Math.abs(v) + 1e-7)), list = boxUv(s, mirror);
-      Object.keys(list).forEach(k => { const f = list[k]; out[k] = { uv: [at[0] + f[0], at[1] + f[1], at[0] + f[0] + f[2], at[1] + f[1] + f[3]], turn: 0 }; });
-      return out;
-    }
-    Object.keys(FACES).forEach(k => {
-      const f = c.uv[k];
-      if (!f || !f.uv) return;
-      const size = f.uv_size || FACE_SIZE[k](c.size);
-      let uv = [f.uv[0], f.uv[1], f.uv[0] + size[0], f.uv[1] + size[1]];
-      if (k === "up" || k === "down") uv = [uv[2], uv[3], uv[0], uv[1]];
-      out[k] = { uv, turn: f.uv_rotation || 0 };
-    });
-    return out;
-  }
-
   // A geometry made ready to pose: its bones parents first ({ name (lower case), parent index,
   // pivot, rest (its pivot less its parent's, a root bone's less 0, 24, 0 as Java's model space
   // counts: what `this` starts at in a position channel), bind
@@ -122,7 +121,7 @@
         const pi = parent && depth < 64 ? place(parent, depth + 1) : -1;
         const own = b.pivot || [0, 0, 0], up = (parent && parent.pivot) || [0, 24, 0];
         const bone = { name, parent: pi, rest: [0, 1, 2].map(i => (own[i] || 0) - (up[i] || 0)), pivot: flipPos(b.pivot || [0, 0, 0]), bind: [0, 1, 2].map(i => (b.rotation && b.rotation[i]) || 0),
-          hidden: !!b.neverRender, faces: [] };
+          hidden: !!b.neverRender, binding: b.binding, faces: [] };
         const pv = bone.pivot, bindPose = b.bind_pose_rotation
           ? M.translate(rotate(M.translate(M.id(), pv[0], pv[1], pv[2]), flipRot(b.bind_pose_rotation)), -pv[0], -pv[1], -pv[2]) : M.id();
         (b.cubes || []).forEach(c => cubeFaces(c, b, g, bindPose, bone.faces));
@@ -148,7 +147,9 @@
       const p = c.pivot ? flipPos(c.pivot) : [0, 1, 2].map(i => (from[i] + to[i]) / 2);
       m = M.translate(rotate(M.translate(m, p[0], p[1], p[2]), flipRot(c.rotation)), -p[0], -p[1], -p[2]);
     }
-    const uvs = cubeUv(c, c.mirror === undefined ? bone.mirror === true : c.mirror === true);
+    const uvs = P.cubeUV(c, c.mirror === undefined ? bone.mirror === true : c.mirror === true);
+    const closed = Object.keys(uvs).length === 6 && box.t.every((v, i) => v - box.f[i] > 1e-4)
+      && Object.values(uvs).every(({ uv }) => Math.abs(uv[2] - uv[0]) >= 1e-6 && Math.abs(uv[3] - uv[1]) >= 1e-6);
     Object.keys(uvs).forEach(k => {
       const F = FACES[k], uv = uvs[k].uv;
       const p = [0, 1, 2, 3].map(i => M.apply(m, ...F[i](box)));
@@ -160,7 +161,7 @@
       let at = [[uv[0], uv[1]], [uv[2], uv[1]], [uv[0], uv[3]], [uv[2], uv[3]]].map(q => [q[0] / W, q[1] / H]);
       for (let turn = uvs[k].turn; turn > 0; turn -= 90) at = [at[2], at[0], at[3], at[1]];
       const n = M.apply(m, ...F[4]), z = M.apply(m, 0, 0, 0);
-      out.push({ o: p[0], u: p[1], v: p[2], n: [n[0] - z[0], n[1] - z[1], n[2] - z[2]], st: at });
+      out.push({ o: p[0], u: p[1], v: p[2], n: [n[0] - z[0], n[1] - z[1], n[2] - z[2]], st: at, closed });
     });
   }
 
@@ -226,6 +227,17 @@
   };
   const det3 = m => m[0] * (m[5] * m[10] - m[6] * m[9]) - m[1] * (m[4] * m[10] - m[6] * m[8]) + m[2] * (m[4] * m[9] - m[5] * m[8]);
   const linear = m => [m[0], m[1], m[2], 0, m[4], m[5], m[6], 0, m[8], m[9], m[10], 0, 0, 0, 0, 1];
+  const faceCoverage = new WeakMap();
+  function hasPixels(entry, mode, face) {
+    const regions = entry.coverage && entry.coverage[mode];
+    if (!regions) return true;
+    let cache = faceCoverage.get(regions);
+    if (!cache) faceCoverage.set(regions, (cache = new WeakMap()));
+    if (cache.has(face)) return cache.get(face);
+    const lo = [0, 1].map(i => Math.min(...face.st.map(p => p[i]))), hi = [0, 1].map(i => Math.max(...face.st.map(p => p[i])));
+    const visible = lo.some(v => v < 0) || hi.some(v => v > 1) || regions.some(r => r[0] < hi[0] - 1e-8 && r[2] > lo[0] + 1e-8 && r[1] < hi[1] - 1e-8 && r[3] > lo[1] + 1e-8);
+    cache.set(face, visible); return visible;
+  }
 
   // An entity's faces under `m` (its model space, in pixels, to the GUI) at partial tick pt:
   // { depth, draw(d) } items to sort with the world's. `world` turns model space into the
@@ -233,7 +245,12 @@
   P.clientEntityItems = function (entity, m, world, pt, blockPx, light) {
     const def = entity.definition(), out = [];
     if (!def) return out;
+    // actor.billboard reads the camera in the entity's model frame, including its body turn.
+    entity.animator.cameraMatrix = m;
     const anim = entity.animator, scale = Math.abs(entity.scaleOf(pt)[0]) || 1;
+    const parentVariables = new Map();
+    const equipment = entity.owner ? [] : equipmentOf(entity, parentVariables);
+    entity.boneTransforms = new Map();
     const poses = new Map();
     entity.renderControllers().forEach(rc => {
       const r = P.entityData.renders[rc], ctx = controllerContext(entity.type, def, rc);
@@ -241,16 +258,18 @@
       if (!g) return;
       if (!poses.has(g)) poses.set(g, poseOf(entity, g));
       const bones = poses.get(g);
-      const layers = (r.textures || []).map(t => pick(entity, ctx, t, "texture")).map(t => t && P.entityData.textures[def.textures[t]]).filter(Boolean).map(P.textureOf);
+      g.bones.forEach((b, i) => { if (!entity.boneTransforms.has(b.name)) entity.boneTransforms.set(b.name, { matrix: bones[i], pivot: b.pivot }); });
+      const layers = (r.textures || []).map(t => pick(entity, ctx, t, "texture")).map(t => t && P.entityData.textures[def.textures[t]]).filter(Boolean);
       if (!layers.length) return;
       // Materials and visibility per bone: the last pattern that matches.
       const materials = [];
       (r.materials || []).forEach(o => Object.keys(o).forEach(k => materials.push([k, pick(entity, ctx, o[k], "material")])));
       const shown = [];
       (r.part_visibility || []).forEach(o => Object.keys(o).forEach(k => shown.push([k, !!anim.eval(o[k])])));
-      const color = r.color ? ["r", "g", "b", "a"].map(c => anim.eval(r.color[c], { this: 1 })) : [1, 1, 1, 1];
+      const color = r.color ? ["r", "g", "b", "a"].map(c => anim.eval(r.color[c], { this: 1 })) : entity.color;
       const uvAnim = r.uv_anim ? { offset: (r.uv_anim.offset || [0, 0]).map(v => anim.eval(v)), scale: (r.uv_anim.scale || [1, 1]).map(v => anim.eval(v)) } : null;
       g.bones.forEach((b, i) => {
+        if (entity.boneVisible && !entity.boneVisible(b.name)) return;
         // Visibility per bone: the last pattern that matches.
         let v = true;
         shown.forEach(([k, s]) => { if (matches(k, b.name)) v = s; });
@@ -259,21 +278,70 @@
         materials.forEach(([k, name]) => { if (matches(k, b.name)) mat = name; });
         const look = materialOf(mat ? def.materials[mat] : "");
         if (look.mode === "none") return;
+        const overlay = look.overlay && r.overlay_color ? ["r", "g", "b", "a"].map(c => anim.eval(r.overlay_color[c], { this: 0 })) : [0, 0, 0, 0];
+        const overlayAlpha = P.clamp(overlay[3], 0, 1);
+        // Texture.enchanted is a shader sampler, never a second skin.
+        const textures = layers.filter(entry => !/enchanted_.*glint/.test(entry.file || "")).map((entry, li) => {
+          const mode = li ? "blend" : look.mode, tint = look.mask && color.slice(0, 3).some(v => Math.abs(v - 1) > 1e-6);
+          const imageMode = li ? mode : look.mask && !tint ? look.alpha : look.image;
+          return { entry, imageMode, tex: P.textureOf(entry, imageMode), mode,
+            mask: !li && (tint || look.emissive) ? P.textureOf(entry, look.image + "Layer") : null };
+        });
+        if (entity.owner) equipmentLayers(entity).forEach(layer => textures.push({ entry: layer.entry, imageMode: "blend",
+          tex: P.textureOf(layer.entry), mode: "blend", color: layer.color || [1, 1, 1] }));
         const full = M.mul(m, bones[i]), flip = det3(full) < 0, w = M.mul(world, bones[i]);
         b.faces.forEach(f => {
           const o = M.apply(full, ...f.o), u = M.apply(full, ...f.u), v2 = M.apply(full, ...f.v);
           const nz = (v2[0] - o[0]) * (u[1] - o[1]) - (v2[1] - o[1]) * (u[0] - o[0]);
-          if (look.cull && (flip ? -nz : nz) <= 0) return;
-          const nw = M.apply(linear(w), ...f.n), shade = shadeOf(nw) * light;
+          // A closed opaque box hides its own back faces even with a two-sided material.
+          // Open, flat, cutout and blended parts still need the material's culling rule.
+          if ((look.cull || f.closed && look.mode === "opaque") && (flip ? -nz : nz) <= 0) return;
+          const visibleTextures = uvAnim ? textures : textures.filter(t => hasPixels(t.entry, t.imageMode, f));
+          if (!visibleTextures.length) return;
+          const nw = M.apply(linear(w), ...f.n), shade = (r.ignore_lighting ? 1 : shadeOf(nw)) * light;
           let st = f.st;
           if (uvAnim) st = st.map(q => [q[0] * uvAnim.scale[0] + uvAnim.offset[0], q[1] * uvAnim.scale[1] + uvAnim.offset[1]]);
           const size = Math.min(1024, Math.max(16, Math.round(blockPx * P.view.cssPerGui * (g.width || 16) / 16 * scale)));
           const c = [shade * color[0], shade * color[1], shade * color[2]];
-          out.push({ depth: (u[2] + v2[2]) / 2, draw: d => layers.forEach((tex, li) =>
-            d.texturedQuadMap(tex.url, o, u, v2, st[0], st[1], st[2], [st[0], st[1], st[3], st[2]], filterOf(c, li ? "blend" : look.mode, color[3]), size)) });
+          out.push({ depth: (u[2] + v2[2]) / 2, draw: d => {
+            visibleTextures.forEach(({ tex, mode, mask, color: tint }) => {
+            const draw = (image, rgb, alphaMode, additive, layer) => {
+              // entity.fragment mixes overlayColor after texture tint and before lighting.
+              // A split mask adds the overlay only once, on its base pass.
+              const offset = layer ? null : overlay.slice(0, 3).map(v => v * overlayAlpha * shade);
+              const args = [image.url, o, u, v2, st[0], st[1], st[2], [st[0], st[1], st[3], st[2]], filterOf(rgb.map(v => v * (1 - overlayAlpha)), alphaMode, color[3], offset), size];
+              if (uvAnim) P.repeatTexture(d, ...args, additive ? "additive" : null);
+              else d.texturedQuadMap(...args, null, additive ? "additive" : null);
+            };
+            if (mask) {
+              // RGB is prepared as C*(1-A) and C*A. Only the base attenuates the
+              // backdrop; the second pass adds its contribution at the same opacity.
+              draw(tex, look.emissive ? color.slice(0, 3) : [shade, shade, shade], mode, look.additive);
+              draw(mask, c, mode, true, true);
+            } else draw(tex, tint ? tint.map(v => v * shade) : c, mode, look.additive);
+            });
+            if (look.glint && textures.length) {
+              const args = [textures[0].tex.url, o, u, v2, st[0], st[1], st[2], [st[0], st[1], st[3], st[2]], null, size];
+              const glint = { src: "/hbui/ponder/assets/glint_entity.png", scale: 0.16, time: Date.now() / 50, alpha: color[3] };
+              if (uvAnim) P.repeatTexture(d, ...args, "additive", glint);
+              else d.texturedQuadMap(...args, null, "additive", null, glint);
+            }
+          } });
         });
       });
     });
+    equipment.forEach(e => {
+      if (e.definition() && Object.keys(e.definition().geometry).length) out.push(...P.clientEntityItems(e, m, world, pt, blockPx, light));
+      else if (e.slot === "mainhand" || e.slot === "offhand") {
+        const bone = entity.boneTransforms.get(e.slot === "offhand" ? "leftitem" : "rightitem");
+        if (!bone) return;
+        let t = M.translate(M.mul(m, bone.matrix), ...bone.pivot);
+        t = M.scale(M.rotZ(M.rotX(t, -90), 180), 8, 8, 8);
+        const pos = M.apply(t, 0, 0, 0);
+        out.push({ depth: pos[2], draw: d => (P.isBlockItem(e.stack.id) ? P.drawBlockCube : P.drawItemSprite)(d, t, e.stack, blockPx / 2) });
+      }
+    });
+    parentVariables.forEach((value, key) => { if (value === undefined) delete anim.variables[key]; else anim.variables[key] = value; });
     return out;
   };
 
@@ -295,6 +363,18 @@
       m = M.scale(m, p.scale[0], p.scale[1], p.scale[2]);
       out.push(M.translate(m, -pv[0], -pv[1], -pv[2]));
     });
+    if (entity.owner) {
+      const bindings = [];
+      g.bones.forEach((b, i) => {
+        const name = b.binding ? entity.animator.eval(b.binding) : b.name;
+        const inherited = entity.owner.boneTransforms.get(String(name).replace(/^'|'$/g, "").toLowerCase());
+        // Binding places the attachable's (0, 24, 0) model origin at the item's bone.
+        // Its children inherit that anchor; same-name armor bones keep the owner's pose.
+        const binding = b.binding && inherited ? M.translate(inherited.matrix, inherited.pivot[0], inherited.pivot[1] - 24, inherited.pivot[2]) : b.parent >= 0 ? bindings[b.parent] : null;
+        bindings[i] = binding;
+        if (binding || inherited) out[i] = M.mul(binding || inherited.matrix, out[i]);
+      });
+    }
     return out;
   }
 
@@ -316,17 +396,30 @@
       this.xRot = this.xRotO = 0;
       this.yHeadRot = this.yHeadRotO = 0;
       this.baby = false;
-      this.variant = this.markVariant = this.skinId = 0;
+      this.variant = /:(slime|magma_cube)$/.test(type) ? 1 : 0;
+      this.markVariant = this.skinId = 0;
+      this.color = [1, 1, 1, 1];
+      this.paddles = [false, false]; this.rowingTime = [0, 0]; this.rowingTimeO = [0, 0];
+      this.lifeSpan = type === "minecraft:evocation_fang" ? 22 : 0;
       this.onGround = true;
       this.noGravity = false;
       this.halfWidth = 0.3; this.height = 1.8;
       this.walkSpeed = this.walkSpeedO = this.walkPosition = 0;
       this.flap = this.oFlap = this.flapSpeed = this.oFlapSpeed = 0;
       this.queries = {};
+      this.equipment = new Map();
+      this.attachments = new Map();
       const def = this.definition();
+      this.updateDimensions();
       this.properties = Object.assign({}, def ? def.properties : {});
       this.extraAnimations = [];
       this.animator = new P.EntityAnimator(this);
+    }
+    updateDimensions() {
+      const def = this.definition(), dimensions = def && def.dimensions || {}, baby = this.baby && dimensions.baby;
+      const box = baby && baby.collision || def && ((def.variantCollisions || {})[this.variant] || def.collision), scale = baby ? baby.scale : dimensions.scale == null ? 1 : dimensions.scale;
+      if (box) { this.halfWidth = box.width * scale / 2; this.height = box.height * scale; }
+      else if (this.type === "minecraft:evocation_fang") { this.halfWidth = 0.25; this.height = 0.8; }
     }
     definition() {
       const def = P.entityData.entities[this.type];
@@ -336,6 +429,16 @@
     // A query by its name without "query." (lower case): a value, or fn(entity, args).
     setQuery(name, value) { this.queries[String(name).toLowerCase()] = value; return this; }
     setProperty(name, value) { this.properties[name] = value; return this; }
+    setItemSlot(slot, stack) {
+      slot = String(slot).toLowerCase().replace(/^slot\.(weapon|armor)\./, "");
+      slot = ({ helmet: "head", chestplate: "chest", leggings: "legs", boots: "feet" })[slot] || slot;
+      if (!/^(mainhand|offhand|head|chest|legs|feet|body)$/.test(slot)) throw new Error("Unknown equipment slot: " + slot);
+      if (!stack || stack.count === 0) this.equipment.delete(slot);
+      else this.equipment.set(slot, typeof stack === "string" ? P.itemStack(stack) : stack);
+      this.attachments.delete(slot);
+      return this;
+    }
+    getItemBySlot(slot) { return this.equipment.get(String(slot).toLowerCase()) || P.itemStack("minecraft:air", 0); }
     // A Molang variable, "variable.name" or "v.name".
     setVariable(name, value) { this.animator.variables[String(name).toLowerCase().replace(/^v\./, "variable.")] = value; return this; }
     // An animation or controller, by the definition's short name or its id, played on top.
@@ -348,6 +451,10 @@
     }
     tick() {
       super.tick();
+      this.updateDimensions();
+      this.rowingTimeO = this.rowingTime.slice();
+      this.rowingTime = this.rowingTime.map((v, i) => this.paddles[i] ? v + Math.PI / 8 : 0);
+      if (this.lifeSpan > 0 && this.tickCount >= this.lifeSpan) this.discard();
       this.xo = this.x; this.yo = this.y; this.zo = this.z;
       this.yRotO = this.yRot; this.xRotO = this.xRot; this.yHeadRotO = this.yHeadRot;
       this.walkSpeedO = this.walkSpeed; this.oFlap = this.flap; this.oFlapSpeed = this.flapSpeed;
@@ -368,7 +475,8 @@
     inLiquid(kind) {
       const b = this.box(), lo = b[0].map(v => Math.floor(v + 0.001)), hi = b[1].map(v => Math.floor(v - 0.001));
       for (let x = lo[0]; x <= hi[0]; x++) for (let y = lo[1]; y <= hi[1]; y++) for (let z = lo[2]; z <= hi[2]; z++) {
-        if (P.liquidKind(this.world.getBlock(x, y, z)) === kind) return true;
+        const block = this.world.getBlock(x, y, z);
+        if (P.liquidKind(block) === kind && y + P.liquidHeight(block, this.world.getBlock(x, y + 1, z)) > b[0][1] + 0.001) return true;
       }
       return false;
     }
@@ -391,7 +499,8 @@
       const s = def.scripts, a = this.animator;
       a.begin(pt);
       const one = k => (s[k] != null ? a.eval(s[k]) : s[k.toLowerCase()] != null ? a.eval(s[k.toLowerCase()]) : 1);
-      const all = s.scale != null ? a.eval(s.scale) : 1;
+      const dimensions = def.dimensions || {}, nativeScale = this.baby && dimensions.baby ? dimensions.baby.scale : dimensions.scale == null ? 1 : dimensions.scale;
+      const all = (s.scale != null ? a.eval(s.scale) : 1) * nativeScale;
       return [all * one("scaleX"), all * one("scaleY"), all * one("scaleZ")];
     }
     // Model space (pixels, facing north) to the scene's: at its feet, its body turned to yRot
@@ -403,9 +512,68 @@
       return M.scale(m, s[0] / 16, s[1] / 16, s[2] / 16);
     }
     render(base, pt, blockPx) {
+      if (this.definition() && this.definition().renderer === "boat") return P.boatItems(this, base, pt, blockPx);
       const world = this.modelToScene(pt);
       return P.clientEntityItems(this, M.mul(base, world), world, pt, blockPx, 1);
     }
   }
+  // Attachable models use the owner's posed bones, then their own animation. Unmodelled
+  // held items use ItemModelGenerator at the existing rightItem/leftItem attachment point.
+  function equipmentOf(owner, parentVariables) {
+    const out = [];
+    owner.equipment.forEach((stack, slot) => {
+      let e = owner.attachments.get(slot);
+      if (!e || e.stack !== stack) {
+        const id = owner.type === "minecraft:player" && P.entityData.attachables[stack.id + ".player"] ? stack.id + ".player" : stack.id;
+        e = Object.create(owner);
+        e.owner = owner; e.type = "ponder:equipment/" + id; e.slot = slot; e.stack = stack;
+        e.definition = () => P.entityData.attachables[id] || null;
+        e.extraAnimations = []; e.queries = Object.assign({}, owner.queries);
+        e.animator = new P.EntityAnimator(e);
+        e.scaleOf = () => [1, 1, 1];
+        owner.attachments.set(slot, e);
+      }
+      e.tickCount = owner.tickCount; e.queries = owner.queries;
+      if (e.definition()) {
+        const variables = e.animator.variables;
+        variables["variable.is_enchanted"] = P.hasFoil(stack) ? 1 : 0;
+        variables["variable.is_dyed"] = stack.color || stack.components && stack.components["minecraft:dyed_color"] != null ? 1 : 0;
+        variables["variable.has_trim"] = 0;
+        e.color = P.equipmentColor(stack);
+        e.animator.begin(owner.animator.pt);
+        const before = Object.assign({}, owner.animator.variables);
+        owner.animator.run(e.definition().scripts.parent_setup);
+        Object.keys(owner.animator.variables).forEach(key => {
+          if (owner.animator.variables[key] !== before[key] && !parentVariables.has(key)) parentVariables.set(key, before[key]);
+        });
+      }
+      out.push(e);
+    });
+    return out;
+  }
+  P.equipmentColor = stack => {
+    const dye = stack.components && stack.components["minecraft:dyed_color"];
+    return stack.color ? stack.color.slice(0, 3).concat(stack.color[3] == null ? 1 : stack.color[3]) : dye == null ? [1, 1, 1, 1] : P.rgb(typeof dye === "number" ? dye : dye.rgb).concat(1);
+  };
+  function equipmentLayers(entity) {
+    const stack = entity.stack, components = stack.components || {}, table = P.entityData.equipment, layers = [];
+    const trim = components["minecraft:trim"];
+    // controller.render.armor.v2 uses the dedicated baby skin without an adult trim atlas.
+    if (trim && !entity.animator.variables["variable.use_baby_geo"]) {
+      const name = String(trim.pattern).replace(/^minecraft:/, "") + (entity.slot === "legs" ? "_leggings" : ""), variants = table.trims && table.trims[name];
+      let material = String(trim.material).replace(/^minecraft:/, "");
+      if (variants) {
+        if (stack.id.startsWith("minecraft:" + material + "_") && variants[material + "_darker"]) material += "_darker";
+        if (variants[material]) layers.push({ entry: variants[material] });
+      }
+    }
+    if (stack.id === "minecraft:shield" && table.shield) {
+      const base = components["minecraft:base_color"], patterns = components["minecraft:banner_patterns"] || [];
+      const add = (name, color) => { if (table.shield[name]) layers.push({ entry: table.shield[name], color: P.dyeColors[P.dyeNames.indexOf(color)] || P.dyeColors[0] }); };
+      if (base || patterns.length) { add("base", base || "white"); patterns.slice(0, 16).forEach(p => add(String(p.pattern).replace(/^minecraft:/, ""), p.color)); }
+    }
+    return layers;
+  }
+  P.EquipmentSlot = { MAINHAND: "mainhand", OFFHAND: "offhand", HEAD: "head", CHEST: "chest", LEGS: "legs", FEET: "feet", BODY: "body" };
   P.ClientEntity = ClientEntity;
 })();

@@ -3,7 +3,7 @@
 // Syntax stays at ES2017 (no ?. ?? or class fields): the vanilla bundle is transpiled below that.
 (function () {
   const P = (window.Ponder = {});
-  P.DEBUG = true;
+  P.DEBUG = false;
 
   // Java's automatic GUI scale (Window.calculateScale): the largest whole scale that keeps
   // the scaled screen at least 320x240 GUI pixels.
@@ -13,6 +13,7 @@
     const fw = window.innerWidth * dpr, fh = window.innerHeight * dpr;
     let s = 1;
     while (fw / (s + 1) >= 320 && fh / (s + 1) >= 240) s++;
+    if (P.guiScale > 0) s = P.clamp(P.guiScale, 1, s);
     view.scale = s;
     view.cssPerGui = s / dpr;
     view.width = Math.ceil(fw / s);
@@ -105,6 +106,11 @@
     GREEN: P.color(0x8cba51, false), BLUE: P.color(0x5f6caf, false), SLOW: P.color(0x22ff22, false),
     MEDIUM: P.color(0x0084ff, false), FAST: P.color(0xff55ff, false), INPUT: P.color(0x7fcde0, false),
     OUTPUT: P.color(0xddc166, false) };
+
+  Object.values(P.Palette).forEach(color => {
+    color.getColor = () => (color[0] << 16) | (color[1] << 8) | color[2];
+    color.getColorObject = () => color.slice();
+  });
 
   // AnimationTickHolder: client ticks, counted while Ponder is open.
   P.ticks = 0;

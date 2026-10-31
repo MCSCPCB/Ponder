@@ -10,7 +10,11 @@ const addons = new Map([["ponder", { script: null, items: ["minecraft:spyglass"]
 
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id !== "ponder:register") return;
-  const { modId, script, items } = JSON.parse(event.message);
+  let data;
+  try { data = JSON.parse(event.message); } catch (e) { return; }
+  if (!data || typeof data !== "object") return;
+  const { modId, script, items } = data;
+  if (!/^[a-z0-9_.-]+$/.test(modId) || !/^ponder_addons\/[a-z0-9_.-]+\/[a-z0-9_./-]+\.js$/.test(script) || script.includes("..") || !Array.isArray(items) || items.some(id => typeof id !== "string" || !/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(id))) return;
   addons.set(modId, { script, items });
 });
 
@@ -40,7 +44,7 @@ world.afterEvents.itemUse.subscribe((event) => {
   openPonder(player, itemId);
 });
 
-// Java's /ponder: no argument opens the tag index, "index" the item index, an item id its scenes.
+// Java's /ponder: indexes, or a ResourceLocation and optional target players.
 system.beforeEvents.startup.subscribe((event) => {
   const registry = event.customCommandRegistry;
   registry.registerCommand({
@@ -48,12 +52,18 @@ system.beforeEvents.startup.subscribe((event) => {
     description: "ponder.command.ponder",
     permissionLevel: CommandPermissionLevel.Any,
     cheatsRequired: false,
-    optionalParameters: [{ name: "ponder.command.scene", type: CustomCommandParamType.String }],
-  }, (origin, scene) => {
+    optionalParameters: [{ name: "ponder.command.scene", type: CustomCommandParamType.String },
+      { name: "ponder.command.players", type: CustomCommandParamType.PlayerSelector }],
+  }, (origin, scene, targets) => {
     const player = origin.sourceEntity;
-    if (!player) return { status: CustomCommandStatus.Failure };
-    const id = scene === "index" ? "ponder:index" : scene || "ponder:tags";
-    system.run(() => openPonder(player, id));
+    if (!targets && (!player || player.typeId !== "minecraft:player")) return { status: CustomCommandStatus.Failure, message: "A player is required" };
+    if (targets && player && (player.typeId !== "minecraft:player" || !(player.commandPermissionLevel >= CommandPermissionLevel.GameDirectors)))
+      return { status: CustomCommandStatus.Failure, message: "Operator permission is required to open Ponder for other players" };
+    let id = !scene || scene === "tags" ? "ponder:tags" : scene === "index" ? "ponder:index" : scene;
+    if (!id.includes(":")) id = "minecraft:" + id;
+    if (!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(id)) return { status: CustomCommandStatus.Failure, message: "Invalid scene id: " + scene };
+    const players = targets || [player];
+    system.run(() => players.forEach(p => openPonder(p, id)));
     return { status: CustomCommandStatus.Success };
   });
 });

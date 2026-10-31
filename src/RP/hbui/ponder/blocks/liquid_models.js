@@ -4,8 +4,10 @@
 // turned along the flow; the sides up to those corners in the flowing texture; the bottom; each
 // face left out against the same liquid or a block that covers it. The neighbours are the
 // section's (PonderLevel masks the world to it), outside it air; the water a waterlogged block
-// holds (P.liquidOf) counts as water there, and is drawn in its cell the same way. Bedrock's
-// liquid_depth is Java's LEVEL: 0 a source, 1 to 7 flowing, 8 and up falling.
+// holds (P.liquidOf) counts as water there, and is drawn in its cell the same way. The scene is
+// viewed from outside: water shows its outward faces, so its reverse faces do not add moving
+// ripples behind the visible surface. Bedrock's liquid_depth is Java's LEVEL: 0 a source, 1 to
+// 7 flowing, 8 and up falling.
 (function () {
   const P = window.Ponder, M = P.Mat;
   const nameOf = block => P.blockId(block).replace(/^minecraft:/, "");
@@ -15,6 +17,8 @@
   // Which liquid a cell holds ("water", "lava"), or null.
   const kindOf = block => { const f = fluidOf(block); return f ? nameOf(f).replace(/^flowing_/, "") : null; };
   P.liquidKind = kindOf;
+
+  P.liquidHeight = (block, above) => kindOf(above) === kindOf(block) ? 1 : ownHeight(fluidOf(block));
 
   // A liquid's model has no quads of its own (liquidQuads makes them with its neighbours) and does
   // not fill its cell, so the faces round it show. `faces` are for its particles. Water's sides
@@ -41,6 +45,45 @@
   const solid = block => !!block && P.blockModel(block).full;
   // Whether a block covers the face of a liquid against it: a full cube that hides what is behind.
   const covers = block => !!block && P.blockModel(block).full && P.blockModel(block).opaque;
+  // isFaceOccludedBySelf: a solid boundary of the waterlogged block hides that whole liquid
+  // face. Use the model's boundary quads, including several rectangles that together close a
+  // stair's side. A partly covered face stays; the world renderer orders it behind the block.
+  // Models are cached, so a section rebuild need not repeat the coverage calculation.
+  const boundaries = new WeakMap();
+  function closedFaces(model) {
+    if (boundaries.has(model)) return boundaries.get(model);
+    const closed = new Set();
+    Object.keys(P.FACES).forEach(side => {
+      if (model.full) { if (model.opaque) closed.add(side); return; }
+      const n = P.FACES[side].n, axes = [0, 1, 2].filter(i => !n[i]), a = axes[0], b = axes[1];
+      const rects = [];
+      (model.quads || []).forEach(q => {
+        if (q.cull !== side || !q.solid) return;
+        const du = [q.u[a] - q.o[a], q.u[b] - q.o[b]], dv = [q.v[a] - q.o[a], q.v[b] - q.o[b]];
+        if (!((Math.abs(du[0]) < 1e-6 && Math.abs(dv[1]) < 1e-6)
+          || (Math.abs(du[1]) < 1e-6 && Math.abs(dv[0]) < 1e-6))) return;
+        const points = [q.o, q.u, q.v, q.u.map((v, i) => v + q.v[i] - q.o[i])];
+        const lo = axis => Math.max(0, Math.min(...points.map(p => p[axis]))), hi = axis => Math.min(1, Math.max(...points.map(p => p[axis])));
+        const r = [lo(a), lo(b), hi(a), hi(b)];
+        if (r[2] - r[0] > 1e-6 && r[3] - r[1] > 1e-6) rects.push(r);
+      });
+      const cuts = [0, 1];
+      rects.forEach(r => { cuts.push(r[0], r[2]); });
+      cuts.sort((a, b) => a - b);
+      for (let i = 1; i < cuts.length; i++) {
+        if (cuts[i] - cuts[i - 1] < 1e-6) continue;
+        const x = (cuts[i] + cuts[i - 1]) / 2;
+        const spans = rects.filter(r => r[0] <= x && r[2] >= x).sort((a, b) => a[1] - b[1]);
+        let end = 0;
+        for (const r of spans) { if (r[1] > end + 1e-6) break; end = Math.max(end, r[3]); }
+        if (end < 1 - 1e-6) return;
+      }
+      closed.add(side);
+    });
+    boundaries.set(model, closed);
+    return closed;
+  }
+  P.closedBlockFaces = closedFaces;
   const normalize = v => { const l = Math.hypot(v[0], v[1], v[2]); return l < 1e-4 ? [0, 0, 0] : [v[0] / l, v[1] / l, v[2] / l]; };
 
   // getHeight of the cell (dx, dy, dz) from the liquid: 1 under the same liquid, else its own
@@ -106,15 +149,19 @@
   // against.
   const SEE_THROUGH = /^minecraft:(.*glass|ice|frosted_ice|blue_ice|slime|honey_block|.*leaves.*)$/;
   const showsOverlay = block => !!block && SEE_THROUGH.test(P.blockId(block));
+  // Java's noOcclusion / noCollission blocks do not hide their own water. Scaffold can give
+  // their cutout textures a closed box (rails and trapdoors), which is not a solid boundary.
+  const OPEN = /^minecraft:(.*glass.*|.*leaves.*|.*rail|.*door|.*sign|.*torch|ladder|.*vine|.*lichen|.*coral.*|.*seagrass|kelp.*|.*lantern|.*candle.*|.*campfire|sea_pickle|frog_spawn|waterlily|barrier|.*ice|slime|honey_block)$/;
 
   // The quads of the liquid `block` (a liquid itself, or the water of a waterlogged block),
   // `at(dx, dy, dz)` giving the blocks round its cell (null for none).
   P.liquidQuads = function (block, at) {
     const model = P.blockModel(block), kind = kindOf(block), out = [];
-    // Lava is opaque and grows over seams; water is see-through (its texture's alpha).
-    const look = tex => ({ tex, dim: true, solid: model.lava });
+    const host = at(0, 0, 0), self = host && P.liquidOf(host) && !OPEN.test(P.blockId(host)) ? closedFaces(P.blockModel(host)) : null;
+    // Lava is opaque; water is see-through (its texture's alpha).
+    const look = tex => ({ tex, dim: true, solid: model.lava, water: !model.lava });
     const other = (dx, dy, dz) => kindOf(at(dx, dy, dz)) !== kind;
-    const up = other(0, 1, 0), down = other(0, -1, 0) && !covers(at(0, -1, 0));
+    const up = other(0, 1, 0), down = !(self && self.has("down")) && other(0, -1, 0) && !covers(at(0, -1, 0));
     const own = heightAt(at, kind, 0, 0, 0);
     let ne = 1, nw = 1, se = 1, sw = 1;
     if (own < 1) {
@@ -135,7 +182,7 @@
         tex = model.flow;
         uv = [[0.5 - c - s, 0.5 - c + s], [0.5 - c + s, 0.5 + c + s], [0.5 + c + s, 0.5 + c - s], [0.5 + c - s, 0.5 - c - s]];
       }
-      const pts = [[0, nw, 0], [0, sw, 1], [1, se, 1], [1, ne, 0]], both = backwardUp(at, kind);
+      const pts = [[0, nw, 0], [0, sw, 1], [1, se, 1], [1, ne, 0]], both = model.lava && backwardUp(at, kind);
       // A top whose corners are not in one plane is the two triangles the game's quad is drawn as.
       if (Math.abs(nw + se - sw - ne) < 1e-6) face(out, pts, uv, look(tex), both);
       else {
@@ -145,14 +192,15 @@
     }
     // The sides: the top corners seen from outside, left then right, where they stand, and the
     // neighbour's offset. Each shows the top left quarter of the flowing texture, cut at the
-    // corners' heights, from both sides; against glass or leaves, water's overlay from outside only.
-    [[nw, ne, [0, 0.001], [1, 0.001], [0, 0, -1]], [se, sw, [1, 0.999], [0, 0.999], [0, 0, 1]],
-      [sw, nw, [0.001, 1], [0.001, 0], [-1, 0, 0]], [ne, se, [0.999, 0], [0.999, 1], [1, 0, 0]]].forEach(([h1, h2, a, b, d]) => {
+    // corners' heights. Water is viewed from outside; opaque lava can show the reverse side.
+    // Against glass or leaves, water uses its static overlay instead of the flowing texture.
+    [[nw, ne, [0, 0.001], [1, 0.001], [0, 0, -1], "north"], [se, sw, [1, 0.999], [0, 0.999], [0, 0, 1], "south"],
+      [sw, nw, [0.001, 1], [0.001, 0], [-1, 0, 0], "west"], [ne, se, [0.999, 0], [0.999, 1], [1, 0, 0], "east"]].forEach(([h1, h2, a, b, d, side]) => {
       const beside = at(d[0], d[1], d[2]);
-      if (!other(d[0], d[1], d[2]) || covers(beside)) return;
+      if ((self && self.has(side)) || !other(d[0], d[1], d[2]) || covers(beside)) return;
       const overlay = model.overlay && showsOverlay(beside);
       face(out, [[a[0], h1, a[1]], [b[0], h2, b[1]], [b[0], y0, b[1]], [a[0], y0, a[1]]],
-        [[0, (1 - h1) / 2], [0.5, (1 - h2) / 2], [0.5, 0.5], [0, 0.5]], look(overlay ? model.overlay : model.flow), !overlay);
+        [[0, (1 - h1) / 2], [0.5, (1 - h2) / 2], [0.5, 0.5], [0, 0.5]], look(overlay ? model.overlay : model.flow), model.lava && !overlay);
     });
     if (down) face(out, [[0, y0, 1], [0, y0, 0], [1, y0, 0], [1, y0, 1]], [[0, 1], [0, 0], [1, 0], [1, 1]], look(model.still), false);
     return out;

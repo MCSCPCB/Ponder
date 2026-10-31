@@ -7,7 +7,17 @@
   // One Molang for every entity: each brings its variables, and its queries through `current`.
   const molang = new P.Molang();
   let current = null;
-  molang.variableHandler = (name, context, args) => (current && name.startsWith("query.") ? current.query(name.slice(6), args) : undefined);
+  molang.variableHandler = (name, context, args) => {
+    if (!current) return undefined;
+    if (name.startsWith("query.")) return current.query(name.slice(6), args);
+    if (name === "context.item_slot") return "'" + ({ mainhand: "main_hand", offhand: "off_hand" }[current.entity.slot] || current.entity.slot || "") + "'";
+    if (name === "context.is_first_person") return 0;
+    if (name.startsWith("context.owning_entity.")) {
+      const owner = current.entity.owner;
+      return owner ? owner.animator.variables["variable." + name.slice(22)] || 0 : 0;
+    }
+    return undefined;
+  };
 
   // Queries Ponder answers itself; any other is the entity's own (ClientEntity.setQuery), else 0.
   const DEFAULTS = { is_alive: 1, health: 20, model_scale: 1 };
@@ -29,9 +39,10 @@
       if (typeof expr === "number") return expr;
       if (typeof expr === "boolean") return expr ? 1 : 0;
       if (typeof expr !== "string") return 0;
+      if (/^'[^']*'$/.test(expr.trim())) return expr.trim().slice(1, -1);
       current = this;
       molang.variables = this.variables;
-      return molang.parse(expr, extra);
+      return molang.parse(expr.replace(/\b(?:c|context)\.owning_entity\s*->\s*(?:v|variable)\./gi, "context.owning_entity."), extra);
     }
     run(scripts) { (Array.isArray(scripts) ? scripts : scripts ? [scripts] : []).forEach(s => this.eval(s)); }
     query(name, args) {
@@ -39,6 +50,26 @@
       if (own !== undefined) return typeof own === "function" ? own(e, args) : own;
       const pt = this.pt, body = P.lerp(pt, e.yRotO, e.yRot);
       switch (name) {
+        case "owner_identifier": return "'" + (e.owner || e).type + "'";
+        case "item_slot_to_bone_name": return e.slot === "offhand" ? "'leftitem'" : "'rightitem'";
+        case "is_item_name_any": {
+          const slot = String(args && args[0] || "mainhand").replace(/^slot\.(weapon|armor)\./, "");
+          const stack = (e.owner || e).equipment && (e.owner || e).equipment.get(slot);
+          return stack && args.slice(1).includes(stack.id) ? 1 : 0;
+        }
+        case "get_equipped_item_name": {
+          const stack = (e.owner || e).equipment && (e.owner || e).equipment.get(args && args[0] ? "offhand" : "mainhand");
+          return "'" + (stack ? stack.id.replace(/^minecraft:/, "") : "") + "'";
+        }
+        case "armor_color_slot": {
+          const stack = (e.owner || e).equipment.get(["head", "chest", "legs", "feet", "body"][args && args[0] || 0]);
+          return stack ? P.equipmentColor(stack)[args && args[1] || 0] : 1;
+        }
+        case "armor_damage_slot": {
+          const stack = (e.owner || e).equipment.get(["head", "chest", "legs", "feet", "body"][args && args[0] || 0]);
+          return stack && (stack.damage || stack.components && stack.components["minecraft:damage"]) || 0;
+        }
+        case "is_item_equipped": return (e.owner || e).equipment.has(args && args[0] ? "offhand" : "mainhand") ? 1 : 0;
         case "life_time": return this.time;
         case "delta_time": return this.dt;
         case "frame_alpha": return pt;
@@ -57,13 +88,19 @@
         case "ground_speed": return Math.hypot(e.x - e.xo, e.z - e.zo) * 20;
         case "vertical_speed": return (e.y - e.yo) * 20;
         case "position_delta": return [e.x - e.xo, e.y - e.yo, e.z - e.zo][args ? args[0] : 0] || 0;
-        case "time_stamp": return e.tickCount;
+        case "time_stamp": return e.world.gameTime;
+        case "life_span": return e.lifeSpan;
         case "modified_move_speed": return P.lerp(pt, e.walkSpeedO, e.walkSpeed);
         case "modified_distance_moved": case "walk_distance": return e.walkPosition - e.walkSpeed * (1 - pt);
         case "target_x_rotation": case "head_x_rotation": return P.lerp(pt, e.xRotO, e.xRot);
         case "target_y_rotation": case "head_y_rotation":
           return e.yHeadRot == null ? 0 : P.wrapDegrees(lerpAngle(pt, e.yHeadRotO, e.yHeadRot) - body);
         case "body_y_rotation": return body;
+        case "camera_rotation": {
+          if (!this.cameraMatrix) return 0;
+          const inverse = P.Mat.invert(this.cameraMatrix), origin = P.Mat.apply(inverse, 0, 0, 0), camera = P.Mat.apply(inverse, 0, 0, 1).map((v, i) => v - origin[i]);
+          return (args && args[0] ? Math.atan2(-camera[0], camera[2]) : Math.asin(P.clamp(camera[1] / Math.hypot(...camera), -1, 1))) * 180 / Math.PI;
+        }
         case "wing_flap_position": return P.lerp(pt, e.oFlap, e.flap);
         case "wing_flap_speed": return P.lerp(pt, e.oFlapSpeed, e.flapSpeed);
         case "health": case "max_health": {

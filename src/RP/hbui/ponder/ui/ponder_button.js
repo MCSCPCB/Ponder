@@ -48,6 +48,9 @@
     }
     tick() { this.fade.tickChaser(); this.flash.tickChaser(); this.colorAnimation.tickChaser(); }
     click(mx, my) {
+      if (!this.active) return;
+      if (!Number.isFinite(mx)) mx = this.x + this.width / 2;
+      if (!Number.isFinite(my)) my = this.y + this.height / 2;
       this.gradientColor = this.colors.click;
       this.startGradientAnimation(this.colorForState(), 0.15);
       if (this.callback) this.callback(mx, my);
@@ -75,7 +78,7 @@
       if (this.icon) P.drawIcon(d, this.icon, x + 2, y + 2, fadeValue);
       if (this.item) d.item(this.item, x + 2 - 4, y + 2 - 4, 1.5, fadeValue);
       if (this.tag) P.renderTag(d, this.tag, x + 2, y + 2, fadeValue);
-      if (this.shortcut) d.centeredText(this.shortcut, x + this.width / 2 + 8, y + this.height - 6, P.scaleAlpha(P.C.TEXT_DARKER, fadeValue), true);
+      if (this.shortcut) d.centeredText(P.keyName(this.shortcut), x + this.width / 2 + 8, y + this.height - 6, P.scaleAlpha(P.C.TEXT_DARKER, fadeValue), true);
     }
   }
   P.PonderButton = PonderButton;
@@ -89,6 +92,17 @@
   class PonderProgressBar {
     constructor(ui, x, y, w, h) { this.ui = ui; this.x = x; this.y = y; this.width = w; this.height = h; this.progress = P.linear().startWithValue(0); this.hovered = false; }
     isVisible() { return true; }
+    moveFocus(direction) {
+      if (direction !== "left" && direction !== "right") return false;
+      const scene = this.ui.activeScene(), times = [0].concat(scene.keyframeTimes, scene.totalTime);
+      this.focusIndex = P.clamp((this.focusIndex || 0) + (direction === "left" ? -1 : 1), 0, times.length - 1);
+      return true;
+    }
+    focusPosition() {
+      const scene = this.ui.activeScene(), times = [0].concat(scene.keyframeTimes, scene.totalTime);
+      const time = times[P.clamp(this.focusIndex || 0, 0, times.length - 1)];
+      return [this.x + Math.min(this.width + 3, (time + 0.5) / Math.max(1, scene.totalTime) * (this.width + 4)), this.y + 1];
+    }
     tick() { this.progress.chase(this.ui.activeScene().getSceneProgress(), 0.5, P.Chaser.EXP); this.progress.tickChaser(); }
     isMouseOver(mx, my) {
       return this.ui.activeScene().keyframeTimes.length > 0 && mx >= this.x && mx < this.x + this.width + 4 && my >= this.y - 3 && my < this.y + this.height + 20;

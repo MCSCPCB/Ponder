@@ -6,7 +6,7 @@
 
 原版方块按游戏的贴图和外形画（外形来自 Scaffold，见[概述](../overview.md)的致谢），带动画的贴图会动。附属包自己的方块（行为包 `blocks/` 里定义的）也不用注册：把整个附属包（行为包和资源包）放进 `tools/input/` 跑一遍适配器，适配器会在资源包的 `hbui/ponder_addons/<文件夹>/` 下写一份 `ponder_blocks.json`，Ponder 按方块定义里的 `minecraft:geometry`、`minecraft:material_instances`、`minecraft:transformation` 和 `permutations` 来画。场景里直接写方块 id 和状态，例如 `P.block("farmersdelight:stove", { "farmersdelight:is_working": true })`。例子见 `packs/FarmersDelightV5.0.5-26.0+`。
 
-自动画法支持整块（`minecraft:geometry.full_block`，或不写 geometry）、`minecraft:geometry.cross`、资源包里的模型文件（逐面 UV、骨骼和方块的旋转、`bone_visibility`），以及按方块状态生效的 permutations。不支持 box UV 和 `tint_method` 染色。
+自动画法支持整块（`minecraft:geometry.full_block`，或不写 geometry）、`minecraft:geometry.cross`、资源包里的模型文件（box UV、逐面 UV、骨骼和方块的旋转、`bone_visibility`），以及按方块状态生效的 permutations。`tint_method` 的草、树叶和水染色使用思索世界的平原颜色。贴图路径先查附属包，再查共享 APK 的原版资源层。
 
 游戏里不存在的方块（只在场景里出现），或者想换掉自动画法时，在插件脚本里注册：
 
@@ -39,7 +39,7 @@ P.registerBlockModel("my_mod:widget", block => ({
 
 ## 粒子
 
-继承 `P.Particle`，实现 `sprite()`。`sprite()` 返回 `{ src, u, v, size, texSize }`：从 `texSize` 见方的贴图里，取 `u, v` 起 `size` 见方的一块。
+继承 `P.Particle`，实现 `sprite()`。`sprite()` 返回 `{ src, u, v, size, texSize }`：从 `texSize` 见方的贴图里，取 `u, v` 起 `size` 见方的一块。长条图集可另设 `texHeight`，此时 `texSize` 为宽度、`texHeight` 为高度；原版纹理可直接用 `pack://` 路径。
 
 ```js
 class SparkParticle extends P.Particle {
@@ -59,9 +59,9 @@ const spark = { make: (world, x, y, z, mx, my, mz) => new SparkParticle(world, x
 然后传给 `emitParticles` 或 `simpleParticleEmitter`：
 
 ```js
-scene.effects.emitParticles(
-  util.vector.topOf(2, 1, 2),
-  scene.effects.simpleParticleEmitter(spark, [0, 0.1, 0]),
+scene.effects().emitParticles(
+  util.vector().topOf(2, 1, 2),
+  scene.effects().simpleParticleEmitter(spark, [0, 0.1, 0]),
   4, 10,
 );
 ```
@@ -81,21 +81,25 @@ scene.effects.emitParticles(
 
 ## 实体
 
-游戏或附属包里定义过的实体用 `scene.effects.createClientEntity` 生成，Ponder 照它的资源包定义画。游戏里没有的实体继承 `P.PonderEntity` 自己画。
+游戏或附属包里定义过的实体用 `scene.world().createClientEntity` 生成，Ponder 照它的资源包定义画。游戏里没有的实体继承 `P.PonderEntity` 自己画。
 
 ### 原版和附属包的实体
 
 原版实体不用注册，写实体 id 就行：
 
 ```js
-const wolf = scene.effects.createClientEntity("minecraft:wolf", [2.5, 1, 2.5], 0);
+const wolf = scene.world().createClientEntity("minecraft:wolf", [2.5, 1, 2.5], 0);
 ```
 
 Ponder 按资源包 `entity/` 里的客户端实体定义画：模型、贴图、材质、动画、动画控制器、渲染控制器，以及 `scripts` 里的 `initialize`、`pre_animation`、`animate` 和 `scale`。Molang 的算法和游戏相同。
 
 附属包自己的实体也不用注册。把整个附属包（行为包和资源包）放进 `tools/input/` 跑一遍适配器，适配器会在资源包的 `hbui/ponder_addons/<文件夹>/` 下写一份 `ponder_entities.json`。里面有附属包的实体定义，它们用到的模型、动画、动画控制器和渲染控制器（可以引用原版的），以及行为包里实体属性（`description.properties`）的默认值和初始生命值。只有实体定义里提到的动画会写进去，所以场景要单独播的动画也要写进实体定义的 `animations`，不必放进 `scripts.animate`。
 
-碰撞箱对所有实体都是 0.6 × 1.8 格，可以改 `halfWidth`（半宽）和 `height`。
+实体贴图的透明通道按材质处理：不透明材质忽略 alpha，镂空材质丢弃 alpha 小于 0.5 的像素，半透明材质保留原图透明度。适配器在 `hbui/ponder/assets/entity_textures/` 生成材质需要的 PNG，相同图片共用一个文件。遮罩染色和自发光分别生成基础层与叠加层，避免 Ore UI 的预乘 alpha 改变颜色；叠加混合、附魔光效和滚动贴图仍需原生界面验收。
+
+基岩原版 PNG 和 TGA 由 Ore UI 通过 `pack://` 读取，适配器不复制原图，也不把方块 TGA 另存成 PNG。`entity_textures/` 只保存透明通道、染色遮罩或纹饰调色实际改变后的图片；与原图相同的材质仍直接引用原版。
+
+碰撞箱、默认缩放和幼年尺寸从行为包读取，缺少定义时才使用 0.6 × 1.8 格。可以改 `halfWidth`（半宽）和 `height`；`baby` 会使用已提取的幼年尺寸。
 
 #### 让实体动起来
 
@@ -105,15 +109,15 @@ Ponder 按资源包 `entity/` 里的客户端实体定义画：模型、贴图�
 
 ```js
 scene.idle(20);
-scene.effects.modifyEntity(wolf, e => e.setQuery("is_sitting", 1));
+scene.world().modifyEntity(wolf, e => e.setQuery("is_sitting", 1));
 ```
 
 羊的 `controller.animation.sheep.move` 在 `query.is_grazing` 为真时低头吃草，吃完一遍（2 秒）回到默认状态；查询一直为真就会接着吃。只吃一遍，就在它开始后把查询改回 0：
 
 ```js
-scene.effects.modifyEntity(sheep, e => e.setQuery("is_grazing", 1));
+scene.world().modifyEntity(sheep, e => e.setQuery("is_grazing", 1));
 scene.idle(2);
-scene.effects.modifyEntity(sheep, e => e.setQuery("is_grazing", 0));
+scene.world().modifyEntity(sheep, e => e.setQuery("is_grazing", 0));
 ```
 
 实体每 tick 先记下当前的位置和朝向（画面在上一 tick 和这一 tick 之间插值），再加重力、按速度移动、乘阻力（在地上 0.546，在空中 0.91）。走路动画读的 `query.modified_move_speed` 和 `query.modified_distance_moved` 按它实际走过的距离算。所以要它一直走，就包一层它的 `tick`，每 tick 先给速度。朝向要在原来的 `tick` 之后改，转身才是平滑的：
@@ -133,13 +137,13 @@ const walker = ticks => e => {
     if (walking) e.yRot += 1;
   };
 };
-scene.effects.createClientEntity("minecraft:cow", [0.5, 1, 3.5], 270, walker(60));
+scene.world().createClientEntity("minecraft:cow", [0.5, 1, 3.5], 270, walker(60));
 ```
 
-史莱姆和岩浆怪的大小是 `query.variant`（1、2、4），默认的 0 画不出来，生成时要设：
+史莱姆和岩浆怪的大小是 `query.variant`（1、2、4），默认是 1。例如生成中型史莱姆：
 
 ```js
-scene.effects.createClientEntity("minecraft:slime", [2.5, 1, 2.5], 0, e => { e.variant = 2; });
+scene.world().createClientEntity("minecraft:slime", [2.5, 1, 2.5], 0, e => { e.variant = 2; });
 ```
 
 `P.ClientEntity` 在 `P.PonderEntity`（见下一节）之外提供：
@@ -158,14 +162,24 @@ scene.effects.createClientEntity("minecraft:slime", [2.5, 1, 2.5], 0, e => { e.v
 | `setVariable(名字, 值)` | 设置 Molang 变量，名字写 `"variable.xxx"` 或 `"v.xxx"`。定义的 `pre_animation` 每帧会重算它自己的变量，盖掉你设的值 |
 | `playAnimation(名字)` | 在实体自己的动画之上再播一个动画或动画控制器，名字是定义里 `animations` 的短名或完整 id |
 | `stopAnimation(名字)` | 停掉 `playAnimation` 播的 |
+| `setItemSlot(槽位, 物品)` | 设置装备，槽位为 `head`、`chest`、`legs`、`feet`、`mainhand`、`offhand`、`body`；物品为 id 或物品对象，`null` 清空 |
 
 这些方法都返回实体本身，可以连着写。
 
 实体自己会算的查询：`life_time`、`anim_time`、`delta_time`、`frame_alpha`、`time_stamp`、`key_frame_lerp_time`、`any_animation_finished`、`all_animations_finished`、`is_on_ground`、`is_in_water`、`is_in_lava`、`is_moving`、`ground_speed`、`vertical_speed`、`position_delta`、`modified_move_speed`、`modified_distance_moved`、`target_x_rotation`、`target_y_rotation`、`body_y_rotation`、`health`、`max_health`、`property`，以及上表字段对应的那几个。其他查询都是 0（`is_alive` 和 `model_scale` 是 1），要用就 `setQuery`。`setQuery` 设过的查询优先于自己算的。
 
+装备使用资源包的 attachable、绑定骨骼和渲染控制器。物品对象可写 `components`，例如染色的皮甲、带纹饰的盔甲或带图案的盾牌：
+
+```js
+e.setItemSlot("chest", { id: "minecraft:leather_chestplate", components: { "minecraft:dyed_color": 0x2277ff } });
+e.setItemSlot("mainhand", { id: "minecraft:diamond_sword", enchanted: true });
+```
+
+`createClientEntity` 自动登记实体类型供入场前准备。工厂生成的实体、回调里设置的装备需要作者声明类型：`scene.getScene().entityTypes.push("minecraft:diamond_sword")`。准备过程不会提前执行工厂或设置回调，也不能消除原生渲染的全部首帧开销。
+
 ### 自己画的实体
 
-继承 `P.PonderEntity`，实现 `tick()` 和 `render(场景矩阵, 插值, 每方块像素)`。`render` 返回 `{ depth, draw(d) }` 的数组：`depth` 是图形中心变换后的 z，和方块一起从小到大绘制；`draw` 收到画布后画上去。
+继承 `P.PonderEntity`，实现 `tick()` 和 `render(场景矩阵, 插值, 每方块像素)`。`render` 返回 `{ depth, draw(d) }` 的数组：`depth` 是图形中心变换后的 z，和方块一起决定提交顺序；`draw` 收到画布后画上去。`texturedQuad` 和 `texturedQuadMap` 收到 `[x, y, z]` 顶点时，DrawList 会根据面实际重叠处的深度确定遮挡，相交处必要时切分，共面贴图保留提交顺序。二维图形和文字保留自己的顺序。
 
 下面是一个慢慢上浮的方块，画法和 `packs/Vanilla` 里的点燃 TNT 相同：
 
@@ -195,9 +209,9 @@ class FloatingBlock extends P.PonderEntity {
 生成和修改：
 
 ```js
-const link = scene.effects.createEntity(world => new FloatingBlock(world, 2.5, 1, 2.5, "minecraft:stone"));
+const link = scene.world().createEntity(world => new FloatingBlock(world, 2.5, 1, 2.5, "minecraft:stone"));
 scene.idle(40);
-scene.effects.modifyEntity(link, entity => entity.discard());
+scene.world().modifyEntity(link, entity => entity.discard());
 ```
 
 `P.PonderEntity` 提供：

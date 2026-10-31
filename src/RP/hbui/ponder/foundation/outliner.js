@@ -51,25 +51,28 @@
   class Outliner {
     constructor() { this.outlines = new Map(); }
     showCluster(slot, selection) {
-      const entry = new OutlineEntry(new BlockClusterOutline(selection));
-      this.outlines.set(slot, entry);
+      const entry = new OutlineEntry(selection.makeOutline());
+      this.outlines.set(slotKey(slot), entry);
       return entry.outline;
     }
     showAABB(slot, box) {
-      const entry = new OutlineEntry(new AABBOutline(box));
-      this.outlines.set(slot, entry);
+      const entry = new OutlineEntry(new ChasingAABBOutline(new P.AABB(...box)));
+      this.outlines.set(slotKey(slot), entry);
       return entry.outline;
     }
     chaseAABB(slot, box) {
+      slot = slotKey(slot);
+      box = new P.AABB(...box);
       const old = this.outlines.get(slot);
-      if (!old || !(old.outline instanceof AABBOutline)) this.outlines.set(slot, new OutlineEntry(new ChasingAABBOutline(box)));
+      if (!old || !(old.outline instanceof ChasingAABBOutline)) this.outlines.set(slot, new OutlineEntry(new ChasingAABBOutline(box)));
       const entry = this.outlines.get(slot);
       entry.ticksTillRemoval = 1;
       entry.outline.targetBox = box;
       return entry.outline;
     }
     showLine(slot, start, end) {
-      if (!this.outlines.has(slot)) this.outlines.set(slot, new OutlineEntry(new LineOutline()));
+      slot = slotKey(slot);
+      if (!this.outlines.has(slot) || !(this.outlines.get(slot).outline instanceof LineOutline)) this.outlines.set(slot, new OutlineEntry(new LineOutline()));
       const entry = this.outlines.get(slot);
       entry.ticksTillRemoval = 1;
       entry.outline.start = start;
@@ -95,6 +98,9 @@
       });
     }
   }
+  // BlockPos and Vec3 implement Java value equality; opaque scene slots retain their identity.
+  const slotKey = slot => slot instanceof P.Vec3 ? slot.constructor.name + ":" + slot.slice().join(",")
+    : Array.isArray(slot) && slot.length === 3 && slot.every(v => typeof v === "number") ? "Vec3:" + slot.join(",") : slot;
   class OutlineEntry {
     constructor(outline) { this.outline = outline; this.ticksTillRemoval = 1; }
     tick() { this.ticksTillRemoval--; this.outline.tick(); }
@@ -123,7 +129,7 @@
     ].forEach(e => d.line(M.apply(matrix, e[0], e[1], e[2]), M.apply(matrix, e[3], e[4], e[5]), width, color));
   }
 
-  P.Outliner = Outliner;
+  Object.assign(P, { Outliner, BlockClusterOutline, ChasingAABBOutline });
 })();
 
 // OutlinerElement: refreshes its outline every tick while it is shown and not fading out.
@@ -131,6 +137,7 @@
   const P = window.Ponder;
   class OutlinerElement extends P.AnimatedSceneElement {
     constructor(outlinerCall) { super(); this.outlinerCall = outlinerCall; this.overrideColor = null; }
+    setColor(color) { this.overrideColor = color; }
     tick(scene) {
       if (this.fade.getValue() < 1 / 16) return;
       if (this.fade.getValue(0) > this.fade.getValue(1)) return;

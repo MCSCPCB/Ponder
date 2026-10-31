@@ -4,6 +4,7 @@
 
   UI.render = function (mx, my, framePt, isPrevious) {
     const d = this.d, pt0 = isPrevious ? 0 : framePt;
+    this.renderingPrevious = isPrevious;
     this.mouse = P.cursor = [mx, my];
     const pt = this.partialTicks(pt0);
     this.pt = pt;
@@ -13,7 +14,12 @@
     this.renderWidgets(d, mx, my, pt);
     this.widgets.forEach(w => w.render(d, mx, my, pt));
     this.renderBackTrackCaption(d);
+    if (!isPrevious && this.identifyMode && P.input.mode === "gamepad" && P.input.useCursor) {
+      d.fill(mx - 3, my, mx + 4, my + 1, P.C.TEXT);
+      d.fill(mx, my - 3, mx + 1, my + 4, P.C.TEXT);
+    }
     d.end();
+    if (!isPrevious) this.prepare();
   };
 
   UI.renderVisibleScenes = function (d, pt) {
@@ -41,13 +47,13 @@
         const white = P.color(0xffffffff, true);
         if (!this.hoveredTooltipItem) {
           // Java re-wraps the lines as plain literals, so their GRAY/WHITE styles are lost.
-          const text = P.translate("ponder.ui.identify_mode", KEY_NAME);
+          const text = P.translate("ponder.ui.identify_mode", P.keyLabel("identify"));
           P.tooltip(d, mx, my, P.splitLines(text, P.int(this.width / 3)).map(l => [l, white]), 9999);
-        } else P.tooltip(d, mx, my, [[P.itemName(this.hoveredTooltipItem), white]], 9999);
+        } else P.itemTooltip(d, mx, my, this.hoveredTooltipItem, pt, this.renderingPrevious);
       }
       this.scan.flashOn();
     } else this.scan.dim();
-    if (P.comfyReading) this.slowMode.flashOn(); else this.slowMode.dim();
+    if (P.settings.comfyReading) this.slowMode.flashOn(); else this.slowMode.dim();
     this.renderSceneOverlay(d, pt, lazy, Math.abs(indexDiff));
     this.renderNextUp(d, pt, nextScene);
     this.widgets.forEach(w => { if (w instanceof P.PonderButton && w !== this.backTrack) w.fade.startWithValue(fade); });
@@ -75,7 +81,6 @@
     });
     this.renderHoverTooltips(d);
   };
-  const KEY_NAME = "Q"; // keyDrop's key name
 
   UI.renderHoverTooltips = function (d) {
     const y = this.height - 16, c = P.C.TEXT_DARKER, at = (b, key, dx) => { if (b.hovered) d.centeredText(P.translate(key), b.x + dx, y, c, true); };
@@ -132,20 +137,31 @@
   };
 
   // GuiGraphics.renderComponentTooltip: lines wrapped to `maxW`, 12 px right of and above the mouse.
-  P.tooltip = function (d, mx, my, lines, maxW) {
+  P.tooltip = function (d, mx, my, lines, maxW, border) {
     const wrapped = [];
-    lines.forEach(l => P.splitLines(l[0], maxW).forEach(t => wrapped.push([t, l[1]])));
+    maxW = Math.min(maxW, P.view.width - 24);
+    lines.forEach(l => {
+      if (l[2]) P.splitStyledLines(l[2], maxW).forEach(runs => wrapped.push([runs.map(run => run.text).join(""), l[1], runs]));
+      else P.splitLines(l[0], maxW).forEach(t => wrapped.push([t, l[1]]));
+    });
     let w = 0;
-    wrapped.forEach(l => { w = Math.max(w, P.textWidth(l[0])); });
+    wrapped.forEach(l => { w = Math.max(w, l[2] ? P.styledWidth(l[2]) : P.textWidth(l[0])); });
     const h = wrapped.length === 1 ? 8 : 10 + (wrapped.length - 1) * 10;
     let x = mx + 12, y = my - 12;
     if (x + w > P.view.width) x -= 28 + w;
     if (y + h + 6 > P.view.height) y = P.view.height - h - 6;
-    const bg = P.color(0xf0100010, true), b0 = P.color(0x505000ff, true), b1 = P.color(0x5028007f, true);
+    x = Math.max(6, x); y = Math.max(6, y);
+    const bg = P.color(0xf0100010, true), b0 = border ? border[0] : P.color(0x505000ff, true), b1 = border ? border[1] : P.color(0x5028007f, true);
     d.fill(x - 3, y - 4, x + w + 3, y - 3, bg); d.fill(x - 3, y + h + 3, x + w + 3, y + h + 4, bg);
     d.fill(x - 3, y - 3, x + w + 3, y + h + 3, bg); d.fill(x - 4, y - 3, x - 3, y + h + 3, bg); d.fill(x + w + 3, y - 3, x + w + 4, y + h + 3, bg);
     d.gradient(x - 3, y - 2, x - 2, y + h + 2, b0, b1); d.gradient(x + w + 2, y - 2, x + w + 3, y + h + 2, b0, b1);
     d.fill(x - 3, y - 3, x + w + 3, y - 2, b0); d.fill(x - 3, y + h + 2, x + w + 3, y + h + 3, b1);
-    wrapped.forEach((l, i) => d.text(l[0], x, y + i * 10 + (i > 0 ? 2 : 0), l[1], true));
+    wrapped.forEach((l, i) => {
+      let dx = x;
+      (l[2] || [{ text: l[0], color: l[1] }]).forEach(run => {
+        d.text(run.text, dx, y + i * 10 + (i > 0 ? 2 : 0), run.color || l[1], true, 1, run); dx += P.styledWidth([run]);
+      });
+    });
+    return [x, y, w, h, wrapped.length];
   };
 })();

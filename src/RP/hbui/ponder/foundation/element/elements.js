@@ -6,11 +6,15 @@
     constructor() { this.visible = true; }
     tick() {}
     reset() {}
+    isVisible() { return this.visible; }
+    setVisible(visible) { this.visible = visible; }
+    whileSkipping() {}
   }
   class AnimatedSceneElement extends PonderElement {
     constructor() { super(); this.fade = P.linear().startWithValue(0); this.fadeVec = null; }
     forceApplyFade(f) { this.fade.startWithValue(f); }
     setFade(f) { this.fade.setValue(f); }
+    setFadeVec(vec) { this.fadeVec = vec; }
   }
   class AnimatedOverlayElement extends PonderElement {
     constructor() { super(); this.fade = P.linear().startWithValue(0); }
@@ -22,15 +26,39 @@
     constructor(selection) {
       super();
       this.section = selection ? selection.copy() : null;
-      this.centerOfRotation = selection ? selection.center() : [0, 0, 0];
+      this.centerOfRotation = selection ? selection.getCenter() : [0, 0, 0];
       this.stabilizationAnchor = null;
       this.version = 0;
       this.resetAnimatedTransform();
     }
     resetAnimatedTransform() { this.animatedOffset = this.prevAnimatedOffset = [0, 0, 0]; this.animatedRotation = this.prevAnimatedRotation = [0, 0, 0]; }
-    reset(scene) { super.reset(scene); this.resetAnimatedTransform(); }
-    tick() { this.prevAnimatedOffset = this.animatedOffset; this.prevAnimatedRotation = this.animatedRotation; }
-    isEmpty() { return this.section == null; }
+    reset(scene) { super.reset(scene); this.resetAnimatedTransform(); this.resetSelectedBlock(); }
+    tick(scene) {
+      this.prevAnimatedOffset = this.animatedOffset; this.prevAnimatedRotation = this.animatedRotation;
+      if (this.isVisible()) scene.world.tickBlockEntities(this.section);
+    }
+    isEmpty() { return this.section == null || this.section.keys.size === 0; }
+    isVisible() { return super.isVisible() && !this.isEmpty(); }
+    setCenterOfRotation(center) { this.centerOfRotation = center; }
+    stabilizeRotation(anchor) { this.stabilizationAnchor = anchor; }
+    selectBlock(pos) { this.selectedBlock = pos; }
+    resetSelectedBlock() { this.selectedBlock = null; }
+    getAnimatedRotation() { return this.animatedRotation; }
+    getAnimatedOffset() { return this.animatedOffset; }
+    whileSkipping() { this.built = null; }
+    // WorldSectionElementImpl.reverseTransformVec uses X, Z, Y in this order.
+    reverseTransformVec(vec, pt) {
+      const M = P.Mat, r = this.prevAnimatedRotation.map((v, i) => P.lerp(pt, v, this.animatedRotation[i]));
+      let p = vec.map((v, i) => v - P.lerp(pt, this.prevAnimatedOffset[i], this.animatedOffset[i]));
+      const around = (center, sign) => {
+        // Right-multiplied matrices apply to points in the reverse order.
+        const rotate = M.mul(M.rotY(M.id(), sign * r[1]), M.mul(M.rotZ(M.id(), sign * r[2]), M.rotX(M.id(), sign * r[0])));
+        p = M.apply(rotate, ...p.map((v, i) => v - center[i])).map((v, i) => v + center[i]);
+      };
+      around(this.centerOfRotation, -1);
+      if (this.stabilizationAnchor) around(this.stabilizationAnchor, 1);
+      return p;
+    }
     setEmpty() { this.section = null; this.queueRedraw(); }
     set(selection) { this.section = selection.copy(); this.queueRedraw(); }
     add(selection) { this.section = this.section.add(selection); this.queueRedraw(); }
@@ -114,7 +142,10 @@
       if (this.item) { width += 24; height = 24; }
       const [bx, by] = P.speechBox(d, s2s[0] + xFade, s2s[1] + yFade, width, height, false, dir);
       if (this.key) d.text(text, bx + 2, by + P.int((height - 9) / 2 + 2), P.scaleAlpha(P.Palette.WHITE, fade), false);
-      if (this.icon) d.sprite(P.WIDGETS, this.icon[0] * 16, this.icon[1] * 16, 16, 16, 256, 256, bx + keyWidth, by, 24, 24);
+      if (this.icon) {
+        if (typeof this.icon.render === "function") this.icon.render(d, bx + keyWidth, by, 24, 24);
+        else d.sprite(P.WIDGETS, this.icon[0] * 16, this.icon[1] * 16, 16, 16, 256, 256, bx + keyWidth, by, 24, 24);
+      }
       if (this.item) d.item(this.item, bx + keyWidth + (this.icon ? 24 : 0), by, 1.5);
     }
   }

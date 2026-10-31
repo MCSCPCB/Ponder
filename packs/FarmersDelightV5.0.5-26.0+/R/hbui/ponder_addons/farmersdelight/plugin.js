@@ -24,36 +24,36 @@
     scene.configureBasePlate(0, 0, 5);
     scene.showBasePlate();
     scene.idle(10);
-    scene.world.showSection(util.select.position(2, 1, 2), "DOWN");
+    scene.world().showSection(util.select().position(2, 1, 2), "DOWN");
     scene.idle(10);
-    scene.world.showSection(util.select.position(2, 2, 2), "DOWN");
+    scene.world().showSection(util.select().position(2, 2, 2), "DOWN");
     scene.idle(15);
-    scene.overlay.showText(70)
+    scene.overlay().showText(70)
       .text("The Cooking Pot is used for cooking and storing food")
-      .pointAt(util.vector.centerOf(2, 2, 2))
+      .pointAt(util.vector().centerOf(2, 2, 2))
       .placeNearTarget()
       .attachKeyFrame();
     scene.idle(80);
-    scene.overlay.showText(80)
+    scene.overlay().showText(80)
       .text("To prepare food, it needs a heat source below it: fire, lava, a campfire or a lit Stove. Bubbles or smoke above the pot show that it is heated")
-      .pointAt(util.vector.centerOf(2, 1, 2))
+      .pointAt(util.vector().centerOf(2, 1, 2))
       .placeNearTarget()
       .attachKeyFrame();
     scene.idle(90);
-    const front = util.vector.blockSurface([2, 1, 2], "NORTH");
-    scene.overlay.showControls(front, "RIGHT", 30).rightClick().withItem("minecraft:flint_and_steel");
+    const front = util.vector().blockSurface([2, 1, 2], "NORTH");
+    scene.overlay().showControls(front, "RIGHT", 30).rightClick().withItem("minecraft:flint_and_steel");
     scene.idle(20);
-    scene.world.modifyBlock([2, 1, 2], () => stove(true), false);
-    scene.overlay.showText(70)
+    scene.world().modifyBlock([2, 1, 2], () => stove(true), false);
+    scene.overlay().showText(70)
       .text("Flint and Steel lights the Stove, which then heats the pot above it")
       .pointAt(front)
       .placeNearTarget()
       .attachKeyFrame();
     scene.idle(80);
-    scene.overlay.showControls(front, "RIGHT", 30).rightClick().withItem("minecraft:iron_shovel");
+    scene.overlay().showControls(front, "RIGHT", 30).rightClick().withItem("minecraft:iron_shovel");
     scene.idle(20);
-    scene.world.modifyBlock([2, 1, 2], () => stove(false), false);
-    scene.overlay.showText(70)
+    scene.world().modifyBlock([2, 1, 2], () => stove(false), false);
+    scene.overlay().showText(70)
       .text("A shovel or a water bucket puts a lit Stove out")
       .pointAt(front)
       .placeNearTarget()
@@ -63,7 +63,7 @@
   }
 
   P.addPlugin({
-    modId: "farmersdelight",
+    getModId() { return "farmersdelight"; },
     name: "Farmer's Delight",
     registerScenes(helper) {
       helper.forComponents("farmersdelight:cooking_pot", "farmersdelight:stove")

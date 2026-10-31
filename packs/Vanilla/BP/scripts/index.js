@@ -10,7 +10,7 @@ world.afterEvents.worldLoad.subscribe(() => {
       "minecraft:redstone_lamp", "minecraft:piston", "minecraft:sticky_piston", "minecraft:lever",
       "minecraft:stone_button", "minecraft:wooden_button", "minecraft:repeater", "minecraft:comparator",
       "minecraft:hopper", "minecraft:iron_ore", "minecraft:deepslate_iron_ore", "minecraft:moss_block",
-      "minecraft:tnt", "minecraft:lead",
+      "minecraft:tnt", "minecraft:lead", "minecraft:paper",
     ],
   }));
 });

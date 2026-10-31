@@ -32,22 +32,22 @@
     itemsY() { return P.int(0.15 * this.height + 85); }
     init() {
       super.init();
-      const tag = this.tag, items = tag.items.filter(i => i !== tag.mainItem);
+      const tag = this.tag, items = tag.items.filter(i => i !== tag.mainItem && P.isItem(i));
       this.items = items;
       const rows = P.clamp(Math.ceil(items.length / 11), 1, 3), layout = centeredHorizontal(items.length, rows, 28, 28, 8);
       this.itemArea = layout.area;
       const cx = P.int(this.width * 0.5), cy = this.itemsY();
       const button = (id, x, y) => {
         const b = new P.PonderButton(x, y).showingItem(id);
-        if (P.indexedItems().includes(id)) b.withCallback((mx, my) => {
+        if (P.doScenesExistForId(id)) b.withCallback((mx, my) => {
           this.centerScalingOn(mx, my);
-          P.screens.transitionTo(new P.PonderUI(id, tag));
+          P.showScenes(id, tag);
         });
         else b.withBorderColors(/^minecraft:/.test(id) ? P.C.MISSING_VANILLA : P.C.MISSING_MODDED);
         this.widgets.push(b);
       };
       items.forEach(id => { button(id, cx + layout.x + 4, cy + layout.y + 4); layout.next(); });
-      if (tag.mainItem) button(tag.mainItem, cx - P.int(layout.totalWidth / 2) - 48, cy - 10);
+      if (tag.mainItem && P.isItem(tag.mainItem)) button(tag.mainItem, cx - P.int(layout.totalWidth / 2) - 48, cy - 10);
       this.mouse = [0, 0];
     }
     initBackTrackIcon(b) { b.showingTag(this.tag); }
@@ -57,7 +57,7 @@
       this.hoveredItem = null;
       this.widgets.forEach(w => { if (w !== this.backTrack && w.item && w.isMouseOver(this.mouse[0], this.mouse[1])) this.hoveredItem = w.item; });
     }
-    render(mx, my, pt) {
+    render(mx, my, pt, previous) {
       const d = this.d, W = this.width, H = this.height;
       this.mouse = [mx, my];
       d.begin();
@@ -77,7 +77,7 @@
       lines.forEach((l, i) => d.text(l, dx, dy + 9 * i, P.C.TEXT, false));
       this.widgets.forEach(b => b.render(d, mx, my, pt));
       this.renderBackTrackCaption(d);
-      if (this.hoveredItem) P.tooltip(d, mx, my, [[P.itemName(this.hoveredItem), P.color(0xffffffff, true)]], 9999);
+      if (this.hoveredItem) P.itemTooltip(d, mx, my, this.hoveredItem, pt, previous);
       d.end();
     }
     renderItems(d) {

@@ -1,6 +1,6 @@
 # 接口参考：场景指令
 
-场景函数接收 `scene` 和 `util`。指令按书写顺序执行，时间单位是 tick，20 tick 为 1 秒。`idle` 之前连续写出的指令在同一时刻发生。
+场景函数接收 `scene` 和 `util`。指令按书写顺序执行，时间单位是 tick，20 tick 为 1 秒。`idle` 之前连续写出的指令在同一时刻发生。指令分组通过 `scene.world()`、`overlay()`、`effects()`、`special()`、`debug()` 取得；工具通过 `util.select()`、`vector()`、`grid()` 取得，每个场景拥有自己的工具实例。
 
 ```js
 function scene(scene, util) {
@@ -29,6 +29,8 @@ function scene(scene, util) {
 | `addLazyKeyframe()` | 同上，但关键帧推后 6 tick，文字的 `attachKeyFrame` 用的就是它 |
 | `markAsFinished()` | 到这里即视为看完，进度条可以跳到下一个场景 |
 | `setNextUpEnabled(开关)` | 暂时禁止或恢复跳到下一个场景 |
+| `getScene()` | 取得运行中的场景对象，可以调用 `getWorld()`、`getSceneBuildingUtil()`、`resolveOptional(link)`、`runWith(link, 回调)` 等方法 |
+| `debug()` | 提供播放场景所需的 `addInstructionInstance(指令)` 和 `enqueueCallback(回调)` |
 
 ## util
 
@@ -45,7 +47,7 @@ function scene(scene, util) {
 | `column(x, z)` | 整列 |
 | `everywhere()` | 整个结构 |
 
-选区可以 `add(另一个)` 合并、`substract(另一个)` 相减。`center()` 返回选区中心。
+选区的 `add(另一个)` 和 `substract(另一个)` 原地修改并返回自己。`getCenter()` 返回中心，`makeOutline()` 创建描边，`test(BlockPos)` 判断包含关系，`forEach(回调)` 和迭代器遍历位置。`column` 从 y=1 开始，不含底板；`layers` 会限制高度。
 
 ### util.vector
 
@@ -56,7 +58,7 @@ function scene(scene, util) {
 | `topOf(x, y, z)` | 方块顶面中心 |
 | `blockSurface([x, y, z], 朝向, 外偏)` | 方块某个面往外一点，外偏默认 0 |
 
-`util.grid.at(x, y, z)` 给出方块坐标，用在需要方块位置的参数上。
+`util.grid().at(x, y, z)` 返回 `P.BlockPos`，可链式调用 `above()`、`east()`、`offset()`、`relative()`。`vector` 方法返回 `P.Vec3`，支持 `add()`、`subtract()`、`scale()`；两者也可按数组索引读取。`position`、`fromTo`、`centerOf`、`topOf` 同时接收位置对象和分开的坐标。`new P.AABB(小角, 大角)` 会整理两角大小，提供 `inflate()`、`move()`、`expandTowards()`、`contract()`。
 
 朝向是 `"UP"`、`"DOWN"`、`"NORTH"`、`"SOUTH"`、`"WEST"`、`"EAST"`。
 
@@ -78,8 +80,8 @@ function scene(scene, util) {
 并入场景主体的方块不能单独移动。要移动或旋转的方块用独立段，并保存返回的 link：
 
 ```js
-const head = scene.world.showIndependentSection(util.select.position(2, 1, 2), "WEST");
-scene.world.moveSection(head, [1, 0, 0], 10);
+const head = scene.world().showIndependentSection(util.select().position(2, 1, 2), "WEST");
+scene.world().moveSection(head, [1, 0, 0], 10);
 ```
 
 | 方法 | 说明 |
@@ -98,9 +100,10 @@ scene.world.moveSection(head, [1, 0, 0], 10);
 | `replaceBlocks(选区, 方块, 播粒子)` | 只替换已有方块的位置 |
 | `modifyBlock([x, y, z], 函数, 播粒子)` | 函数接收旧方块、返回新方块 |
 | `modifyBlocks(选区, 函数, 播粒子)` | 对整个选区 |
-| `cycleBlockProperty([x, y, z], 状态名, 取值列表)` | 状态按列表循环。布尔和 0/1 状态可以不给列表 |
-| `toggleRedstonePower(选区)` | 翻转红石功率：信号 0 与 15 对调，点亮状态取反 |
-| `modifyBlockEntityNBT(选区, 类型, 函数)` | 改方块实体数据。类型是基岩版的方块实体 id（`"Bed"`、`"Banner"`），函数接收数据对象、直接改它 |
+| `cycleBlockProperty([x, y, z], 状态名, 取值列表)` | 取值列表可省略，使用适配器提取的原版或附属包状态域；未知状态报错 |
+| `toggleRedstonePower(选区)` | 按状态域切换功率、通电或点亮状态，包括附属包声明的状态 |
+| `modifyBlockEntity(位置, 类型, 函数)` | 函数接收对应类型的实时方块实体对象 |
+| `modifyBlockEntityNBT(选区, 类型, 函数[, 重绘方块])` | 类型为 `P.BannerBlockEntity` 等类，函数接收 Java 形式的 `P.CompoundTag`；第四参数省略时不重建静态模型 |
 | `restoreBlocks(选区)` | 恢复成结构里的初始方块 |
 | `destroyBlock([x, y, z])` | 破坏并播粒子 |
 | `incrementBlockBreakingProgress([x, y, z])` | 破坏进度加一档，第十档时破坏 |
@@ -136,10 +139,20 @@ P.block("minecraft:bed", { direction: 2, head_piece_bit: true }, { nbt: { id: "B
 没写数据的床是红色的，旗帜是白色的。床的状态是 `direction`（床头朝向，0 南、1 西、2 北、3 东）和 `head_piece_bit`；立着的旗帜是 `ground_sign_direction`（0 到 15，0 朝南），挂墙的是 `facing_direction`（2 北、3 南、4 西、5 东）。
 
 ```js
-scene.world.modifyBlockEntityNBT(util.select.position(2, 1, 2), "Banner", nbt => {
-  nbt.Patterns.push({ Color: 1, Pattern: "cre" });
+scene.world().modifyBlockEntityNBT(util.select().position(2, 1, 2), P.BannerBlockEntity, nbt => {
+  nbt.getList("patterns").push({ color: "orange", pattern: "minecraft:creeper" });
 });
 ```
+
+结构和 `P.block(..., { nbt })` 存储基岩数据，指令中的 `CompoundTag` 使用对应方块实体的 Java 字段。它提供 `getInt`、`putInt`、`getString`、`putString`、`getBoolean`、`getCompound`、`getList`、`copy` 等方法。可见区段每个世界 tick 推进方块实体一次，重播恢复结构初态。移动活塞在脚本里设置的 `blockState` 使用 `{ id, states }`；Java 结构中的 `{ Name, Properties }` 由适配器离线转换，运行时不再转换。
+
+```js
+scene.world().modifyBlockEntity(util.grid().at(2, 1, 2), P.ChestBlockEntity, chest => chest.startOpen());
+scene.idle(20);
+scene.world().modifyBlockEntity(util.grid().at(2, 1, 2), P.ChestBlockEntity, chest => chest.stopOpen());
+```
+
+自定义方块实体继承 `P.BlockEntity`，实现 `tick()`、`fromBedrock(tag)`、`bedrockData()` 等需要的方法，用 `P.registerBlockEntity(ids, Type, renderer)` 注册。绘制函数接收 `(d, entity, matrix, partialTick, light, size, ticks, model, visibleQuads)`，负责画完该方块，包括需要保留的静态部分；沿用现有 `P.drawModelQuads` 和 `P.drawBlockCube`。
 
 `modifyBlock` 的函数里：
 
@@ -158,7 +171,7 @@ scene.world.modifyBlockEntityNBT(util.select.position(2, 1, 2), "Banner", nbt =>
 
 | 方法 | 说明 |
 | --- | --- |
-| `text(文字)` | 内容。翻译键按调用顺序编号，见[插件注册](registration.md)的“翻译键”一节 |
+| `text(文字, ...参数)` | 内容和格式参数。翻译键按调用顺序编号，见[插件注册](registration.md)的“翻译键”一节 |
 | `sharedText(key, ...参数)` | 用本插件的共享文本 |
 | `pointAt(位置)` | 指示线指向的场景坐标 |
 | `placeNearTarget()` | 文字贴近指示点，否则放在屏幕左侧 |
@@ -173,8 +186,8 @@ scene.world.modifyBlockEntityNBT(util.select.position(2, 1, 2), "Banner", nbt =>
 ### 描边与线条
 
 ```js
-scene.overlay.showOutline(P.Palette.GREEN, "lamp", util.select.position(2, 1, 2), 40);
-scene.overlay.showLine(P.Palette.RED, util.vector.centerOf(1, 1, 2), util.vector.centerOf(3, 1, 2), 40);
+scene.overlay().showOutline(P.Palette.GREEN, "lamp", util.select().position(2, 1, 2), 40);
+scene.overlay().showLine(P.Palette.RED, util.vector().centerOf(1, 1, 2), util.vector().centerOf(3, 1, 2), 40);
 ```
 
 | 方法 | 说明 |
@@ -189,7 +202,7 @@ scene.overlay.showLine(P.Palette.RED, util.vector.centerOf(1, 1, 2), util.vector
 ### 操作提示
 
 ```js
-scene.overlay.showControls(util.vector.topOf(2, 1, 2), "DOWN", 40)
+scene.overlay().showControls(util.vector().topOf(2, 1, 2), "DOWN", 40)
   .rightClick()
   .withItem("minecraft:redstone")
   .whileSneaking();
@@ -202,7 +215,7 @@ scene.overlay.showControls(util.vector.topOf(2, 1, 2), "DOWN", 40)
 | `leftClick()` | 左键图标 |
 | `rightClick()` | 右键图标 |
 | `scroll()` | 滚轮图标 |
-| `showing(图标)` | 用 `P.Icons` 里的图标 |
+| `showing(图标)` | 用 `P.Icons` 的图标，或提供带 `render(d, x, y, alpha)` 的 ScreenElement 对象 |
 | `withItem(物品 id)` | 附带物品 |
 | `whileSneaking()` | 加上“潜行 +”前缀 |
 | `whileCTRL()` | 加上“Ctrl +”前缀 |
@@ -226,12 +239,12 @@ scene.overlay.showControls(util.vector.topOf(2, 1, 2), "DOWN", 40)
 ### 粒子
 
 ```js
-scene.effects.indicateRedstone([2, 1, 2]);
-scene.effects.indicateSuccess([2, 1, 2]);
+scene.effects().indicateRedstone([2, 1, 2]);
+scene.effects().indicateSuccess([2, 1, 2]);
 
-scene.effects.emitParticles(
-  util.vector.centerOf(2, 1, 2),
-  scene.effects.simpleParticleEmitter(P.dust(0xff0000, 1), [0, 0.2, 0]),
+scene.effects().emitParticles(
+  util.vector().centerOf(2, 1, 2),
+  scene.effects().simpleParticleEmitter(P.dust(0xff0000, 1), [0, 0.2, 0]),
   8,   // 每个周期的数量
   4,   // 周期数
 );
@@ -245,14 +258,25 @@ scene.effects.emitParticles(
 | `simpleParticleEmitter(粒子, 运动向量)` | 在位置上发射 |
 | `particleEmitterWithinBlockSpace(粒子, 运动向量)` | 散布到所在方块内 |
 
-粒子用 `P.dust(颜色, 大小)` 或 `P.blockParticle(方块)`。颜色是 `0xRRGGBB`。自定义粒子见[自定义方块、粒子与实体](custom-content.md)。
+粒子可用 `P.dust(颜色, 大小)`、`P.dustTransition(起始颜色, 结束颜色, 大小)`、`P.entityEffect(颜色, 透明度)`、`P.blockParticle(方块)`、`P.itemParticle(物品)`，颜色是 `0xRRGGBB`，透明度为 0 到 1。
 
-### 掉落物与实体
+`P.ParticleTypes` 提供以下类型：
+
+| 类别 | 名称 |
+| --- | --- |
+| 烟与火焰 | `SMOKE`、`LARGE_SMOKE`、`WHITE_SMOKE`、`SPIT`、`POOF`、`FLAME`、`SMALL_FLAME`、`SOUL_FIRE_FLAME`、`CAMPFIRE_COSY_SMOKE`、`CAMPFIRE_SIGNAL_SMOKE`、`LAVA` |
+| 提示与命中 | `HEART`、`ANGRY_VILLAGER`、`NOTE`、`CRIT`、`ENCHANTED_HIT`、`DAMAGE_INDICATOR`、`HAPPY_VILLAGER`、`COMPOSTER`、`EGG_CRACK` |
+| 魔法与轨迹 | `PORTAL`、`REVERSE_PORTAL`、`ENCHANT`、`NAUTILUS`、`VAULT_CONNECTION`、`EFFECT`、`INSTANT_EFFECT`、`ENTITY_EFFECT`、`WITCH`、`END_ROD`、`TOTEM_OF_UNDYING` |
+| 水与环境 | `BUBBLE`、`BUBBLE_COLUMN_UP`、`BUBBLE_POP`、`RAIN`、`SPLASH`、`FISHING`、`MYCELIUM`、`DOLPHIN` |
+
+运动向量按对应粒子的语义使用，例如 `NOTE` 的第一个分量决定颜色，`ENCHANT` 的向量决定飞向发射点前的初始偏移。其他粒子通过 `{ make(world, x, y, z, mx, my, mz) }` 提供实例，尚未内置全部原版粒子类型。自定义粒子见[自定义方块、粒子与实体](custom-content.md)。
+
+## scene.world 的掉落物与实体
 
 ```js
-const item = scene.effects.createItemEntity(util.vector.centerOf(2, 2, 2), [0, 0.2, 0], "minecraft:redstone");
+const item = scene.world().createItemEntity(util.vector().centerOf(2, 2, 2), [0, 0.2, 0], "minecraft:redstone");
 scene.idle(20);
-scene.effects.modifyEntity(item, entity => entity.discard());
+scene.world().modifyEntity(item, entity => entity.discard());
 ```
 
 | 方法 | 说明 |
@@ -264,12 +288,12 @@ scene.effects.modifyEntity(item, entity => entity.discard());
 | `modifyEntities(类型, 回调)` | 修改该类型的所有实体 |
 | `modifyEntitiesInside(类型, 选区, 回调)` | 只修改选区内的 |
 
-掉落物的类型是 `P.ItemEntity`。掉落物有重力和碰撞，落到世界底部（y ≤ -0.5）或存在超过 6000 tick 会自行消失。
+掉落物的类型是 `P.ItemEntity`。掉落物有重力和碰撞，存在超过 6000 tick 会自行消失。物品对象可带 `components`；掉落方块还可带 `states` 和 `nbt`。`minecraft:dyed_color`、`potion_contents`、`enchantments`、`enchantment_glint_override` 等组件同时影响已支持的模型、染色、光效和提示行；这并不覆盖全部原版物品的特殊模型和提示语义。
 
 ```js
-const sheep = scene.effects.createClientEntity("minecraft:sheep", [2.5, 1, 2.5], 0);
+const sheep = scene.world().createClientEntity("minecraft:sheep", [2.5, 1, 2.5], 0);
 scene.idle(20);
-scene.effects.modifyEntity(sheep, e => { e.yRot = 90; });   // 转身朝西
+scene.world().modifyEntity(sheep, e => { e.yRot = 90; });   // 转身朝西
 ```
 
 实体按游戏里的模型、动画和渲染控制器画，自己不会动（没有 AI）。怎么让它走、转头、坐下，见[自定义方块、粒子与实体](custom-content.md)的“原版和附属包的实体”一节。
@@ -278,14 +302,13 @@ scene.effects.modifyEntity(sheep, e => { e.yRot = 90; });   // 转身朝西
 
 | 方法 | 说明 |
 | --- | --- |
-| `movePointOfInterest(位置)` | 把镜头的注视点移到该位置 |
-| `movePointOfInterestTo([x, y, z])` | 同上，参数是方块坐标 |
+| `movePointOfInterest(位置)` | `BlockPos` 取方块中心，`Vec3` 或数组取精确位置 |
 | `hideElement(link, 方向)` | 让一个元素滑出 |
 | `createBirb(位置, 姿态)` | 从上方淡入一只鹦鹉，返回 link。颜色在红蓝、绿、黄蓝、灰里随机 |
 | `changeBirbPose(link, 姿态)` | 换鹦鹉的姿态 |
 | `moveParrot(link, 偏移, tick)` | 在这些 tick 里把鹦鹉移动偏移量 |
 | `rotateParrot(link, x, y, z, tick)` | 在这些 tick 里转动鹦鹉（x 是头的俯仰，y 是身体朝向） |
-| `createCart(位置, 角度, 实体 id)` | 从上方淡入一辆矿车，返回 link。实体 id 如 `"minecraft:minecart"`、`"minecraft:chest_minecart"`（对应 Java 的 `Minecart::new`、`MinecartChest::new`），装着的方块照 Java 画在车里 |
+| `createCart(位置, 角度, 工厂)` | 工厂接收 `(world, x, y, z)` 并返回矿车，可以设置 `displayBlock` 和 `displayOffset`；从上方淡入并返回 link |
 | `rotateCart(link, 角度, tick)` | 在这些 tick 里转动矿车 |
 | `moveCart(link, 偏移, tick)` | 在这些 tick 里移动矿车 |
 
@@ -299,8 +322,8 @@ scene.effects.modifyEntity(sheep, e => { e.yRot = 90; });   // 转身朝西
 | `FlappyPose` | 移动时扇翅膀 |
 
 ```js
-const birb = scene.special.createBirb(util.vector.topOf(2, 1, 2), P.ParrotPose.FacePointOfInterestPose);
+const birb = scene.special().createBirb(util.vector().topOf(2, 1, 2), P.ParrotPose.FacePointOfInterestPose);
 scene.idle(20);
-scene.special.changeBirbPose(birb, P.ParrotPose.FlappyPose);
-scene.special.moveParrot(birb, [0, 1, 0], 20);
+scene.special().changeBirbPose(birb, P.ParrotPose.FlappyPose);
+scene.special().moveParrot(birb, [0, 1, 0], 20);
 ```
