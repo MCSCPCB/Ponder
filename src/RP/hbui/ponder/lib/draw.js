@@ -1,6 +1,7 @@
 // Immediate-mode drawing onto pooled DOM nodes, so the screens can keep Java's render code
-// shape: each frame re-issues its draw calls in order, a node is reused per call position and
-// only touched when its style changed. Coordinates are GUI pixels; DOM order is draw order.
+// shape: each frame re-issues its draw calls in order. Image nodes retain their texture URL,
+// including native geo-item textures; changing depth order must not recreate those resources.
+// Coordinates are GUI pixels; z-index preserves draw order without detaching image nodes.
 (function () {
   const P = window.Ponder;
   // Java's 8 px font. Minecraft Seven v4 has the Java advances at 8 px (A = 6, i = 2, space = 4).
@@ -98,37 +99,53 @@
     constructor(container) {
       this.root = container;
       this.nodes = [];
+      this.pools = new Map();
       this.used = 0;
+      this.frame = 0;
+      this.imageBindings = 0;
+      this.mappedFaces = 0;
+      this.faceFilterPixels = 0;
     }
-    begin() { this.used = 0; }
+    begin() {
+      this.used = 0; this.frame++; this.mappedFaces = 0; this.faceFilterPixels = 0;
+      this.pools.forEach(pool => { pool.used = 0; });
+    }
     end() {
-      for (let i = this.used; i < this.nodes.length; i++) this.style(this.nodes[i], "display:none");
+      this.nodes.forEach(n => { if (n.frame !== this.frame) this.style(n, "display:none"); });
     }
-    // The next node, emptied when it held something else: "box" (no content), "text" or "image".
-    take(kind) {
-      let n = this.nodes[this.used];
+    // Pools are per kind and image URL. Sorting faces or inserting entities changes only
+    // transforms and draw order, never a live image's src or its native texture ownership.
+    take(kind, src, mapped) {
+      const key = kind === "image" ? (mapped ? "mapped:" : "image:") + src : kind;
+      let pool = this.pools.get(key);
+      if (!pool) { pool = { nodes: [], used: 0 }; this.pools.set(key, pool); }
+      let n = pool.nodes[pool.used++];
       if (!n) {
         const el = document.createElement("div");
         this.root.appendChild(el);
-        n = this.nodes[this.used] = { el: el, css: "", kind: "box", text: "", img: null, src: "", imgCss: "" };
+        n = { el: el, css: "", kind: kind, text: "", img: null, src: src || "", imgCss: "", clip: null, clipCss: "" };
+        if (kind === "image") {
+          if (mapped) { n.clip = document.createElement("div"); n.el.appendChild(n.clip); }
+          n.img = document.createElement("img");
+          n.img.src = src;
+          (n.clip || n.el).appendChild(n.img);
+          this.imageBindings++;
+        }
+        pool.nodes.push(n);
+        this.nodes.push(n);
       }
-      this.used++;
-      if (n.kind !== kind) {
-        n.el.textContent = "";
-        n.text = "";
-        n.img = null;
-        n.src = n.imgCss = "";
-        n.kind = kind;
-      }
+      n.order = this.used++;
+      n.frame = this.frame;
       return n;
     }
     style(n, css) {
+      css += ";z-index:" + n.order;
       if (n.css !== css) { n.el.style.cssText = css; n.css = css; }
       return n;
     }
     // A box at (x, y), w x h GUI pixels, with extra CSS.
-    box(x, y, w, h, extra, kind) {
-      return this.style(this.take(kind || "box"), `position:absolute;left:0;top:0;transform-origin:0 0;transform:translate(${P.px(x)},${P.px(y)});width:${P.px(w)};height:${P.px(h)};${extra || ""}`);
+    box(x, y, w, h, extra, kind, src) {
+      return this.style(this.take(kind || "box", src), `position:absolute;left:0;top:0;transform-origin:0 0;transform:translate(${P.px(x)},${P.px(y)});width:${P.px(w)};height:${P.px(h)};${extra || ""}`);
     }
     // A polygon (GUI points relative to x, y) filled with a horizontal gradient.
     polygon(x, y, w, h, points, stops) {
@@ -170,9 +187,7 @@
     // A u,v region of a texture (texW x texH) drawn into x, y, w, h.
     sprite(src, u, v, uw, vh, texW, texH, x, y, w, h, alpha, filter) {
       const sx = w / uw, sy = h / vh;
-      const n = this.box(x, y, w, h, `overflow:hidden;opacity:${(alpha === undefined ? 1 : alpha).toFixed(3)}`, "image");
-      if (!n.img) { n.img = document.createElement("img"); n.el.appendChild(n.img); }
-      if (n.src !== src) { n.img.src = src; n.src = src; }
+      const n = this.box(x, y, w, h, `overflow:hidden;opacity:${(alpha === undefined ? 1 : alpha).toFixed(3)}`, "image", src);
       const css = `position:absolute;left:0;top:0;transform-origin:0 0;transform:translate(${P.px(-u * sx)},${P.px(-v * sy)});width:${P.px(texW * sx)};height:${P.px(texH * sy)};image-rendering:pixelated${filter ? ";filter:" + filter : ""}`;
       if (n.imgCss !== css) { n.img.style.cssText = css; n.imgCss = css; }
     }
@@ -181,29 +196,56 @@
     // `filter` (a CSS filter) shades or tints it.
     texturedQuad(src, o, u, v, filter, size) {
       const s = size || 16, k = P.view.cssPerGui / s, f = n => n.toFixed(5);
-      const n = this.style(this.take("image"), `position:absolute;left:0;top:0;width:${s}px;height:${s}px;transform-origin:0 0;` +
+      const n = this.style(this.take("image", src), `position:absolute;left:0;top:0;width:${s}px;height:${s}px;transform-origin:0 0;` +
         `transform:matrix(${f((u[0] - o[0]) * k)},${f((u[1] - o[1]) * k)},${f((v[0] - o[0]) * k)},${f((v[1] - o[1]) * k)},${P.num(o[0])},${P.num(o[1])})`);
-      if (!n.img) { n.img = document.createElement("img"); n.el.appendChild(n.img); }
-      if (n.src !== src) { n.img.src = src; n.src = src; }
       const css = `position:absolute;left:0;top:0;width:${s}px;height:${s}px;image-rendering:pixelated${filter ? ";filter:" + filter : ""}`;
       if (n.imgCss !== css) { n.img.style.cssText = css; n.imgCss = css; }
     }
     // texturedQuad for any part of the texture: the GUI points o, u and v show the texture at
     // fractions a, b and c ([x, y]; turned or flipped as they come), and only the polygon `clip`
-    // ([x, y] fractions) is drawn. The whole texture is laid out so and clipped.
+    // ([x, y] fractions) is drawn. Crop before filtering: filtering the complete skin under
+    // every face allocates native surfaces for mostly invisible pixels. The outer filter
+    // stays in screen space and is bounded to this face; its child owns the UV transform.
     texturedQuadMap(src, o, u, v, a, b, c, clip, filter, size) {
       const p1 = b[0] - a[0], q1 = b[1] - a[1], p2 = c[0] - a[0], q2 = c[1] - a[1], det = p1 * q2 - p2 * q1;
+      if (!Number.isFinite(det) || Math.abs(det) < 1e-12 || clip.length < 3) return;
       const ux = u[0] - o[0], uy = u[1] - o[1], vx = v[0] - o[0], vy = v[1] - o[1];
       // GUI pixels per unit across and down the texture, and where its corner lands.
       const jx = [(ux * q2 - vx * q1) / det, (uy * q2 - vy * q1) / det], jy = [(vx * p1 - ux * p2) / det, (vy * p1 - uy * p2) / det];
       const x = o[0] - jx[0] * a[0] - jy[0] * a[1], y = o[1] - jx[1] * a[0] - jy[1] * a[1];
       const s = size || 16, k = P.view.cssPerGui / s, f = n => n.toFixed(5), at = n => (n * s).toFixed(3) + "px";
-      const n = this.style(this.take("image"), `position:absolute;left:0;top:0;width:${s}px;height:${s}px;transform-origin:0 0;` +
-        `transform:matrix(${f(jx[0] * k)},${f(jx[1] * k)},${f(jy[0] * k)},${f(jy[1] * k)},${P.num(x)},${P.num(y)});clip-path:polygon(${clip.map(p => at(p[0]) + " " + at(p[1])).join(",")})`);
-      if (!n.img) { n.img = document.createElement("img"); n.el.appendChild(n.img); }
-      if (n.src !== src) { n.img.src = src; n.src = src; }
-      const css = `position:absolute;left:0;top:0;width:${s}px;height:${s}px;image-rendering:pixelated${filter ? ";filter:" + filter : ""}`;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      const low = [Infinity, Infinity], high = [-Infinity, -Infinity];
+      for (const p of clip) {
+        const px = x + jx[0] * p[0] + jy[0] * p[1], py = y + jx[1] * p[0] + jy[1] * p[1];
+        if (!Number.isFinite(px) || !Number.isFinite(py)) return;
+        minX = Math.min(minX, px); minY = Math.min(minY, py);
+        maxX = Math.max(maxX, px); maxY = Math.max(maxY, py);
+        low[0] = Math.min(low[0], p[0]); low[1] = Math.min(low[1], p[1]);
+        high[0] = Math.max(high[0], p[0]); high[1] = Math.max(high[1], p[1]);
+      }
+      if (low[0] === high[0] || low[1] === high[1]) return;
+      const pad = 1 / P.view.cssPerGui;
+      minX -= pad; minY -= pad;
+      const width = maxX + pad - minX, height = maxY + pad - minY;
+      const left = low[0] * s, top = low[1] * s, w = (high[0] - low[0]) * s, h = (high[1] - low[1]) * s;
+      // Rectangle UVs need only overflow clipping. Other convex polygons use Gameface's
+      // stencil path; antialiased clip masks would allocate another texture for each face.
+      const rectangle = clip.length === 4 && clip.every((p, i) => {
+        const q = clip[(i + 1) % clip.length];
+        return (p[0] === low[0] || p[0] === high[0]) && (p[1] === low[1] || p[1] === high[1])
+          && ((p[0] === q[0]) !== (p[1] === q[1]));
+      });
+      const n = this.style(this.take("image", src, true), `position:absolute;left:${P.px(minX)};top:${P.px(minY)};width:${P.px(width)};height:${P.px(height)};overflow:hidden${filter ? ";filter:" + filter : ""}`);
+      const clipCss = `position:absolute;left:0;top:0;width:${f(w)}px;height:${f(h)}px;overflow:hidden;shape-rendering:optimizeSpeed;transform-origin:0 0;` +
+        `transform:matrix(${f(jx[0] * k)},${f(jx[1] * k)},${f(jy[0] * k)},${f(jy[1] * k)},${P.num(x + jx[0] * low[0] + jy[0] * low[1] - minX)},${P.num(y + jx[1] * low[0] + jy[1] * low[1] - minY)})` +
+        (rectangle ? "" : `;clip-path:polygon(${clip.map(p => at(p[0] - low[0]) + " " + at(p[1] - low[1])).join(",")})`);
+      if (n.clipCss !== clipCss) { n.clip.style.cssText = clipCss; n.clipCss = clipCss; }
+      const css = `position:absolute;left:${f(-left)}px;top:${f(-top)}px;width:${s}px;height:${s}px;image-rendering:pixelated`;
       if (n.imgCss !== css) { n.img.style.cssText = css; n.imgCss = css; }
+      this.mappedFaces++;
+      // Diagnostic geometry only: CSS area is not measured GPU memory or allocation count.
+      if (filter) this.faceFilterPixels += width * height * P.view.cssPerGui * P.view.cssPerGui;
     }
     // A line from GUI point a to b, `width` GUI pixels thick.
     line(a, b, width, c) {

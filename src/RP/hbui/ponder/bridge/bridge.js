@@ -1,5 +1,5 @@
-// Talks to the server's data-driven form the way the vanilla bundle does (read from its
-// 1.26.40 build): queries go over window.engine ("query:subscribe/<name>" -> "query:updated/<id>"),
+// Talks to the server's data-driven form the way the current vanilla bundle does:
+// queries go over window.engine ("query:subscribe/<name>" -> "query:updated/<id>"),
 // button presses through window.__commands__. The form the behavior pack opens carries the
 // marker "ponder:<item id>#<stamp>;"; while it is up, Ponder covers it and vanilla's #root is
 // hidden. The stamp is new for every form, so one opened right after another for the same item
@@ -47,8 +47,8 @@
   }
   // The definition only binds the form's text to a data store path ("$.minecraft.custom_form_data_
   // {instanceId}"); the text itself is read from there, as vanilla's getString binding does. The
-  // behavior pack puts the markers in the title and the first two labels.
-  const FIELDS = ["title", "layout[0].text", "layout[1].text"];
+  // behavior pack puts the complete request in both the title and first label.
+  const FIELDS = ["title", "layout[0].text"];
   let dropData = [], dataPath = "";
   function watchData() {
     const m = /^\$\.([^.\s]+)\.([^.\s]+)$/m.exec(bridge.definition);
@@ -58,6 +58,7 @@
     dropData.forEach(drop => drop());
     bridge.data = {};
     dropData = m ? FIELDS.map(field => subscribe("vanillaCoreDataStoreStringQuery", [m[1], m[2], field, false], value => {
+      if (path !== dataPath) return;
       bridge.data[field] = value && value.value != null ? String(value.value) : "";
       if (P.DEBUG) P.log("data", field, bridge.data[field].slice(0, 80));
     })) : [];
@@ -75,6 +76,7 @@
       bridge.tree = null;
       if (dropDefinition) dropDefinition();
       dropDefinition = screenId ? subscribe("vanilla.CoreDataDrivenUIDefinitionQuery", [1, screenId], def => {
+        if (screenId !== bridge.screenId) return;
         bridge.tree = def;
         bridge.definition = strings(def, []).join("\n");
         if (P.DEBUG) P.log("definition", bridge.definition.slice(0, 300).replace(/\n/g, " | "));
@@ -84,25 +86,39 @@
     });
   }
 
-  // A marker, from the form's data, its definition, or else the text Ore UI rendered.
-  function find(pattern) {
-    let m = pattern.exec(FIELDS.map(field => bridge.data[field] || "").join("\n"));
-    if (m) return m[1];
-    m = pattern.exec(bridge.definition);
-    if (m) return m[1];
+  // Keep fields separate: a title can arrive before the label, and a new title must never
+  // borrow an old form's plugins. Each complete field carries both markers.
+  function formTexts() {
+    const texts = FIELDS.map(field => bridge.data[field] || "");
+    strings(bridge.tree, texts);
     const root = document.getElementById("root");
-    if (!root) return null;
-    m = pattern.exec(root.textContent || "");
-    if (m) return m[1];
-    const texts = root.getElementsByTagName("fast-text");
-    for (let i = 0; i < texts.length; i++) {
-      m = pattern.exec(texts[i].getAttribute("text") || texts[i].text || "");
+    if (root) {
+      texts.push(root.textContent || "");
+      const nodes = root.getElementsByTagName("fast-text");
+      for (let i = 0; i < nodes.length; i++) texts.push(nodes[i].getAttribute("text") || nodes[i].text || "");
+    }
+    return texts;
+  }
+  function find(pattern) {
+    for (const text of formTexts()) {
+      const m = pattern.exec(text);
       if (m) return m[1];
     }
     return null;
   }
-  // The other authors' plugins the behavior pack knows of: [{ modId, script }].
-  const findAddons = () => JSON.parse(find(ADDONS) || "[]");
+  // null means that the request is still arriving; [] explicitly means no external plugins.
+  function findAddons(form) {
+    for (const text of formTexts()) {
+      const marker = MARKER.exec(text), match = ADDONS.exec(text);
+      if (!marker || marker[1] !== form || !match) continue;
+      const addons = JSON.parse(match[1]);
+      if (!Array.isArray(addons) || addons.some(a => !a || typeof a.modId !== "string" || typeof a.script !== "string")) {
+        throw new Error("Invalid Ponder plugin list for " + form);
+      }
+      return addons;
+    }
+    return null;
+  }
 
   function setVanillaHidden(hidden) {
     const root = document.getElementById("root");
@@ -112,27 +128,40 @@
   // bridge.form is the form on screen, "<item id>#<stamp>", and `closed` the last one Ponder
   // closed itself: a closed form's data can stay as it was (1.26.60), so that one is not read as
   // open again. `gaveUp` is set when Ponder shows nothing for the form, which is then vanilla's.
-  let closed = null, gaveUp = false;
+  let closed = null, gaveUp = false, started = false, waiting = false;
   function poll() {
+    P.flushLogs();
     let form = find(MARKER);
     if (form === closed) form = null;
-    if (form === bridge.form) return;
-    if (bridge.form && !gaveUp && bridge.onClose) bridge.onClose();
-    bridge.form = form;
-    bridge.item = form && form.slice(0, form.lastIndexOf("#"));
-    gaveUp = false;
-    setVanillaHidden(!!form);
-    if (!form) return;
+    if (form !== bridge.form) {
+      if (bridge.form && !gaveUp && bridge.onClose) bridge.onClose();
+      bridge.form = form;
+      bridge.item = form && form.slice(0, form.lastIndexOf("#"));
+      gaveUp = started = waiting = false;
+      setVanillaHidden(false);
+    }
+    if (!form || started || gaveUp) return;
     const giveBack = () => {
       if (bridge.form !== form) return;
       gaveUp = true;
       if (bridge.onClose) bridge.onClose();
       setVanillaHidden(false);
     };
+    let addons;
+    try { addons = findAddons(form); }
+    catch (e) { P.error("invalid form", form, e); giveBack(); return; }
+    if (addons === null) {
+      if (!waiting) P.log("waiting for complete form", form);
+      waiting = true;
+      return;
+    }
+    started = true;
+    setVanillaHidden(true);
+    P.log("request", form, "addons=" + JSON.stringify(addons));
     // onOpen resolves to false when there is nothing to show, and the vanilla form comes back,
     // as it does when opening fails.
-    new Promise(resolve => resolve(bridge.onOpen(bridge.item, findAddons()))).then(shown => { if (!shown) giveBack(); },
-      e => { P.log("open failed:", e && e.message); giveBack(); });
+    new Promise(resolve => resolve(bridge.onOpen(bridge.item, addons))).then(shown => { if (!shown) giveBack(); },
+      e => { P.error("open failed:", form, e); giveBack(); });
   }
 
   // Presses the vanilla button showing `label`: the innermost element with that text gets the

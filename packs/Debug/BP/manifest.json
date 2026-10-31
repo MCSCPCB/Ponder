@@ -1,0 +1,37 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Ponder Debug Behavior",
+    "description": "第 1 批 TODO 集中验收场景：实体、碰撞、尖牙、农夫乐事作物贴图。",
+    "uuid": "b3bdb809-eac6-489b-8be7-d07b332fc5cd",
+    "version": [1, 0, 7],
+    "min_engine_version": [1, 26, 60]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "uuid": "4daac91f-0eb4-46b8-ba44-74ca838d7180",
+      "version": [1, 0, 7],
+      "language": "javascript",
+      "entry": "scripts/index.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "4eb618fc-1b3b-4ab0-8365-c6e6d7906bb0",
+      "version": [1, 0, 7]
+    },
+    {
+      "module_name": "@minecraft/server",
+      "version": "alpha"
+    },
+    {
+      "uuid": "eae14a5a-7092-4213-a263-868bca4243e5",
+      "version": [1, 0, 9]
+    },
+    {
+      "uuid": "d0131071-9ec1-edcd-6871-857c700703d8",
+      "version": [5, 0, 6]
+    }
+  ]
+}

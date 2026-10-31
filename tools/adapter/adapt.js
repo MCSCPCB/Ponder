@@ -2,24 +2,20 @@
 //
 //   1. Put the packs in tools/input/ as .zip, .mcpack or .mcaddon: Ponder itself (src/BP and
 //      src/RP) and the add-ons with Ponder scenes, each add-on whole (behavior and resource pack).
-//   2. Into tools/version/<version>/ put the game's gui folder, so that
-//      tools/version/<version>/gui/dist/hbui/gameplay.html exists; Mojang's
-//      bedrock-samples-v<release>-full.zip (github.com/Mojang/bedrock-samples/releases, the newest
-//      full release no newer than <version>), which has vanilla's resource pack with its
-//      textures; and in scaffold/ the shape tables of Scaffold (github.com/EvilSlimeLabs/Scaffold:
-//      block_definition, block_geometry, block_rotation, state_rotations and dust_connections
-//      .json from scaffold/lookups/) with its LICENSE. Optionally, in resource_packs/ the game's
-//      own vanilla packs (vanilla, vanilla_1.14, ... from the game's data/resource_packs, their
-//      entity, models, animations, animation_controllers and render_controllers folders), whose
-//      entity data bedrock-samples merges file by file and partly loses.
-//   3. node tools/adapter/adapt.js <version>
+//   2. Verify the latest official releases and prepare _sample as its README describes.
+//      metadata/baseline.json selects the current Bedrock, Java and Scaffold references.
+//      Current game packs must be extracted into unpacked/; loose files stay in game/data/.
+//   3. node tools/adapter/adapt.js latest
 //   4. Take the results from tools/output/<version>/.
 //
-// <version> is the folder's name, 1.26.60.4 or 1-26-60-4. Inputs can also be given after it
+// An explicit version must match the verified baseline; old references are never a fallback.
+// Inputs can also be given after the version
 // (folders, .zip, .mcpack, .mcaddon) instead of using tools/input/. Every manifest.json in an
 // input is one pack; an input with one pack becomes a .mcpack, one with more an .mcaddon.
 // An add-on's behavior and resource packs belong in the same run, so that each one's dependency
 // on the other moves to the other's new version.
+// --bundle <name> writes all adapted inputs to one <name>.mcaddon, including the main pack,
+// test scenes and their dependencies. Each input is still adapted as its own pack group.
 //
 // Ponder (the input whose resource pack has hbui/gameplay.html):
 // - swaps vanilla's hashed bundle names at the top of hbui/gameplay.html for the target's;
@@ -38,12 +34,17 @@
 // Its scripts and min_engine_version stay as they are.
 // Every pack: 1 is added to the last digit of header.version, so the game takes it as a new
 // pack; dependencies on packs adapted in the same run follow. UUIDs stay the same.
+// Resource packs containing hbui/ need a root content.zipe for Ore UI to read their files;
+// add an empty marker when missing, preserving any existing content.zipe unchanged.
 "use strict";
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
+const { isDeepStrictEqual } = require("node:util");
+const { materialPolicy, entityTextureImages } = require("./entity_textures.js");
 
 const TOOLS = path.resolve(__dirname, "..");
+const SAMPLE = path.resolve(TOOLS, "..", "_sample");
 
 // What Ponder needs from vanilla's Ore UI, with every name each has gone by. Add a name here when
 // a version renames one; the adapter rewrites the quoted name in the pack's .js and .html files.
@@ -54,6 +55,7 @@ const NAMES = [
   { use: "DDUI data store commands", names: ["vanillaCoreDataStoreSetCommandGroup", "vanillaDduiDataStoreSetCommandGroup"] },
   { use: "form button press", names: ["dataStoreButtonPress"] },
   { use: "form close button press", names: ["dataStoreCloseButtonPress"] },
+  { use: "DDUI content log", names: ["vanillaCoreDduiContentLogCommandGroup"] },
   { use: "translation", names: ["coreTranslateCommandGroup"] },
   { use: "sounds", names: ["soundCommandGroup"] },
   { use: "item icons", names: ["geo-item://"], unquoted: true },
@@ -83,12 +85,20 @@ function parseJson(bytes, name) {
 
 // ---- the target version's gui folder ----
 
-// The folder may be named 1.26.60.4 or 1-26-60-4, whichever way the version was typed.
-function versionFolder(version) {
-  const names = [version, version.replace(/\./g, "-"), version.replace(/-/g, ".")];
-  const found = names.map(name => path.join(TOOLS, "version", name)).find(folder => fs.existsSync(folder));
-  if (!found) fail("no folder tools/version/" + version + " (put that version's gui folder there)");
-  return found;
+function loadBaseline(version = "latest") {
+  const file = path.join(SAMPLE, "metadata", "baseline.json");
+  if (!fs.existsSync(file)) fail("missing _sample/metadata/baseline.json; prepare the latest release references first");
+  const baseline = parseJson(fs.readFileSync(file), file);
+  const current = baseline.bedrock.version;
+  if (version !== "latest" && version.replace(/-/g, ".") !== current) fail("requested " + version + "; the verified current Bedrock baseline is " + current);
+  const folder = path.join(SAMPLE, "bedrock", current);
+  const source = parseJson(fs.readFileSync(path.join(folder, "game", "source.json")), "game/source.json");
+  if (source.version !== current) fail("game resources do not match the verified Bedrock baseline");
+  return {
+    version: current, folder, gui: path.join(folder, "game", "data", "gui"),
+    scaffold: path.join(SAMPLE, "scaffold", baseline.scaffold.commit),
+    java: path.join(SAMPLE, "java", baseline.java.version, "sources"),
+  };
 }
 
 // gameplay.html names the bundles the game loads; everything Ponder calls lives in the .js one.
@@ -125,12 +135,15 @@ function renames(bundle) {
 
 // ---- reading packs ----
 
-function readDir(dir) {
+function readDir(dir, keep) {
   const files = new Map();
   const walk = current => fs.readdirSync(current, { withFileTypes: true }).forEach(entry => {
     const full = path.join(current, entry.name);
     if (entry.isDirectory()) walk(full);
-    else files.set(path.relative(dir, full).split(path.sep).join("/"), fs.readFileSync(full));
+    else {
+      const name = path.relative(dir, full).split(path.sep).join("/");
+      if (!keep || keep(name)) files.set(name, fs.readFileSync(full));
+    }
   });
   walk(dir);
   return files;
@@ -258,13 +271,18 @@ function adaptText(text, list) {
 
 const TEXT = new Set([".js", ".html", ".css", ".json", ".lang"]);
 
-// `main`: the pack is Ponder's own. An add-on's files other than its manifest are left as they are.
+// `main`: the pack is Ponder's own. Add-on scripts stay unchanged; all UI packs get the marker.
 function adaptPack(pack, target, engine, versions, main) {
   const manifest = manifestOf(pack);
   const report = { name: manifest.header.name, uuid: manifest.header.uuid, changes: adaptManifest(manifest, engine, versions, main) };
   // Two-space JSON with number arrays on one line, as the packs write it.
   const json = JSON.stringify(manifest, null, 2).replace(/\[\s*(\d+(?:,\s*\d+)*)\s*\]/g, (match, list) => "[" + list.split(/,\s*/).join(", ") + "]");
   pack.set("manifest.json", Buffer.from(json + "\n"));
+  if ((manifest.modules || []).some(module => module.type === "resources")
+      && [...pack.keys()].some(name => name.startsWith("hbui/")) && !pack.has("content.zipe")) {
+    pack.set("content.zipe", Buffer.alloc(0));
+    report.changes.push("added content.zipe so Ore UI can read hbui/");
+  }
   if (!main) return report;
 
   const html = pack.get("hbui/gameplay.html");
@@ -291,9 +309,8 @@ function adaptPack(pack, target, engine, versions, main) {
 
 // ---- vanilla's blocks, from bedrock-samples ----
 
-// The resource pack in the version folder's bedrock-samples-v<release>-full.zip (one pack, every
-// version layer already merged; of its images only their sizes and the colour maps are kept),
-// plains' climate from its behavior pack, and Scaffold's tables in its scaffold/.
+// The current full samples, plains' climate from their behavior pack, and Scaffold's tables.
+// Only image dimensions and colour maps are kept; the game supplies the textures at runtime.
 const SCAFFOLD = ["block_definition", "block_geometry", "block_rotation", "state_rotations", "dust_connections"];
 const RESOURCES = /^resource_pack\/(blocks\.json|textures\/(terrain_texture|flipbook_textures)\.json|textures\/.+\.(png|tga)|biomes\/plains\.client_biome\.json|(entity|models\/entity|animations|animation_controllers|render_controllers)\/.+\.json|models\/mobs\.json)$|^behavior_pack\/(biomes\/plains\.biome\.json|entities\/.+\.json)$/;
 // blocks.json keys some blocks by an older name than their id.
@@ -301,12 +318,11 @@ const LEGACY_NAMES = {
   grass: "grass_block", chain: "iron_chain", seaLantern: "sea_lantern", tripWire: "trip_wire", invisibleBedrock: "invisible_bedrock",
   movingBlock: "moving_block", pistonArmCollision: "piston_arm_collision", stickyPistonArmCollision: "sticky_piston_arm_collision",
 };
-function vanillaPack(folder) {
-  const zips = fs.readdirSync(folder).filter(name => /^bedrock-samples-v[\d.]+-full\.zip$/.test(name)).sort();
-  if (!zips.length) fail("no bedrock-samples-v<release>-full.zip in " + path.relative(TOOLS, folder) + " (download it from github.com/Mojang/bedrock-samples/releases)");
-  const file = path.join(folder, zips[zips.length - 1]), files = new Map(), sizes = new Map();
+function vanillaPack(baseline) {
+  const { folder, scaffold: scaffoldRoot } = baseline;
+  const file = path.join(folder, "samples"), files = new Map(), sizes = new Map();
   // Files by their path in their pack (biomes/plains.biome.json is the behavior pack's).
-  readZip(file, name => RESOURCES.test(name)).forEach((bytes, name) => {
+  readDir(file, name => RESOURCES.test(name)).forEach((bytes, name) => {
     const rel = name.slice(name.indexOf("/") + 1), image = /^(.+)\.(png|tga)$/.exec(rel);
     if (!image || /^textures\/colormap\//.test(rel)) files.set(rel, bytes);
     if (image && (image[2] === "png" || !sizes.has(image[1]))) sizes.set(image[1], Object.assign({ file: rel }, imageSize(bytes, image[2])));
@@ -316,38 +332,74 @@ function vanillaPack(folder) {
   Object.keys(LEGACY_NAMES).forEach(name => { if (blocks[name]) blocks[LEGACY_NAMES[name]] = blocks[name]; });
   const scaffold = {};
   SCAFFOLD.forEach(name => {
-    const table = path.join(folder, "scaffold", name + ".json");
+    const table = path.join(scaffoldRoot, "lookups", name + ".json");
     if (!fs.existsSync(table)) fail("missing " + path.relative(TOOLS, table) + " (Scaffold's scaffold/lookups/" + name + ".json)");
     scaffold[name] = parseJson(fs.readFileSync(table), "scaffold/" + name + ".json");
   });
-  const license = path.join(folder, "scaffold", "LICENSE");
+  const license = path.join(scaffoldRoot, "LICENSE");
   if (!fs.existsSync(license)) fail("missing " + path.relative(TOOLS, license) + " (Scaffold's LICENSE)");
   const terrain = parseJson(files.get("textures/terrain_texture.json"), "vanilla textures/terrain_texture.json").texture_data;
   return {
     file, files, sizes, scaffold, license: fs.readFileSync(license, "utf8"), blocks, terrain,
     flipbooks: flipbookTable(parseJson(files.get("textures/flipbook_textures.json"), "vanilla textures/flipbook_textures.json")),
     tints: textureTints(plainsColors(files), terrain),
-    layers: vanillaLayers(path.join(folder, "resource_packs")),
+    layers: vanillaLayers(folder, "resource_packs"),
+    behaviorLayers: vanillaLayers(folder, "behavior_packs"),
+    javaDimensions: javaEntityDimensions(baseline.java),
   };
 }
 
-// The game's own vanilla packs, when resource_packs/ holds them (copied from the game's
-// data/resource_packs: vanilla, vanilla_1.14, ...): each one's entity data by path, oldest first.
+// All version layers shipped with the current game, in ascending layer order.
 // bedrock-samples merges them file by file and so loses what only an older pack defines (a
 // ghast's scale, a vex's moves); the game merges them by identifier, the newer pack winning.
-const LAYER_FOLDERS = ["entity", "models", "animations", "animation_controllers", "render_controllers"];
-function vanillaLayers(dir) {
-  if (!fs.existsSync(dir)) return [];
+const LAYER_FOLDERS = ["entity", "models", "animations", "animation_controllers", "render_controllers", "materials"];
+function vanillaLayers(folder, kind) {
+  const roots = [path.join(folder, "unpacked", kind), path.join(folder, "game", "data", kind)];
+  roots.forEach(dir => { if (!fs.existsSync(dir)) fail("missing current game resources: " + dir); });
   const versionOf = name => (name === "vanilla" ? [0] : name.slice("vanilla_".length).split(".").map(Number));
   const order = (a, b) => { const x = versionOf(a), y = versionOf(b); for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
-  return fs.readdirSync(dir).filter(name => /^vanilla(_\d+(\.\d+)*)?$/.test(name)).sort(order).map(name => {
+  const layers = [...new Set(roots.flatMap(dir => fs.readdirSync(dir)))].filter(name => /^vanilla(_\d+(\.\d+)*)?$/.test(name)).sort(order);
+  if (!layers.length) fail("no current vanilla layers in " + kind);
+  return layers.map(name => {
     const files = new Map();
-    LAYER_FOLDERS.forEach(sub => {
+    roots.forEach(dir => (kind === "behavior_packs" ? ["entities"] : LAYER_FOLDERS).forEach(sub => {
       const at = path.join(dir, name, sub);
-      if (fs.existsSync(at)) readDir(at).forEach((bytes, rel) => { if (rel.endsWith(".json")) files.set(sub + "/" + rel, bytes); });
-    });
+      if (fs.existsSync(at)) readDir(at, rel => rel.endsWith(sub === "materials" ? ".material" : ".json")).forEach((bytes, rel) => {
+        // Archive manifests also contain empty registrations. A loose file supplies the data.
+        if (!bytes.length) return;
+        if (bytes.subarray(0, 3).toString() === "MCB") fail("decode the current binary definition before using it: " + path.join(at, rel));
+        files.set(sub + "/" + rel, bytes);
+      });
+    }));
     return files;
   });
+}
+
+// Collision dimensions need no extra texture/model files, so use the current Java registry.
+// Bedrock calls a few of the same entity types by different identifiers.
+const JAVA_ENTITY_NAMES = {
+  boat: "oak_boat", chest_boat: "oak_chest_boat", breeze_wind_charge_projectile: "breeze_wind_charge",
+  ender_crystal: "end_crystal", eye_of_ender_signal: "eye_of_ender", evocation_fang: "evoker_fangs",
+  evocation_illager: "evoker", xp_bottle: "experience_bottle", xp_orb: "experience_orb",
+  fireworks_rocket: "firework_rocket", fishing_hook: "fishing_bobber", thrown_trident: "trident",
+  tropicalfish: "tropical_fish", villager_v2: "villager", wind_charge_projectile: "wind_charge",
+  wither_skull_dangerous: "wither_skull", zombie_pigman: "zombified_piglin", zombie_villager_v2: "zombie_villager",
+};
+function javaEntityDimensions(sources) {
+  const file = path.join(sources, "net/minecraft/world/entity/EntityTypes.java");
+  const source = fs.readFileSync(file, "utf8"), dimensions = {};
+  const declarations = source.matchAll(/public static final EntityType<[^;]+?\s+(\w+)\s*=\s*register\(([\s\S]*?);/g);
+  for (const [, name, body] of declarations) {
+    const size = /\.sized\(([\d.]+)F?,\s*([\d.]+)F?\)/.exec(body);
+    if (!size) fail("cannot read current Java dimensions for " + name + " in " + file);
+    dimensions["minecraft:" + name.toLowerCase()] = { width: Number(size[1]), height: Number(size[2]) };
+  }
+  if (!dimensions["minecraft:player"]) fail("no Java entity dimensions in " + file);
+  Object.entries(JAVA_ENTITY_NAMES).forEach(([bedrock, java]) => {
+    if (!dimensions["minecraft:" + java]) fail("current Java entity type missing: " + java);
+    dimensions["minecraft:" + bedrock] = dimensions["minecraft:" + java];
+  });
+  return dimensions;
 }
 
 // ---- plains' colours ----
@@ -469,7 +521,7 @@ function tintedEntry(entry, tint, vanilla) {
 }
 
 // A texture's file in a pack, with its extension (textures/blocks/stone -> textures/blocks/stone.png).
-const textureFile = (files, texture) => [".png", ".tga"].map(ext => texture + ext).find(name => files.has(name)) || null;
+const textureFile = (files, texture) => (/\.(png|tga)$/.test(texture) ? [texture] : [texture + ".png", texture + ".tga"]).find(name => files.has(name)) || null;
 // The texture a terrain_texture.json entry draws: its first variant. One the game tints
 // (overlay_color, tint_color) gives null unless `tints` says how, since its file alone is not
 // what the game shows.
@@ -479,7 +531,6 @@ function terrainPath(entry, tints) {
   if (t && typeof t === "object") return (t.overlay_color || t.tint_color) && !(tints && tints.has(t.path)) ? null : t.path || null;
   return typeof t === "string" ? t : null;
 }
-const terrainFile = (files, terrain, name) => { const t = terrainPath(terrain[name]); return t && textureFile(files, t); };
 // Every texture a terrain_texture.json entry lists, tinted or not, in order: a block's state
 // picks one by its place in the list.
 function terrainList(entry) {
@@ -698,8 +749,8 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
       if (geometries.has(g.identifier) && !index.geometries[g.identifier]) index.geometries[g.identifier] = { width: g.width || 16, height: g.height || 16, bones: g.bones };
     });
   }));
-  // A texture name is looked up in each resource pack's terrain_texture.json, then vanilla's. Each
-  // keeps its size, and its animation from that pack's flipbook_textures.json.
+  // Resolve the atlas name once, then resolve that path through the whole resource stack.
+  // The pack defining the atlas entry need not contain the image (or its flipbook).
   const terrains = resourcePacks.map(pack => {
     const bytes = pack.files.get("textures/terrain_texture.json");
     return bytes ? parseJson(bytes, pack.name + " textures/terrain_texture.json").texture_data || {} : {};
@@ -709,19 +760,57 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
     return bytes ? flipbookTable(parseJson(bytes, pack.name + " textures/flipbook_textures.json")) : new Map();
   });
   textures.forEach(name => {
+    const atlas = terrains.find(terrain => Object.prototype.hasOwnProperty.call(terrain, name)) || vanilla.terrain;
+    const p = terrainPath(atlas[name]);
+    if (!p) { missing.push("texture " + name); return; }
+    const key = p.replace(/\.(png|tga)$/, "");
+    const flipbook = flipbooks.map(table => table.get(key)).find(Boolean) || vanilla.flipbooks.get(key);
     for (let i = 0; i < resourcePacks.length; i++) {
-      const file = terrainFile(resourcePacks[i].files, terrains[i], name);
+      const file = textureFile(resourcePacks[i].files, p);
       if (!file) continue;
       const size = Object.assign({ file }, imageSize(resourcePacks[i].files.get(file), path.extname(file).slice(1)));
-      index.textures[name] = Object.assign({ pack: resourcePacks[i].uuid }, textureEntry(size, flipbooks[i].get(file.replace(/\.(png|tga)$/, ""))));
+      index.textures[name] = Object.assign({ pack: resourcePacks[i].uuid }, textureEntry(size, flipbook));
       return;
     }
-    const p = terrainPath(vanilla.terrain[name]), size = p && vanilla.sizes.get(p);
-    if (size) index.textures[name] = textureEntry(size, vanilla.flipbooks.get(p));
+    const size = vanilla.sizes.get(key);
+    if (size && (!/\.(png|tga)$/.test(p) || size.file === p)) index.textures[name] = textureEntry(size, flipbook);
     else missing.push("texture " + name);
   });
   geometries.forEach(id => { if (!BUILT_IN_GEOMETRY.has(id) && !index.geometries[id]) missing.push("geometry " + id); });
   return { index, missing };
+}
+
+// Material inheritance applies removals after additions, including named skinning variants.
+// Keep shader semantics in the table instead of guessing them from the material's name.
+function entityMaterials(sources, base) {
+  const definitions = {}, resolved = {};
+  sources.forEach(source => source.files.forEach((bytes, name) => {
+    if (!/^materials\/.+\.material$/.test(name)) return;
+    const entries = parseJson(bytes, name).materials || {};
+    Object.keys(entries).forEach(key => {
+      if (key === "version") return;
+      const [id, parent] = key.split(":");
+      definitions[id] = { parent, value: entries[key] };
+    });
+  }));
+  const merge = (parent, value) => {
+    const out = Object.assign({}, parent, value);
+    for (const key of ["defines", "states"]) out[key] = Array.from(new Set((value[key] || parent[key] || []).concat(value["+" + key] || [])))
+      .filter(entry => !(value["-" + key] || []).includes(entry));
+    return out;
+  };
+  const resolve = (id, seen) => {
+    if (resolved[id]) return resolved[id];
+    const entry = definitions[id];
+    if (!entry) return base && base[id] || {};
+    if (seen.has(id)) throw new Error("Cyclic entity material: " + id);
+    return (resolved[id] = merge(entry.parent ? resolve(entry.parent, new Set([...seen, id])) : {}, entry.value));
+  };
+  Object.keys(definitions).forEach(id => {
+    const material = resolve(id, new Set());
+    (material.variants || []).forEach(variant => Object.keys(variant).forEach(name => { resolved[id + "." + name] = merge(material, variant[name]); }));
+  });
+  return resolved;
 }
 
 // The entity tables: vanilla_entities.json (hbui/ponder/entities/), every client entity of the
@@ -735,16 +824,13 @@ function addonBlockIndex(behaviorPacks, resourcePacks, vanilla) {
 // ponder_blocks.json). An add-on's names may point at vanilla's (`base`), which it does not
 // repeat unless vanilla_entities.json leaves it out (no vanilla entity names it, as
 // controller.render.piglin): that is copied in. A name nothing defines is in `missing`.
-// Render controllers the game has and bedrock-samples leaves out (its iron_golem file holds only
-// the cracks), as the game's vanilla pack defines them; the samples' own win when they have one.
-const SAMPLES_GAPS = {
-  "controller.render.iron_golem": { geometry: "Geometry.default", materials: [{ "*": "Material.default" }], textures: ["Texture.default"] },
-};
 // `sources` are { files, texture(path) }: a pack's files by path, and a texture's entry or null;
 // `behavior` the behavior packs' files by path.
 function entityTable(sources, behavior, base) {
   const entities = {}, geometries = {}, animations = {}, controllers = {}, renders = {}, textures = {}, missing = [];
   const own = { geometries, animations, controllers, renders };
+  const materialDefinitions = entityMaterials(sources, base && base.all.materials);
+  const materials = Object.fromEntries(Object.entries(materialDefinitions).map(([name, value]) => [name, materialPolicy(value)]));
   const borrow = (table, id) => { const v = base && base.all[table][id]; if (v) own[table][id] = v; return v; };
   // Sources in order: a later one's definition replaces an earlier one's of the same name.
   const each = (prefix, fn) => sources.forEach((s, i) => { for (const [name, bytes] of s.files) if (name.startsWith(prefix) && name.endsWith(".json")) fn(parseJson(bytes, name), i); });
@@ -779,13 +865,14 @@ function entityTable(sources, behavior, base) {
   each("animations/", json => Object.assign(animations, json.animations || {}));
   each("animation_controllers/", json => Object.assign(controllers, json.animation_controllers || {}));
   each("render_controllers/", json => Object.assign(renders, json.render_controllers || {}));
-  if (!base) Object.keys(SAMPLES_GAPS).forEach(id => { if (!renders[id]) renders[id] = SAMPLES_GAPS[id]; });
-  const properties = {}, health = {};
+  const properties = {}, health = {}, collision = {};
   behavior.forEach(files => { for (const [name, bytes] of files) if (/^entities\/.+\.json$/.test(name)) {
     const e = parseJson(bytes, name)["minecraft:entity"] || {}, d = e.description;
     // A fresh entity's health, which query.health reads (an iron golem's cracks).
     const h = ((e.components || {})["minecraft:health"] || {});
     if (d && typeof (h.value ?? h.max) === "number") health[d.identifier] = { value: h.value ?? h.max, max: h.max ?? h.value };
+    const box = (e.components || {})["minecraft:collision_box"];
+    if (d && box && Number.isFinite(box.width) && Number.isFinite(box.height)) collision[d.identifier] = { width: box.width, height: box.height };
     // An enum's default is its name; another's given as Molang (a bee's has_nectar reads its
     // component groups) is taken as false or 0, as a fresh entity has.
     if (d && d.properties) properties[d.identifier] = Object.fromEntries(Object.keys(d.properties).map(k => {
@@ -823,6 +910,7 @@ function entityTable(sources, behavior, base) {
       scripts: d.scripts || {}, materials: d.materials || {}, properties: properties[id] || {},
     };
     if (health[id]) entities[id].health = health[id];
+    if (collision[id]) entities[id].collision = collision[id];
     Object.values(d.geometry || {}).forEach(g => { if (!has("geometries", g)) missing.push("geometry " + g); });
     Object.values(d.animations || {}).forEach(a => { if (!has("animations", a) && !has("controllers", a)) missing.push("animation " + a); });
     (d.animation_controllers || []).forEach(entry => Object.values(typeof entry === "string" ? { entry } : entry).forEach(c => {
@@ -843,10 +931,10 @@ function entityTable(sources, behavior, base) {
   const only = (table, set) => { const out = {}; Object.keys(table).forEach(k => { if (set.has(k)) out[k] = table[k]; }); return out; };
   const table = {
     entities, geometries: only(geometries, named.geometries), animations: only(animations, named.animations),
-    controllers: only(controllers, named.animations), renders: only(renders, named.renders), textures, missing: [...new Set(missing)],
+    controllers: only(controllers, named.animations), renders: only(renders, named.renders), textures, materials, missing: [...new Set(missing)],
   };
   // Vanilla's whole tables, for the add-ons (`all`, not written out).
-  if (!base) Object.defineProperty(table, "all", { value: { geometries, animations, controllers, renders, texture: p => sources.map(s => s.texture(p)).find(Boolean) } });
+  if (!base) Object.defineProperty(table, "all", { value: { geometries, animations, controllers, renders, materials: materialDefinitions, texture: p => sources.map(s => s.texture(p)).find(Boolean) } });
   return table;
 }
 // Vanilla's, from bedrock-samples, then the game's own packs over it when given. Textures come
@@ -856,7 +944,33 @@ const vanillaEntityTable = vanilla => {
     const size = vanilla.sizes.get(p);
     return size ? textureEntry(size, vanilla.flipbooks.get(p)) : null;
   };
-  return entityTable([vanilla.files].concat(vanilla.layers).map(files => ({ files, texture })), [vanilla.files], null);
+  const table = entityTable([vanilla.files].concat(vanilla.layers).map(files => ({ files, texture })), [vanilla.files].concat(vanilla.behaviorLayers), null);
+  Object.entries(table.entities).forEach(([id, entity]) => {
+    if (vanilla.javaDimensions[id]) entity.collision = vanilla.javaDimensions[id];
+    // These client definitions represent blocks, not world entities with an entity box.
+    else if (["minecraft:bed", "minecraft:decorated_pot", "minecraft:skull", "minecraft:trial_spawner"].includes(id)) entity.collision = { width: 0, height: 0 };
+    else if (!entity.collision) fail("no current collision dimensions for " + id);
+  });
+  // The current installation's cat definitions omit the bind pose in the newer format.
+  // Its base layer still supplies the rest rotations for the exact same adult cubes.
+  // Restore those cube-only rotations; rotating the body bone would also move the legs.
+  // Never use a different release, change the baby geometry, or overwrite authored poses.
+  const cat = table.geometries["geometry.cat"];
+  const shape = b => ({ parent: b.parent || null, pivot: b.pivot, cubes: (b.cubes || []).map(c => ({
+    origin: c.origin, size: c.size, pivot: c.pivot || null, rotation: c.rotation || [0, 0, 0], inflate: c.inflate || 0,
+  })) });
+  if (cat) vanilla.layers.forEach(files => {
+    const bytes = files.get("models/entity/cat.geo.json");
+    if (!bytes) return;
+    const source = geometryEntries(parseJson(bytes, "cat.geo.json")).find(g => g.identifier === "geometry.cat");
+    if (!source) return;
+    cat.bones.forEach(b => {
+      if (b.rotation || b.bind_pose_rotation) return;
+      const rest = source.bones.find(r => r.name === b.name && r.bind_pose_rotation);
+      if (rest && isDeepStrictEqual(shape(rest), shape(b))) b.bind_pose_rotation = rest.bind_pose_rotation.slice();
+    });
+  });
+  return table;
 };
 // An add-on's, from its resource packs, its textures in the first pack that has the file.
 const addonEntityTable = (resourcePacks, behaviorPacks, base) => entityTable(resourcePacks.map(pack => ({ files: pack.files, texture: p => {
@@ -918,13 +1032,14 @@ function addonName(group) {
 
 function safe(name) { return name.replace(/[<>:"/\\|?*]/g, "").trim() || "pack"; }
 
-function writeOutput(groups, version) {
+function writeOutput(groups, version, bundle) {
   const outDir = path.join(TOOLS, "output", version);
   fs.mkdirSync(outDir, { recursive: true });
   const written = [];
-  groups.forEach(group => {
-    const single = group.packs.length === 1;
-    const file = path.join(outDir, safe(single ? group.packs[0].name : addonName(group)) + (single ? ".mcpack" : ".mcaddon"));
+  const outputs = bundle ? [{ packs: groups.flatMap(group => group.packs) }] : groups;
+  outputs.forEach(group => {
+    const single = !bundle && group.packs.length === 1;
+    const file = path.join(outDir, safe(bundle || (single ? group.packs[0].name : addonName(group))) + (single ? ".mcpack" : ".mcaddon"));
     // Packs named by a translation key ("pack.name") can share a name; later ones get " 2", " 3".
     const seen = new Map();
     const folders = single
@@ -953,11 +1068,19 @@ function inputsFrom(args) {
 
 function main() {
   const [version, ...args] = process.argv.slice(2);
-  if (!version) fail("usage: node tools/adapter/adapt.js <version> [input...]");
-  const folder = versionFolder(version);
-  const target = gameplay(path.join(folder, "gui"));
+  if (!version) fail("usage: node tools/adapter/adapt.js <version> [--bundle <name>] [input...]");
+  let bundle = null;
+  const option = args.indexOf("--bundle");
+  if (option >= 0) {
+    bundle = args[option + 1];
+    if (!bundle || bundle.startsWith("--") || bundle !== safe(bundle)) fail("--bundle needs a file name without an extension or directory");
+    args.splice(option, 2);
+    if (args.includes("--bundle")) fail("--bundle can only be specified once");
+  }
+  const baseline = loadBaseline(version);
+  const target = gameplay(baseline.gui);
   target.renames = renames(target.bundle);
-  const engine = engineVersion(version);
+  const engine = engineVersion(baseline.version);
 
   // The input whose resource pack has hbui/gameplay.html is Ponder itself; the others are add-ons.
   const groups = inputsFrom(args).map(input => {
@@ -978,12 +1101,19 @@ function main() {
   let vanilla = null;
   const loadVanilla = () => {
     if (vanilla) return vanilla;
-    vanilla = vanillaPack(folder);
-    console.log("vanilla blocks from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/") + " and " + path.relative(TOOLS, path.join(folder, "scaffold")).split(path.sep).join("/"));
+    vanilla = vanillaPack(baseline);
+    console.log("vanilla blocks from " + path.relative(TOOLS, vanilla.file).split(path.sep).join("/") + " and " + path.relative(TOOLS, baseline.scaffold).split(path.sep).join("/"));
     return vanilla;
   };
-  let vanillaEntities = null;
-  const loadVanillaEntities = () => vanillaEntities || (vanillaEntities = vanillaEntityTable(loadVanilla()));
+  let vanillaEntities = null, vanillaImages = null;
+  const vanillaImage = entry => fs.readFileSync(path.join(loadVanilla().file, "resource_pack", entry.file));
+  const loadVanillaEntities = () => {
+    if (!vanillaEntities) {
+      vanillaEntities = vanillaEntityTable(loadVanilla());
+      vanillaImages = entityTextureImages(vanillaEntities, vanillaImage);
+    }
+    return vanillaEntities;
+  };
   for (const group of groups) {
     const resourcePacks = group.packs.filter(isResourcePack), behaviorPacks = group.packs.filter(pack => !isResourcePack(pack));
     if (group.main) {
@@ -993,6 +1123,8 @@ function main() {
         pack.files.set(VANILLA_TABLE, Buffer.from(JSON.stringify(table)));
         pack.files.set(VANILLA_LICENSE, Buffer.from(SHAPES_NOTICE + vanilla.license));
         pack.files.set(ENTITY_TABLE, Buffer.from(JSON.stringify(entityTable)));
+        vanillaImages.forEach((bytes, file) => pack.files.set(file, bytes));
+        pack.report.changes.push("entity material alpha: " + vanillaImages.size + " prepared textures; unchanged skins reuse native resources");
         pack.report.changes.push(ENTITY_TABLE + ": " + Object.keys(entityTable.entities).length + " entities, "
           + Object.keys(entityTable.geometries).length + " geometries, " + Object.keys(entityTable.animations).length + " animations, "
           + Object.keys(entityTable.textures).length + " textures" + (entityTable.missing.length ? "; not found: " + entityTable.missing.join(", ") : ""));
@@ -1020,13 +1152,16 @@ function main() {
     }
     if (resourcePacks.some(pack => [...pack.files.keys()].some(name => /^entity\/.*\.json$/.test(name)))) {
       const entities = addonEntityTable(resourcePacks, behaviorPacks, loadVanillaEntities());
+      const images = entityTextureImages(entities, entry => entry.pack
+        ? resourcePacks.find(pack => pack.uuid === entry.pack).files.get(entry.file) : vanillaImage(entry), vanillaEntities);
+      targets.forEach(pack => images.forEach((bytes, file) => pack.files.set(file, bytes)));
       write(ADDON_ENTITIES, entities, Object.keys(entities.entities).length + " entities, " + Object.keys(entities.geometries).length + " geometries, "
         + Object.keys(entities.animations).length + " animations, " + Object.keys(entities.textures).length + " textures"
         + (entities.missing.length ? "; not found: " + entities.missing.join(", ") : ""));
     }
   }
 
-  const written = writeOutput(groups, path.basename(folder));
+  const written = writeOutput(groups, baseline.version, bundle);
   groups.forEach(group => group.packs.forEach(pack => {
     console.log(pack.report.name);
     pack.report.changes.forEach(change => console.log("  " + change));
@@ -1034,4 +1169,5 @@ function main() {
   console.log("wrote " + written.join(", "));
 }
 
-main();
+if (require.main === module) main();
+module.exports = { loadBaseline, vanillaPack, vanillaLayers, vanillaEntityTable, entityTable, addonEntityTable, addonBlockIndex, vanillaBlockTable, readInput, packsOf, manifestOf, isResourcePack, gameplay, renames, adaptHtml, adaptPack };

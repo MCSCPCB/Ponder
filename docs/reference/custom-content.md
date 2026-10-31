@@ -95,7 +95,7 @@ Ponder 按资源包 `entity/` 里的客户端实体定义画：模型、贴图�
 
 附属包自己的实体也不用注册。把整个附属包（行为包和资源包）放进 `tools/input/` 跑一遍适配器，适配器会在资源包的 `hbui/ponder_addons/<文件夹>/` 下写一份 `ponder_entities.json`。里面有附属包的实体定义，它们用到的模型、动画、动画控制器和渲染控制器（可以引用原版的），以及行为包里实体属性（`description.properties`）的默认值和初始生命值。只有实体定义里提到的动画会写进去，所以场景要单独播的动画也要写进实体定义的 `animations`，不必放进 `scripts.animate`。
 
-碰撞箱对所有实体都是 0.6 × 1.8 格，可以改 `halfWidth`（半宽）和 `height`。
+碰撞箱从适配器生成的数据读取。原版两版共有的实体按当前 Java 版的类型尺寸，基岩独有实体和附属包实体按行为包的 `minecraft:collision_box`；附属包未定义时采用 0.6 × 1.8 格。场景可以改 `halfWidth`（半宽）和 `height`。
 
 #### 让实体动起来
 
@@ -136,11 +136,13 @@ const walker = ticks => e => {
 scene.effects.createClientEntity("minecraft:cow", [0.5, 1, 3.5], 270, walker(60));
 ```
 
-史莱姆和岩浆怪的大小是 `query.variant`（1、2、4），默认的 0 画不出来，生成时要设：
+史莱姆和岩浆怪默认大小为 1，生成后即可显示。修改 `variant` 会同时调整显示大小和碰撞箱；常用大小为 1、2、4，取值按 Java 限制为 1 到 127 的整数。例如生成中型史莱姆：
 
 ```js
 scene.effects.createClientEntity("minecraft:slime", [2.5, 1, 2.5], 0, e => { e.variant = 2; });
 ```
+
+唤魔者尖牙默认播放一次咬合动画，生命周期为 22 tick，随后移除；默认不受重力影响。直接生成即可，也可以通过 `setQuery("life_span", tick数)` 调整这一时间。
 
 `P.ClientEntity` 在 `P.PonderEntity`（见下一节）之外提供：
 
@@ -150,7 +152,8 @@ scene.effects.createClientEntity("minecraft:slime", [2.5, 1, 2.5], 0, e => { e.v
 | `yHeadRot` | 头的朝向，同上。`query.target_y_rotation` 是它减去身体朝向 |
 | `xRot` | 头的俯仰，度数，正数低头 |
 | `baby` | 幼年（`query.is_baby`），模型、贴图和缩放跟着变 |
-| `variant`、`markVariant`、`skinId` | `query.variant`、`query.mark_variant`、`query.skin_id`，决定颜色、花纹等 |
+| `variant`、`markVariant`、`skinId` | `query.variant`、`query.mark_variant`、`query.skin_id`，决定颜色、花纹等；史莱姆、岩浆怪的 `variant` 同时决定大小 |
+| `lifeSpan` | `query.life_span`，尖牙默认为 22 tick，其他实体为 0 |
 | `noGravity` | 为真时不下落 |
 | `setDeltaMovement([x, y, z])` | 速度，单位是格每 tick |
 | `setQuery(名字, 值)` | 设置一个查询，名字不带 `query.`。值也可以是函数 `(实体, 参数) => 值`，每次读取时调用 |
@@ -161,7 +164,7 @@ scene.effects.createClientEntity("minecraft:slime", [2.5, 1, 2.5], 0, e => { e.v
 
 这些方法都返回实体本身，可以连着写。
 
-实体自己会算的查询：`life_time`、`anim_time`、`delta_time`、`frame_alpha`、`time_stamp`、`key_frame_lerp_time`、`any_animation_finished`、`all_animations_finished`、`is_on_ground`、`is_in_water`、`is_in_lava`、`is_moving`、`ground_speed`、`vertical_speed`、`position_delta`、`modified_move_speed`、`modified_distance_moved`、`target_x_rotation`、`target_y_rotation`、`body_y_rotation`、`health`、`max_health`、`property`，以及上表字段对应的那几个。其他查询都是 0（`is_alive` 和 `model_scale` 是 1），要用就 `setQuery`。`setQuery` 设过的查询优先于自己算的。
+实体自己会算的查询：`life_time`、`life_span`、`anim_time`、`delta_time`、`frame_alpha`、`time_stamp`、`key_frame_lerp_time`、`any_animation_finished`、`all_animations_finished`、`is_on_ground`、`is_in_water`、`is_in_lava`、`is_moving`、`ground_speed`、`vertical_speed`、`position_delta`、`modified_move_speed`、`modified_distance_moved`、`target_x_rotation`、`target_y_rotation`、`body_y_rotation`、`health`、`max_health`、`property`，以及上表字段对应的那几个。其他查询都是 0（`is_alive` 和 `model_scale` 是 1），要用就 `setQuery`。`setQuery` 设过的查询优先于自己算的。
 
 ### 自己画的实体
 

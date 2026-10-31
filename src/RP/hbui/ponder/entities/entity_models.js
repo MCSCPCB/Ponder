@@ -8,8 +8,8 @@
   // The tables tools/adapter writes: vanilla's (hbui/ponder/entities/vanilla_entities.json) and
   // each add-on's (hbui/ponder_addons/<folder>/ponder_entities.json), merged by name, an
   // add-on's over vanilla's.
-  const TABLES = ["entities", "geometries", "animations", "controllers", "renders", "textures"];
-  P.entityData = { entities: {}, geometries: {}, animations: {}, controllers: {}, renders: {}, textures: {} };
+  const TABLES = ["entities", "geometries", "animations", "controllers", "renders", "textures", "materials"];
+  P.entityData = { entities: {}, geometries: {}, animations: {}, controllers: {}, renders: {}, textures: {}, materials: {} };
   const merge = t => TABLES.forEach(k => Object.assign(P.entityData[k], t[k] || {}));
   let vanillaLoaded = null;
   const addonsLoaded = new Set();
@@ -37,12 +37,16 @@
     + "warden_bioluminescent_layer", { mode: "blend", cull: false });
   set("entity_dissolve_layer0", { mode: "none", cull: true });
   const CUTOUT = { mode: "cutout", cull: false };
-  const materialOf = name => MATERIALS[String(name).split(".")[0]] || CUTOUT;
+  const materialOf = name => {
+    const key = String(name).split(".")[0], look = MATERIALS[key] || CUTOUT;
+    // Preserve face culling while taking alpha semantics from the current native material.
+    return Object.assign({}, look, P.entityData.materials[name] || P.entityData.materials[key]);
+  };
 
-  // A colour matrix filter: rgb times `c`, and alpha as the material wants it. An opaque one is
-  // drawn as a cutout too (alpha times 255): only the clear pixels, which faces rarely show, differ.
+  // The adapter prepares opaque/cutout alpha before image premultiplication. Multiplying
+  // alpha by 255 in Gameface also amplifies RGB; colour matrices must keep alpha in 0..1.
   const filterOf = (c, mode, alpha) => {
-    const a = mode === "blend" ? alpha.toFixed(3) + ", 0" : "255, 0";
+    const a = (mode === "blend" ? P.clamp(alpha, 0, 1).toFixed(3) : "1") + ", 0";
     return `coh-color-matrix(${c[0].toFixed(3)}, 0, 0, 0, 0, 0, ${c[1].toFixed(3)}, 0, 0, 0, 0, 0, ${c[2].toFixed(3)}, 0, 0, 0, 0, 0, ${a})`;
   };
 
@@ -149,6 +153,10 @@
       m = M.translate(rotate(M.translate(m, p[0], p[1], p[2]), flipRot(c.rotation)), -p[0], -p[1], -p[2]);
     }
     const uvs = cubeUv(c, c.mirror === undefined ? bone.mirror === true : c.mirror === true);
+    const closed = Object.keys(uvs).length === 6 && box.t.every((v, i) => v - box.f[i] > 1e-4)
+      && Object.values(uvs).every(({ uv }) => Math.abs(uv[2] - uv[0]) >= 1e-6 && Math.abs(uv[3] - uv[1]) >= 1e-6);
+    const solid = closed ? { from: box.f, to: box.t, matrix: m, corners: [] } : null;
+    if (solid) for (let i = 0; i < 8; i++) solid.corners.push(M.apply(m, ...box.f.map((v, k) => i & (1 << k) ? box.t[k] : v)));
     Object.keys(uvs).forEach(k => {
       const F = FACES[k], uv = uvs[k].uv;
       const p = [0, 1, 2, 3].map(i => M.apply(m, ...F[i](box)));
@@ -160,7 +168,7 @@
       let at = [[uv[0], uv[1]], [uv[2], uv[1]], [uv[0], uv[3]], [uv[2], uv[3]]].map(q => [q[0] / W, q[1] / H]);
       for (let turn = uvs[k].turn; turn > 0; turn -= 90) at = [at[2], at[0], at[3], at[1]];
       const n = M.apply(m, ...F[4]), z = M.apply(m, 0, 0, 0);
-      out.push({ o: p[0], u: p[1], v: p[2], n: [n[0] - z[0], n[1] - z[1], n[2] - z[2]], st: at });
+      out.push({ o: p[0], u: p[1], v: p[2], n: [n[0] - z[0], n[1] - z[1], n[2] - z[2]], st: at, solid });
     });
   }
 
@@ -227,6 +235,86 @@
   const det3 = m => m[0] * (m[5] * m[10] - m[6] * m[9]) - m[1] * (m[4] * m[10] - m[6] * m[8]) + m[2] * (m[4] * m[9] - m[5] * m[8]);
   const linear = m => [m[0], m[1], m[2], 0, m[4], m[5], m[6], 0, m[8], m[9], m[10], 0, 0, 0, 0, 1];
 
+  // Remove surfaces buried inside another opaque closed cube in model space. Average-depth
+  // sorting alone lets the top of a sheep's leg paint over its body. Only intersecting cube
+  // bounds need clipping, and a pose cache makes a stationary entity/camera orbit reuse it.
+  // Open, flat, cutout and blended parts neither occlude nor get trimmed here.
+  const surfaceCache = new WeakMap(), FACE_POLY = [[0, 0], [1, 0], [1, 1], [0, 1]], EPS = 1e-6;
+  const facePoint = (f, p) => f.o.map((v, k) => v + (f.u[k] - v) * p[0] + (f.v[k] - v) * p[1]);
+  const bounds = points => ({ low: [0, 1, 2].map(k => Math.min(...points.map(p => p[k]))), high: [0, 1, 2].map(k => Math.max(...points.map(p => p[k]))) });
+  const overlaps = (a, b) => a.low.every((v, k) => Math.min(a.high[k], b.high[k]) - Math.max(v, b.low[k]) > EPS);
+  const distance = (p, plane) => p[0] * plane[0] + p[1] * plane[1] + plane[2];
+  function halfPolygon(poly, plane, sign) {
+    const out = [];
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length], da = distance(a, plane) * sign, db = distance(b, plane) * sign;
+      if (da >= 0) out.push(a);
+      if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
+        const t = da / (da - db); out.push([P.lerp(t, a[0], b[0]), P.lerp(t, a[1], b[1])]);
+      }
+    }
+    return out;
+  }
+  function outsideBox(poly, planes) {
+    // Strict interior only: touching or coplanar surfaces must not erase one another.
+    if (planes.some(p => poly.every(v => distance(v, p) <= EPS))) return [poly];
+    let inside = poly;
+    const outside = [];
+    for (const plane of planes) {
+      if (inside.every(p => distance(p, plane) >= -EPS)) continue;
+      const piece = halfPolygon(inside, plane, -1);
+      if (piece.length >= 3) outside.push(piece);
+      inside = halfPolygon(inside, plane, 1);
+      if (inside.length < 3) break;
+    }
+    return outside;
+  }
+  function opaqueSurfaces(entity, rc, g, bones, looks) {
+    let cache = surfaceCache.get(entity);
+    if (!cache) surfaceCache.set(entity, (cache = new Map()));
+    const modes = looks.map(l => l && l.mode).join(","), previous = cache.get(rc);
+    if (previous && previous.g === g && previous.modes === modes && bones.every((m, i) => m.every((v, j) => v === previous.bones[i][j]))) return previous.faces;
+    const boxes = [], bySolid = new Map();
+    g.bones.forEach((b, i) => {
+      if (!looks[i] || looks[i].mode !== "opaque") return;
+      b.faces.forEach(f => {
+        if (!f.solid || bySolid.has(f.solid) || Math.abs(det3(bones[i])) < EPS) return;
+        const box = { solid: f.solid, bounds: bounds(f.solid.corners.map(p => M.apply(bones[i], ...p))),
+          inverse: M.invert(M.mul(bones[i], f.solid.matrix)) };
+        boxes.push(box); bySolid.set(f.solid, box);
+      });
+    });
+    boxes.forEach(box => { box.others = boxes.filter(other => other !== box && overlaps(box.bounds, other.bounds)); });
+    const faces = g.bones.map((b, i) => {
+      if (!looks[i] || looks[i].mode !== "opaque") return b.faces;
+      const out = [];
+      b.faces.forEach(f => {
+        const box = bySolid.get(f.solid);
+        if (!box || !box.others.length) { out.push(f); return; }
+        let pieces = [FACE_POLY];
+        for (const other of box.others) {
+          const m = M.mul(other.inverse, bones[i]), o = M.apply(m, ...f.o), u = M.apply(m, ...f.u), v = M.apply(m, ...f.v), planes = [];
+          for (let k = 0; k < 3; k++) {
+            planes.push([u[k] - o[k], v[k] - o[k], o[k] - other.solid.from[k]]);
+            planes.push([o[k] - u[k], o[k] - v[k], other.solid.to[k] - o[k]]);
+          }
+          pieces = pieces.flatMap(p => outsideBox(p, planes));
+          if (!pieces.length) break;
+        }
+        pieces.forEach(poly => {
+          if (poly === FACE_POLY) { out.push(f); return; }
+          // A convex fragment uses the original face's affine UV mapping, with a smaller clip.
+          const centre = poly.reduce((a, p) => [a[0] + p[0] / poly.length, a[1] + p[1] / poly.length], [0, 0]);
+          out.push(Object.assign({}, f, { centre: facePoint(f, centre), clip: poly.map(p => [0, 1].map(k =>
+            f.st[0][k] + (f.st[1][k] - f.st[0][k]) * p[0] + (f.st[2][k] - f.st[0][k]) * p[1])) }));
+        });
+      });
+      return out;
+    });
+    cache.set(rc, { g, modes, bones, faces });
+    return faces;
+  }
+
   // An entity's faces under `m` (its model space, in pixels, to the GUI) at partial tick pt:
   // { depth, draw(d) } items to sort with the world's. `world` turns model space into the
   // scene's (for shading). `light` dims the whole entity (an element fading in).
@@ -241,7 +329,7 @@
       if (!g) return;
       if (!poses.has(g)) poses.set(g, poseOf(entity, g));
       const bones = poses.get(g);
-      const layers = (r.textures || []).map(t => pick(entity, ctx, t, "texture")).map(t => t && P.entityData.textures[def.textures[t]]).filter(Boolean).map(P.textureOf);
+      const layers = (r.textures || []).map(t => pick(entity, ctx, t, "texture")).map(t => t && P.entityData.textures[def.textures[t]]).filter(Boolean);
       if (!layers.length) return;
       // Materials and visibility per bone: the last pattern that matches.
       const materials = [];
@@ -250,27 +338,37 @@
       (r.part_visibility || []).forEach(o => Object.keys(o).forEach(k => shown.push([k, !!anim.eval(o[k])])));
       const color = r.color ? ["r", "g", "b", "a"].map(c => anim.eval(r.color[c], { this: 1 })) : [1, 1, 1, 1];
       const uvAnim = r.uv_anim ? { offset: (r.uv_anim.offset || [0, 0]).map(v => anim.eval(v)), scale: (r.uv_anim.scale || [1, 1]).map(v => anim.eval(v)) } : null;
-      g.bones.forEach((b, i) => {
+      const looks = g.bones.map(b => {
         // Visibility per bone: the last pattern that matches.
         let v = true;
         shown.forEach(([k, s]) => { if (matches(k, b.name)) v = s; });
-        if (!v || b.hidden || !b.faces.length) return;
+        if (!v || b.hidden || !b.faces.length) return null;
         let mat = null;
         materials.forEach(([k, name]) => { if (matches(k, b.name)) mat = name; });
-        const look = materialOf(mat ? def.materials[mat] : "");
-        if (look.mode === "none") return;
+        return materialOf(mat ? def.materials[mat] : "");
+      });
+      const surfaces = opaqueSurfaces(entity, rc, g, bones, looks);
+      g.bones.forEach((b, i) => {
+        const look = looks[i];
+        if (!look || look.mode === "none") return;
+        const textures = layers.map((entry, li) => {
+          const url = !li && entry.images && entry.images[look.alpha || look.mode];
+          return P.textureOf(url ? Object.assign({}, entry, { url: url }) : entry);
+        });
         const full = M.mul(m, bones[i]), flip = det3(full) < 0, w = M.mul(world, bones[i]);
-        b.faces.forEach(f => {
+        surfaces[i].forEach(f => {
           const o = M.apply(full, ...f.o), u = M.apply(full, ...f.u), v2 = M.apply(full, ...f.v);
           const nz = (v2[0] - o[0]) * (u[1] - o[1]) - (v2[1] - o[1]) * (u[0] - o[0]);
-          if (look.cull && (flip ? -nz : nz) <= 0) return;
+          if ((look.cull || f.solid && look.mode === "opaque") && (flip ? -nz : nz) <= 0) return;
           const nw = M.apply(linear(w), ...f.n), shade = shadeOf(nw) * light;
           let st = f.st;
+          let clip = f.clip || [st[0], st[1], st[3], st[2]];
           if (uvAnim) st = st.map(q => [q[0] * uvAnim.scale[0] + uvAnim.offset[0], q[1] * uvAnim.scale[1] + uvAnim.offset[1]]);
+          if (uvAnim) clip = clip.map(q => [q[0] * uvAnim.scale[0] + uvAnim.offset[0], q[1] * uvAnim.scale[1] + uvAnim.offset[1]]);
           const size = Math.min(1024, Math.max(16, Math.round(blockPx * P.view.cssPerGui * (g.width || 16) / 16 * scale)));
           const c = [shade * color[0], shade * color[1], shade * color[2]];
-          out.push({ depth: (u[2] + v2[2]) / 2, draw: d => layers.forEach((tex, li) =>
-            d.texturedQuadMap(tex.url, o, u, v2, st[0], st[1], st[2], [st[0], st[1], st[3], st[2]], filterOf(c, li ? "blend" : look.mode, color[3]), size)) });
+          out.push({ depth: f.centre ? M.apply(full, ...f.centre)[2] : (u[2] + v2[2]) / 2, draw: d => textures.forEach((tex, li) =>
+            d.texturedQuadMap(tex.url, o, u, v2, st[0], st[1], st[2], clip, filterOf(c, li ? "blend" : look.mode, color[3]), size)) });
         });
       });
     });
@@ -316,17 +414,35 @@
       this.xRot = this.xRotO = 0;
       this.yHeadRot = this.yHeadRotO = 0;
       this.baby = false;
-      this.variant = this.markVariant = this.skinId = 0;
+      // Java AbstractCubeMob starts at size 1; Bedrock's visual scale reads that as variant.
+      this.cubeMob = type === "minecraft:slime" || type === "minecraft:magma_cube";
+      this._variant = this.cubeMob ? 1 : 0;
+      this.markVariant = this.skinId = 0;
       this.onGround = true;
-      this.noGravity = false;
-      this.halfWidth = 0.3; this.height = 1.8;
+      this.noGravity = type === "minecraft:evocation_fang";
+      // Java EvokerFangs: 20 attack ticks plus LIFE_OFFSET (2); no motion or gravity.
+      this.lifeSpan = type === "minecraft:evocation_fang" ? 22 : 0;
       this.walkSpeed = this.walkSpeedO = this.walkPosition = 0;
       this.flap = this.oFlap = this.flapSpeed = this.oFlapSpeed = 0;
       this.queries = {};
       const def = this.definition();
+      const collision = def && def.collision;
+      this.halfWidth = collision ? collision.width / 2 : 0.3;
+      this.height = collision ? collision.height : 1.8;
       this.properties = Object.assign({}, def ? def.properties : {});
       this.extraAnimations = [];
       this.animator = new P.EntityAnimator(this);
+    }
+    get variant() { return this._variant; }
+    set variant(value) {
+      if (this.cubeMob) {
+        // AbstractCubeMob.setSize clamps to 1..127 and refreshes its dimensions.
+        value = Number.isFinite(value) ? P.clamp(Math.floor(value), 1, 127) : 1;
+        const scale = value / this._variant;
+        this.halfWidth *= scale;
+        this.height *= scale;
+      }
+      this._variant = value;
     }
     definition() {
       const def = P.entityData.entities[this.type];
@@ -348,6 +464,7 @@
     }
     tick() {
       super.tick();
+      if (this.type === "minecraft:evocation_fang" && this.tickCount > this.animator.query("life_span")) { this.discard(); return; }
       this.xo = this.x; this.yo = this.y; this.zo = this.z;
       this.yRotO = this.yRot; this.xRotO = this.xRot; this.yHeadRotO = this.yHeadRot;
       this.walkSpeedO = this.walkSpeed; this.oFlap = this.flap; this.oFlapSpeed = this.flapSpeed;

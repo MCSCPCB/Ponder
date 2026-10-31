@@ -4,7 +4,11 @@ Ponder 是 [Java 版 Create 的 Ponder](https://github.com/Creators-of-Create/Cr
 
 ## 安装
 
-把 `src/BP` 和 `src/RP` 作为行为包和资源包启用。`src` 自带一个望远镜的示例场景，拿着望远镜使用即可打开。
+按 [`_sample/README.md`](_sample/README.md) 准备并核实当前最新正式版的资源后，运行 `node tools/adapter/adapt.js latest src packs/Vanilla "packs/FarmersDelightV5.0.5-26.0+"`。适配器从 `_sample/metadata/baseline.json` 读取本次核实的版本，生成实体和方块数据、更新 Ore UI 引用，并把安装包写入 `tools/output/<基岩版本>/`。`latest` 使用已核实的本地基线，不会自动下载或检查新版本；取用新版本时先更新基线。导入生成的安装包，并在世界里启用对应行为包和资源包。
+
+`src` 自带一个望远镜的示例场景，拿着望远镜使用即可打开。适配器与实体数据的自动检查可运行 `node --test tools/adapter/adapt.test.js`，同样使用 `_sample` 当前基线。
+
+开发验收的测试原包统一放在 [`packs/Debug`](packs/Debug/README.md)，使用适配器的 `--bundle "Ponder Debug"` 选项将主包、测试包和测试依赖合成一个 `Ponder Debug.mcaddon`。具体打包命令和本批测试入口见该目录的说明。
 
 仓库里还有两个示例包，演示怎么给自己的附加包写思索场景：
 

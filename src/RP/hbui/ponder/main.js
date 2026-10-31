@@ -26,23 +26,46 @@
   }
 
   // Loads the other authors' plugins (their script calls P.addPlugin) before scenes are registered.
-  // Each script runs once per page; a plugin already added is not loaded again.
-  const loaded = new Set();
+  // Concurrent opens share the pending load; failures may be retried on the next open.
+  const loading = new Map();
   function loadAddons(addons) {
-    return Promise.all(addons.filter(a => !loaded.has(a.script)).map(a => new Promise(resolve => {
-      loaded.add(a.script);
-      const el = document.createElement("script");
-      el.src = "/hbui/" + a.script;
-      el.onload = () => { P.log("addon", a.modId); resolve(); };
-      el.onerror = () => { P.log("addon failed", a.modId, a.script); resolve(); };
-      document.head.appendChild(el);
-    })));
+    return Promise.all(addons.map(a => {
+      const registered = () => P.plugins.some(plugin => plugin.modId === a.modId);
+      if (registered()) return Promise.resolve();
+      if (loading.has(a.script)) return loading.get(a.script);
+      const pending = new Promise((resolve, reject) => {
+        const el = document.createElement("script");
+        el.src = "/hbui/" + a.script;
+        let settled = false;
+        const finish = error => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeout);
+          if (error) {
+            if (el.parentNode) el.parentNode.removeChild(el);
+            P.error("addon failed", a.modId, a.script, error);
+            reject(error);
+          } else { P.log("addon registered", a.modId, a.script); resolve(); }
+        };
+        const timeout = setTimeout(() => finish(new Error("Plugin load timed out: " + a.script)), 15000);
+        el.onload = () => finish(registered() ? null : new Error("Script did not register plugin " + a.modId));
+        el.onerror = () => finish(new Error("Cannot load plugin script " + a.script));
+        P.log("load addon", a.modId, a.script);
+        document.head.appendChild(el);
+      });
+      loading.set(a.script, pending);
+      pending.then(() => loading.delete(a.script), () => loading.delete(a.script));
+      return pending;
+    }));
   }
 
   P.bridge.onOpen = function (item, addons) {
     const form = P.bridge.form;
     return Promise.all([loadAddons(addons), P.loadBlockData(addons), P.loadEntityData(addons)]).then(() => {
+      if (P.bridge.form !== form) return;
       P.registerAll();
+      P.log("scene registry", "plugins=" + P.plugins.map(p => p.modId).join(","), "items=" + P.indexedItems().length,
+        "entities=" + Object.keys(P.entityData.entities).length);
       return P.loadStructures(P.structurePaths());
     }).then(() => {
       if (P.bridge.form !== form) return false; // the form closed, or another opened, while loading
@@ -50,7 +73,7 @@
       if (item === "ponder:index") screen = new P.PonderIndexScreen();
       else if (item === "ponder:tags") screen = new P.PonderTagIndexScreen();
       else if (P.indexedItems().includes(item)) screen = new P.PonderUI(item);
-      else { P.log("no scenes for", item); return false; }
+      else { P.error("no scenes for", item, "requested addons=" + JSON.stringify(addons), "registered plugins=" + P.plugins.map(p => p.modId).join(",")); return false; }
       P.updateView();
       P.screens.reset();
       root.style.display = "";
@@ -68,6 +91,7 @@
 
   // 20 ticks a second; frames in between are drawn at the partial tick.
   let last = Date.now(), acc = 0, mouse = [-1000, -1000], viewKey = "";
+  let renderKey = "", lastRenderLog = 0, maxRenderMs = 0;
   function frame() {
     requestAnimationFrame(frame);
     const now = Date.now();
@@ -85,7 +109,21 @@
     bg.begin();
     P.menuBackground(bg);
     bg.end();
+    const screen = P.screens.current, scene = screen.activeScene && screen.activeScene();
+    const keyNow = scene ? scene.id + ":" + scene.world.entities.map(e => e.type).join(",") : screen.constructor.name;
+    const changed = keyNow !== renderKey;
+    if (changed) { renderKey = keyNow; P.log("render begin", keyNow); }
+    const renderStart = Date.now();
     P.screens.render(mouse[0], mouse[1], pt);
+    maxRenderMs = Math.max(maxRenderMs, Date.now() - renderStart);
+    if (changed || now - lastRenderLog >= 5000) {
+      const d = screen.d;
+      P.log("render submitted", keyNow, "draws=" + d.used, "pooled=" + d.nodes.length,
+        "imageBindings=" + d.imageBindings, "mappedFaces=" + d.mappedFaces,
+        "faceFilterPx=" + Math.round(d.faceFilterPixels), "maxJsMs=" + maxRenderMs);
+      lastRenderLog = now;
+      maxRenderMs = 0;
+    }
   }
 
   const toGui = e => [e.clientX / P.view.cssPerGui, e.clientY / P.view.cssPerGui];
@@ -115,7 +153,7 @@
     listen();
     P.bridge.start();
     requestAnimationFrame(frame);
-    P.log("ponder ready");
+    P.log("ponder ready; form protocol 2");
   }
   if (document.body) start();
   else document.addEventListener("DOMContentLoaded", start);

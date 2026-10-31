@@ -13,14 +13,18 @@
 - [ ] `.tga` 贴图在 Ore UI 里能不能显示。旗帜图案全是 `.tga`。
 - [ ] 床、旗帜、含水方块、水贴着玻璃和树叶的那一面（同一个测试场景里有）。
 
+批注（2026-10-31）：用户已确认主包 1.0.10 / Debug 1.0.8 测试成功，猫基础姿态、羊后右腿交界处及此前实体颜色问题均已通过本批验收。本次计入 1 次正式游戏测试，累计 1/6 次，剩余 5 次；此前复杂排障不追溯计数。上方整体渲染项还包含本批未覆盖的实体；猫姿态项同时包含尚未完成的豹猫和北极熊，因此两项保留未勾选。
+
 ## 实体
+
+批注（2026-10-31）：本批数据生成直接读取 `_sample` 已核实的最新正式版基线，合并当前游戏自带的 56 个原版资源层及对应行为层，原项中的 `tools/version/1.26.60.4` 路径不再使用。已生成 131 个实体的定义和碰撞尺寸；两版共有类型的尺寸取 Java 当前版，基岩独有类型与附属包取行为包。史莱姆、岩浆怪默认大小为 1，修改大小同步更新碰撞箱；尖牙默认生命周期为 22 tick。本批自动检查、安装包场景模拟及用户验收已通过，下方“数据”四项确认完成；这不代表上方覆盖范围更大的“待实机确认”整项已经完成。
 
 ### 数据
 
-- [ ] 把 1.26.60 游戏 `data/resource_packs/` 下所有 `vanilla*` 文件夹（只要 entity、models、animations、animation_controllers、render_controllers）拷进 `tools/version/1.26.60.4/resource_packs/` 再跑适配器。bedrock-samples 每个路径只放一份文件，游戏却按 id 合并各版本层，所以 sample 里有 12 个名字只有引用、没有定义：羊的 `setup.v2` 和 `baby_transform`（羊站不对）、恶魂的 `ghast.scale`、恼鬼的 `vex.move`、猫和狐狸的 `baby_transform`、监守者的 `hurt`、旋风人的 `idle_ground_sound`、玩家的 `hudplayer` 和 `fishing_rod`。
-- [ ] 碰撞箱对所有实体都是 0.6 × 1.8（`R/entities/entity_models.js` 的 ClientEntity 构造函数）。Java 用各实体类型自己的尺寸。适配器可以从行为包的 `minecraft:collision_box` 读（sample 行为包里有 168 处）。
-- [ ] 史莱姆、岩浆怪默认 `variant` 是 0，画不出来，现在要场景自己设大小。
-- [ ] 唤魔者尖牙要设 `life_span` 才出现。
+- [x] 把 1.26.60 游戏 `data/resource_packs/` 下所有 `vanilla*` 文件夹（只要 entity、models、animations、animation_controllers、render_controllers）拷进 `tools/version/1.26.60.4/resource_packs/` 再跑适配器。bedrock-samples 每个路径只放一份文件，游戏却按 id 合并各版本层，所以 sample 里有 12 个名字只有引用、没有定义：羊的 `setup.v2` 和 `baby_transform`（羊站不对）、恶魂的 `ghast.scale`、恼鬼的 `vex.move`、猫和狐狸的 `baby_transform`、监守者的 `hurt`、旋风人的 `idle_ground_sound`、玩家的 `hudplayer` 和 `fishing_rod`。
+- [x] 碰撞箱对所有实体都是 0.6 × 1.8（`R/entities/entity_models.js` 的 ClientEntity 构造函数）。Java 用各实体类型自己的尺寸。适配器可以从行为包的 `minecraft:collision_box` 读（sample 行为包里有 168 处）。
+- [x] 史莱姆、岩浆怪默认 `variant` 是 0，画不出来，现在要场景自己设大小。
+- [x] 唤魔者尖牙要设 `life_span` 才出现。
 
 ### 画法
 
@@ -193,8 +197,10 @@
 
 ## 结构文件与适配器
 
+批注（2026-10-31）：附属包贴图先按 atlas 键解析路径，再沿资源包栈查找同一路径的文件；支持引用其他附属包或原版文件。农夫乐事原先缺失的 22 张作物贴图已全部解析，40 个生长阶段方块的模型与贴图关联通过安装包检查，用户已确认作物正常渲染，对应贴图解析项确认完成。
+
 - [ ] 读 Java 的 `.nbt` 结构：之前定了要支持，现在只读基岩的 `.mcstructure`（`R/level/structure/nbt.js`）。要解 gzip、按大端读，还要把 Java 的方块 id 和状态换成基岩的。
-- [ ] 附属包贴图指向原版文件时找不到：农夫乐事的 terrain_texture.json 里 `beetroots_stage0` 这类条目指向 `textures/blocks/beetroots_stage_0`，文件在原版里、附属包没带。适配器在附属包里找不到文件后只拿名字去查原版的 terrain_texture.json（`tools/adapter/adapt.js:711-722`），原版的键名是 `beetroot`，所以 22 张作物贴图报“找不到”。游戏是按路径在资源包栈里往下找的，适配器也应该拿路径去原版里找。
+- [x] 附属包贴图指向原版文件时找不到：农夫乐事的 terrain_texture.json 里 `beetroots_stage0` 这类条目指向 `textures/blocks/beetroots_stage_0`，文件在原版里、附属包没带。适配器在附属包里找不到文件后只拿名字去查原版的 terrain_texture.json（`tools/adapter/adapt.js:711-722`），原版的键名是 `beetroot`，所以 22 张作物贴图报“找不到”。游戏是按路径在资源包栈里往下找的，适配器也应该拿路径去原版里找。
 
 ## 发布前要改回来的
 

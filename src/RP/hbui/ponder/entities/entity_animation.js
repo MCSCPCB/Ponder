@@ -7,7 +7,21 @@
   // One Molang for every entity: each brings its variables, and its queries through `current`.
   const molang = new P.Molang();
   let current = null;
-  molang.variableHandler = (name, context, args) => (current && name.startsWith("query.") ? current.query(name.slice(6), args) : undefined);
+  molang.variableHandler = (name, context, args) => {
+    if (!current) return undefined;
+    if (name.startsWith("query.")) return current.query(name.slice(6), args);
+    // Vanilla supplies this cat controller variable in native code. An unset variable is
+    // otherwise zero, which incorrectly makes every resting cat sneak. Explicit Molang
+    // variables (including a scene's setVariable) are resolved before this fallback.
+    if (name === "variable.state" && current.entity.type === "minecraft:cat") {
+      if (current.query("is_lying_down") || current.variables["variable.liedown_amount"] > 0) return 4;
+      if (current.query("is_sitting")) return 2;
+      if (current.query("is_sprinting")) return 1;
+      if (current.query("is_sneaking")) return 0;
+      return 3;
+    }
+    return undefined;
+  };
 
   // Queries Ponder answers itself; any other is the entity's own (ClientEntity.setQuery), else 0.
   const DEFAULTS = { is_alive: 1, health: 20, model_scale: 1 };
@@ -40,6 +54,7 @@
       const pt = this.pt, body = P.lerp(pt, e.yRotO, e.yRot);
       switch (name) {
         case "life_time": return this.time;
+        case "life_span": return e.lifeSpan;
         case "delta_time": return this.dt;
         case "frame_alpha": return pt;
         case "anim_time": return this.animTime;

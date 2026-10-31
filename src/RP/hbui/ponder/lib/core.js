@@ -115,13 +115,35 @@
     if (group && group.play) return group.play.callable.call(group.play, name, volume == null ? 1 : volume, pitch == null ? 1 : pitch);
   };
 
-  // On-screen log for testing without a console. Removed with P.DEBUG = false.
-  const lines = [];
-  P.log = function () {
-    const text = Array.prototype.slice.call(arguments).join(" ");
+  // The native DDUI logger writes to Minecraft Bedrock/logs/ContentLog*.txt. Its signature in
+  // the current vanilla bundle is log(message, level): Inform=1, Warning=2, Error=3.
+  // Keep early messages until the command exists; the small on-screen tail is only a test aid.
+  const lines = [], pendingLogs = [];
+  const logSession = Date.now().toString(36);
+  let logSequence = 0;
+  P.flushLogs = function () {
+    const group = window.__commands__ && window.__commands__.vanillaCoreDduiContentLogCommandGroup;
+    const command = group && group.log;
+    if (!command || typeof command.callable !== "function") return;
+    try {
+      while (pendingLogs.length) {
+        const entry = pendingLogs[0];
+        command.callable.call(command, entry.message, entry.level);
+        pendingLogs.shift();
+      }
+    } catch (e) { /* Logging must not prevent the screen from opening. Retry on the next poll. */ }
+  };
+  function log(level, args) {
+    const text = Array.prototype.slice.call(args).map(value => value && value.stack ? value.stack : String(value)).join(" ");
     lines.push(text);
     if (lines.length > 14) lines.shift();
     if (P.DEBUG && P.logNode) P.logNode.textContent = lines.join("\n");
-  };
-  window.addEventListener("error", e => P.log("error:", e.message, "@" + e.lineno));
+    pendingLogs.push({ message: "[Ponder " + logSession + ":" + ++logSequence + "] " + text, level });
+    if (pendingLogs.length > 200) pendingLogs.shift();
+    P.flushLogs();
+  }
+  P.log = function () { log(1, arguments); };
+  P.error = function () { log(3, arguments); };
+  window.addEventListener("error", e => P.error("error:", e.error || e.message, e.filename || "", "@" + e.lineno));
+  window.addEventListener("unhandledrejection", e => P.error("unhandled promise:", e.reason));
 })();

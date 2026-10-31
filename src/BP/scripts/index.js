@@ -12,6 +12,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id !== "ponder:register") return;
   const { modId, script, items } = JSON.parse(event.message);
   addons.set(modId, { script, items });
+  console.warn("[Ponder/BP] registered " + modId + " " + script + " items=" + JSON.stringify(items));
 });
 
 const hasPonder = (itemId) => [...addons.values()].some((a) => a.items.includes(itemId));
@@ -26,9 +27,12 @@ const CLOSE_LABEL = "ponder:close;";
 
 // Opens Ponder for an item. Every way in goes through here.
 function openPonder(player, itemId) {
-  const mark = marker(itemId, Date.now());
+  // Ore UI delivers each field separately. Keep the item, stamp and plugin list in one value
+  // so receiving the title alone is sufficient and cannot use another form's plugin list.
+  const mark = marker(itemId, Date.now()) + addonMarker();
+  console.warn("[Ponder/BP] open " + mark);
   const form = new CustomForm(player, mark);
-  form.label(mark).label(addonMarker()).button(CLOSE_LABEL, () => form.close()).closeButton();
+  form.label(mark).button(CLOSE_LABEL, () => form.close()).closeButton();
   void form.show();
 }
 

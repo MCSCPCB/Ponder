@@ -1,0 +1,23 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Ponder Debug Resources",
+    "description": "第 1 批 TODO 集中验收场景：实体、碰撞、尖牙、农夫乐事作物贴图。",
+    "uuid": "4eb618fc-1b3b-4ab0-8365-c6e6d7906bb0",
+    "version": [1, 0, 7],
+    "min_engine_version": [1, 26, 60]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "53e654c1-2019-4b57-aee7-5c30bff33b3d",
+      "version": [1, 0, 7]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "b3bdb809-eac6-489b-8be7-d07b332fc5cd",
+      "version": [1, 0, 7]
+    }
+  ]
+}
